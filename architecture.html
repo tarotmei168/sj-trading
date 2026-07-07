@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>🦞 小龍蝦系統完整架構</title>
+<style>
+body{font-family:sans-serif;margin:30px;background:#f5f5f5;font-size:18px}
+h1{color:#d32f2f;border-bottom:4px solid #d32f2f;padding-bottom:10px;font-size:28px}
+h2{color:#1976d2;margin-top:35px;border-left:5px solid #1976d2;padding-left:12px;font-size:24px}
+h3{color:#333;font-size:20px}
+table{width:100%;border-collapse:collapse;margin:12px 0 25px 0;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
+th{background:#1976d2;color:#fff;padding:12px;text-align:left;font-size:16px}
+td{padding:10px 12px;border-bottom:1px solid #eee;font-size:16px}
+tr:hover{background:#e3f2fd}
+.fire{color:#d32f2f;font-weight:bold}
+.star{color:#f57c00;font-weight:bold}
+.ok{color:#2e7d32;font-weight:bold}
+.note{color:#888}
+.tag{display:inline-block;padding:3px 8px;border-radius:4px;font-size:14px;margin:0 3px}
+.tag-fomc{background:#d32f2f;color:#fff}
+.tag-earnings{background:#1976d2;color:#fff}
+.tag-exdiv{background:#388e3c;color:#fff}
+.tag-trust{background:#7b1fa2;color:#fff}
+.tag-fa{background:#00838f;color:#fff}
+.summary{background:#e8f5e9;padding:18px;border-radius:6px;margin:15px 0;font-size:16px}
+.box{border:2px solid #1976d2;border-radius:8px;padding:15px;margin:15px 0;background:#fff}
+.box-title{font-size:20px;font-weight:bold;color:#1976d2;margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<h1>🦞 小龍蝦系統完整架構</h1>
+
+<!-- ═══ 摘要 ═══ -->
+<div class="summary">
+<strong>✅ 已整合模組總表（全部可運作）：</strong><br><br>
+🌤 全球聯動與總經氣象台 — <span class="ok">✅ global_weather.py</span><br>
+&nbsp;&nbsp;└ 🇺🇸 費城半導體SOX（台股最重要美股指標）<br>
+&nbsp;&nbsp;└ 🗳️ 川普投顧地緣政治特區（Yahoo財經每日自動搜尋）<br>
+&nbsp;&nbsp;└ 📅 未來14天關鍵事件（除權息/法說/FOMC/期貨結算/投信季底結帳/月底結帳）<br>
+🔗 台美產業聯動40組（半導體/AI/零組件/重電/軍工/傳產共200檔）— <span class="ok">✅ us_tw_mapping_matrix.py</span><br>
+🏦 投信買賣超(每天16:30更新) — <span class="ok">✅ daily_market_update.py</span><br>
+🚨 每月底法人結帳大作帳（每月最後3交易日）— <span class="ok">✅ global_weather.py</span><br>
+📰 產業大事關鍵字過濾（法說/財報/訂單/擴產等）— <span class="ok">✅ news_filter.py</span><br>
+🔒 第1層核心持股15分K監控(08:30~13:35) — <span class="ok">✅ day_monitor_loop.py</span><br>
+🎯 第2層潛力股同步監控(9檔+10檔) — <span class="ok">✅ day_monitor_loop.py</span><br>
+📊 3年日K資料庫(19檔+大盤) — <span class="ok">✅ database/ 目錄</span><br>
+🔄 08:30 cron晨報+監控啟動 — <span class="ok">✅ cron已設定</span><br>
+🔄 16:30 cron全市場資料庫更新 — <span class="ok">✅ cron已設定</span><br>
+</div>
+
+<!-- ═══ 第0層：全球天氣 ═══ -->
+<div class="box">
+<div class="box-title">🌤 第0層：全球聯動與總經氣象台 (global_weather.py)</div>
+<p><strong>🇺🇸 第一維度：美股 = 只留費城半導體SOX</strong><br>
+台股以半導體為核心，只要看費半就知道開盤方向。其他道瓊/標普/那斯達克不再列出。</p>
+<p><strong>📅 第二維度：未來14天關鍵事件</strong><br>
+除權息、法說會、FOMC、台指期結算、投信季底結帳、每月底法人結帳大作帳</p>
+<p><strong>🔗 第三維度：台美產業聯動40組（us_tw_mapping_matrix.py）</strong><br>
+美股領頭羊波動>2%時，自動跳出連動台股警報</p>
+<p><strong>🗳️ 川普投顧大砲特區</strong><br>
+每天Yahoo財經自動搜尋「Trump+關稅+晶片」，有重大發言直接印在晨報</p>
+</div>
+
+<!-- ═══ 第1層：核心持股 ═══ -->
+<div class="box">
+<div class="box-title">🔒 第1層：核心持股（有部位，全力監控救援）</div>
+<p><strong>9檔：</strong> 2436偉詮電、2337旺宏、5351鈺創、3673TPK-KY、3711日月光、4958臻鼎-KY、3042晶技、2454聯發科、2317鴻海</p>
+<p><strong>盤中監控：</strong> 08:30~13:35每2分鐘檢查15分K金叉/死叉，含RSI+支撐+新聞</p>
+<p><strong>通知規則：</strong> 提前預警(K/D差距<1)發4次、金叉/死叉發4次、一般1次</p>
+</div>
+
+<!-- ═══ 第2層：潛力股 ═══ -->
+<div class="box">
+<div class="box-title">🎯 第2層：潛力股（無部位，等右側開槍）</div>
+<p><strong>10檔：</strong> 3443創意、3661世芯、3035智原、3231緯創、2382廣達、3017奇鋐、2451創見、8150南茂、2344華邦電、6770力積電</p>
+<p><strong>監控方式：</strong> 與核心持股同步，每2分鐘檢查15分K</p>
+</div>
+
+<!-- ═══ 第3層：投信建倉 ═══ -->
+<div class="box">
+<div class="box-title">🏦 第3層：投信秘密建倉偵測 (daily_market_update.py)</div>
+<p><strong>每天16:30執行：</strong></p>
+<p>1️⃣ 下載TWSE投信買賣超 → SITC_Accumulation.csv（算連買天數）<br>
+2️⃣ 下載FinMind月營收 → 年增率計算<br>
+3️⃣ 產出黑馬清單 → Potential_Candidates.txt</p>
+<p><strong>篩選條件：</strong> 投信連買1~3天 + 營收年增>20% + 60天橫盤<25%</p>
+</div>
+
+<!-- ═══ 第4層：新聞 ═══ -->
+<div class="box">
+<div class="box-title">📰 第4層：產業大事 (news_filter.py)</div>
+<p><strong>資料源：</strong> FinMind TaiwanStockNews（免費，免Token）</p>
+<p><strong>關鍵字過濾（只留產業大事）：</strong><br>
+法說會、營收、財報、訂單、擴產、缺料、漲價、調升、調降、法說、除息、上市櫃、併購、量產等</p>
+<p><strong>輸出：</strong> 每檔股票最多3則摘要，直接印在晨報表格上</p>
+</div>
+
+<!-- ═══ 排程 ═══ -->
+<div class="box">
+<div class="box-title">⏰ 排程任務（Cron）</div>
+<table>
+<tr><th>時間</th><th>任務</th><th>執行內容</th></tr>
+<tr><td><strong>08:30</strong></td><td>晨報+監控啟動</td>
+<td>1.產出完整晨報（4層）<br>2.啟動DayMonitor背景監控(至13:35)</td></tr>
+<tr><td><strong>16:30</strong></td><td>全市場資料庫全量更新</td>
+<td>1.投信買賣超累積表<br>2.基本面營收資料庫<br>3.黑馬精選清單<br>4.新聞過濾更新</td></tr>
+</table>
+</div>
+
+<!-- ═══ 本地資料庫 ═══ -->
+<div class="box">
+<div class="box-title">🗄️ 本地資料庫 (database/)</div>
+<table>
+<tr><th>檔案</th><th>內容</th></tr>
+<tr><td>taiwan_stock_info.csv</td><td>全市場4,276檔清單（代號/名稱/產業）</td></tr>
+<tr><td>TAIEX_daily_kline.csv</td><td>大盤加權指數3年日K（727筆）</td></tr>
+<tr><td>{代號}_3y.csv</td><td>19檔監控標的×3年日K（各約720筆）</td></tr>
+<tr><td>SITC_Accumulation.csv</td><td>投信買賣超累積表（算連買天數）</td></tr>
+<tr><td>Fundamentals_Database.csv</td><td>基本面營收資料庫</td></tr>
+<tr><td>ai_themes.json</td><td>AI產業聯想結果（DeepSeek）</td></tr>
+<tr><td>news_filtered.json</td><td>新聞過濾結果（FinMind）</td></tr>
+</table>
+</div>
+
+<!-- ═══ 原始碼檔案 ═══ -->
+<div class="box">
+<div class="box-title">📁 原始碼檔案 (src/sj_trading/)</div>
+<table>
+<tr><th>檔案</th><th>功能</th></tr>
+<tr><td>global_weather.py</td><td>全球天氣：費半/未來14天事件/川普/40組聯動</td></tr>
+<tr><td>us_tw_mapping_matrix.py</td><td>台美產業聯動40組完整字典（65個美股代號, 200檔台股）</td></tr>
+<tr><td>day_monitor_loop.py</td><td>盤中15分K監控(08:30~13:35)每2分鐘檢查19檔</td></tr>
+<tr><td>daily_market_update.py</td><td>16:30全市場更新：投信+營收+黑馬清單+AI聯想</td></tr>
+<tr><td>news_filter.py</td><td>FinMind新聞關鍵字過濾（只留產業大事）</td></tr>
+<tr><td>morning_report_v2.py</td><td>完整晨報產生器（4層結構）</td></tr>
+<tr><td>full_report_now.py</td><td>即時晨報（手動執行）</td></tr>
+<tr><td>ticker_fix.py</td><td>台股代碼自動校正(.TW/.TWO)，90筆對照表</td></tr>
+<tr><td>optimize_strategy.py</td><td>個股最佳化參數回測系統</td></tr>
+<tr><td>pure_data_download.py</td><td>FinMind純淨日K下載（與三竹對齊）</td></tr>
+<tr><td>lobster_pipeline.py</td><td>晨報引擎(舊版，保留相容)</td></tr>
+</table>
+</div>
+
+<!-- ═══ 連動40組摘要 ═══ -->
+<div class="box">
+<div class="box-title">🔗 台美產業聯動40組一覽</div>
+<table>
+<tr><th>組</th><th>產業</th><th>🇺🇸美股</th><th>🇹🇼台股</th></tr>
+<tr><td>1</td><td>先進製程與晶圓代工</td><td>TSM / ASML</td><td>2330台積電、5347世界、2303聯電</td></tr>
+<tr><td>2</td><td>IC設計與手機晶片</td><td>QCOM</td><td>2454聯發科</td></tr>
+<tr><td>3</td><td>矽光子CPO</td><td>MRVL / AVGO / INTC</td><td>6442光聖、3363上詮、3163波若威、3081聯亞</td></tr>
+<tr><td>4</td><td>ASIC/IP</td><td>NVDA / AMD / ARM</td><td>3443創意、3661世芯、3035智原、6643 M31</td></tr>
+<tr><td>5</td><td>記憶體</td><td>MU / WDC</td><td>2337旺宏、2451創見、3260威剛、2408南亞科、2344華邦電</td></tr>
+<tr><td>6</td><td>半導體設備</td><td>AMAT / LRCX / KLAC</td><td>3131弘塑、3583辛耘、6187萬潤、3680家登</td></tr>
+<tr><td>7</td><td>先進封裝</td><td>ASX / AMKR</td><td>3711日月光、2449京元電、8150南茂</td></tr>
+<tr><td>8</td><td>利基IC</td><td>TXN / STM</td><td>3034聯詠、2379瑞昱、8016矽創</td></tr>
+<tr><td>9</td><td>車用功率</td><td>ON / IFNNY / NXPI</td><td>2481強茂、5425台半、3675德微、6435大中</td></tr>
+<tr><td>10</td><td>AI伺服器代工</td><td>SMCI / DELL / HPQ</td><td>2382廣達、3231緯創、6669緯穎、2356英業達、2317鴻海</td></tr>
+<tr><td>11</td><td>散熱</td><td>VRT</td><td>3017奇鋐、3324雙鴻、8996高力、3653健策</td></tr>
+<tr><td>12</td><td>機殼導軌</td><td>SMCI</td><td>2059川湖、6117迎廣、8210勤誠、3013晟銘電</td></tr>
+<tr><td>13</td><td>電源管理</td><td>ETN / VRT</td><td>2308台達電、6412群電、6282康舒</td></tr>
+<tr><td>14</td><td>高階PCB</td><td>輝達鏈</td><td>2368金像電、3044健鼎、3037欣興</td></tr>
+<tr><td>15</td><td>CCL高頻材料</td><td>台耀</td><td>6274台燿、6213聯茂、2383台光電</td></tr>
+<tr><td>16</td><td>被動元件</td><td>村田 / TDK</td><td>2327國巨、2492華新科、6207雷科</td></tr>
+<tr><td>17</td><td>ABF載板</td><td>揖斐電</td><td>3037欣興、3189景碩、8046南電</td></tr>
+<tr><td>18</td><td>PC周邊IC</td><td>INTC / MSFT</td><td>2436偉詮電、5269祥碩、4966譜瑞</td></tr>
+<tr><td>19</td><td>石英元件</td><td>京瓷</td><td>3042晶技、2484希華</td></tr>
+<tr><td>20</td><td>FPC軟板</td><td>AAPL</td><td>4958臻鼎、6269台郡</td></tr>
+<tr><td>21~40</td><td colspan="3">第三代半導體/觸控/連接器/光學鏡頭/網通/重電/綠能/軍工/機器人/電動車/低軌衛星/鋼鐵/水泥/航運/塑膠/紡織/生技/醫材</td></tr>
+</table>
+</div>
+
+<!-- ═══ 通知規則 ═══ -->
+<div class="box">
+<div class="box-title">📢 通知規則</div>
+<table>
+<tr><th>訊號類型</th><th>發送次數</th></tr>
+<tr><td>⏰ 提前預警（K/D差距<1）</td><td><strong>4次</strong></td></tr>
+<tr><td>⭐ 金叉（GC）</td><td><strong>4次</strong></td></tr>
+<tr><td>💀 死叉（DC）</td><td><strong>4次</strong></td></tr>
+<tr><td>📊 一般狀態更新</td><td>1次</td></tr>
+</table>
+</div>
+
+<p class="note" style="margin-top:30px;font-size:16px">🦞 小龍蝦系統 | 2026-07-07 19:17 | 所有模組可運作</p>
+
+</body>
+</html>
