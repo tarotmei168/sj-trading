@@ -60,7 +60,7 @@
 
     <div class="header">
         <h1>🌤️ 全球股市天氣預報</h1>
-        <p>🦞 小龍蝦自動產出 | 2026-07-08 06:07 | 雙核心 FinMind+Shioaji</p>
+        <p>🦞 小龍蝦自動產出 | 2026-07-08 06:16 | 雙核心 FinMind+Shioaji</p>
     </div>
 
     <!-- 費半 + 開盤基調 -->
@@ -76,14 +76,44 @@
         </p>
     </div>
 
-    <!-- 即時報價校正（永豐金 API）-->
+    <!-- 核心持股技術面（永豐金報價 + FinMind KD/RSI/支撐）-->
     <div class="card">
-        <div class="card-title">📡 即時報價校正 · 永豐金 API</div>
+        <div class="card-title">🔒 第1層：核心持股技術監控</div>
         <table>
             <thead>
-                <tr><th>代號/名稱</th><th>現價</th><th>漲跌</th><th>高低/量</th></tr>
+                <tr><th>代號/名稱</th><th>現價</th><th>漲跌</th><th>高低</th><th>K/D 金叉?</th><th>RSI</th><th>25天支撐</th></tr>
             </thead>
-            <tbody><tr><td><b>2436</b><br>偉詮電</td><td>70.3</td><td style="color:var(--red-alert)">🔴 -9.52%</td><td>H:77.1 L:70.2<br>量:7351</td></tr><tr><td><b>2337</b><br>旺宏</td><td>139.0</td><td style="color:var(--red-alert)">🔴 -3.80%</td><td>H:146.0 L:136.5<br>量:64341</td></tr><tr><td><b>2454</b><br>聯發科</td><td>4030.0</td><td style="color:#ffa502">🟡 -1.70%</td><td>H:4250.0 L:3955.0<br>量:7879</td></tr><tr><td><b>2317</b><br>鴻海</td><td>237.0</td><td style="color:var(--red-alert)">🔴 -2.06%</td><td>H:243.0 L:236.0<br>量:49410</td></tr><tr><td><b>3711</b><br>日月光</td><td>651.0</td><td style="color:var(--red-alert)">🔴 -4.12%</td><td>H:702.0 L:648.0<br>量:23331</td></tr><tr><td><b>3042</b><br>晶技</td><td>210.0</td><td style="color:var(--red-alert)">🔴 -6.45%</td><td>H:234.0 L:208.0<br>量:36982</td></tr><tr><td><b>8150</b><br>南茂</td><td>109.0</td><td style="color:var(--red-alert)">🔴 -5.62%</td><td>H:118.5 L:107.0<br>量:93883</td></tr><tr><td><b>3443</b><br>創意</td><td>4480.0</td><td style="color:var(--red-alert)">🔴 -2.71%</td><td>H:4830.0 L:4425.0<br>量:2141</td></tr><tr><td><b>3017</b><br>奇鋐</td><td>2450.0</td><td style="color:var(--red-alert)">🔴 -8.23%</td><td>H:2670.0 L:2410.0<br>量:3977</td></tr><tr><td><b>2451</b><br>創見</td><td>256.0</td><td style="color:var(--red-alert)">🔴 -5.36%</td><td>H:270.5 L:255.5<br>量:4508</td></tr><tr><td><b>2330</b><br>台積電</td><td>2440.0</td><td style="color:#ffa502">🟡 -0.81%</td><td>H:2500.0 L:2440.0<br>量:27777</td></tr></tbody>
+            <tbody><tr><td><b>2436</b><br>偉詮電</td><td>70.3</td><td style="color:var(--red-alert)">🔴 -9.52%</td><td>H:77.1 L:70.2</td><td>K46.6 D43.1 ➖</td><td>54.2</td><td>64.3</td></tr>
+<tr><td><b>2337</b><br>旺宏</td><td>139.0</td><td style="color:var(--red-alert)">🔴 -3.80%</td><td>H:146.0 L:136.5</td><td>K2.4 D2.4 ➖</td><td>33.9</td><td>135.0</td></tr>
+<tr><td><b>2454</b><br>聯發科</td><td>4030.0</td><td style="color:#ffa502">🟡 -1.70%</td><td>H:4250.0 L:3955.0</td><td>K55.0 D60.8 ➖</td><td>35.3</td><td>3880.0</td></tr>
+<tr><td><b>2317</b><br>鴻海</td><td>237.0</td><td style="color:var(--red-alert)">🔴 -2.06%</td><td>H:243.0 L:236.0</td><td>K8.8 D12.6 ➖</td><td>21.4</td><td>237.0</td></tr>
+<tr><td><b>3711</b><br>日月光</td><td>651.0</td><td style="color:var(--red-alert)">🔴 -4.12%</td><td>H:702.0 L:648.0</td><td>K49.2 D53.9 ➖</td><td>59.7</td><td>539.0</td></tr>
+<tr><td><b>3042</b><br>晶技</td><td>210.0</td><td style="color:var(--red-alert)">🔴 -6.45%</td><td>H:234.0 L:208.0</td><td>K61.9 D63.9 ➖</td><td>44.0</td><td>185.5</td></tr>
+<tr><td><b>8150</b><br>南茂</td><td>109.0</td><td style="color:var(--red-alert)">🔴 -5.62%</td><td>H:118.5 L:107.0</td><td>K80.8 D74.2 ➖</td><td>58.5</td><td>87.2</td></tr>
+<tr><td><b>3443</b><br>創意</td><td>4480.0</td><td style="color:var(--red-alert)">🔴 -2.71%</td><td>H:4830.0 L:4425.0</td><td>K37.5 D46.8 ➖</td><td>42.4</td><td>4025.0</td></tr>
+<tr><td><b>3017</b><br>奇鋐</td><td>2450.0</td><td style="color:var(--red-alert)">🔴 -8.23%</td><td>H:2670.0 L:2410.0</td><td>K68.2 D69.2 ➖</td><td>53.2</td><td>2255.0</td></tr>
+<tr><td><b>2451</b><br>創見</td><td>256.0</td><td style="color:var(--red-alert)">🔴 -5.36%</td><td>H:270.5 L:255.5</td><td>K21.4 D16.3 ➖</td><td>21.0</td><td>250.5</td></tr>
+<tr><td><b>2330</b><br>台積電</td><td>2440.0</td><td style="color:#ffa502">🟡 -0.81%</td><td>H:2500.0 L:2440.0</td><td>K68.2 D69.0 ➖</td><td>53.5</td><td>2250.0</td></tr>
+</tbody>
+        </table>
+    </div>
+
+    <!-- 潛力股技術面 -->
+    <div class="card">
+        <div class="card-title">🎯 第2層：潛力股技術監控</div>
+        <table>
+            <thead>
+                <tr><th>代號/名稱</th><th>現價</th><th>漲跌</th><th>高低</th><th>K/D 金叉?</th><th>RSI</th><th>25天支撐</th></tr>
+            </thead>
+            <tbody><tr><td><b>3231</b><br>緯創</td><td>155.5</td><td style="color:#ffa502">🟡 -1.58%</td><td>H:159.5 L:155.5</td><td>K50 D50 ➖</td><td>-</td><td>-</td></tr>
+<tr><td><b>2382</b><br>廣達</td><td>373.0</td><td style="color:#ffa502">🟡 -1.32%</td><td>H:380.0 L:372.5</td><td>K50 D50 ➖</td><td>-</td><td>-</td></tr>
+<tr><td><b>3443</b><br>創意</td><td>4480.0</td><td style="color:var(--red-alert)">🔴 -2.71%</td><td>H:4830.0 L:4425.0</td><td>K37.5 D46.8 ➖</td><td>42.4</td><td>4025.0</td></tr>
+<tr><td><b>2303</b><br>聯電</td><td>155.0</td><td style="color:var(--red-alert)">🔴 -6.62%</td><td>H:167.5 L:152.0</td><td>K50 D50 ➖</td><td>-</td><td>-</td></tr>
+<tr><td><b>2344</b><br>華邦電</td><td>174.0</td><td style="color:var(--red-alert)">🔴 -4.91%</td><td>H:186.0 L:172.0</td><td>K50 D50 ➖</td><td>-</td><td>-</td></tr>
+<tr><td><b>2408</b><br>南亞科</td><td>403.0</td><td style="color:var(--red-alert)">🔴 -3.81%</td><td>H:437.0 L:402.0</td><td>K50 D50 ➖</td><td>-</td><td>-</td></tr>
+<tr><td><b>2454</b><br>聯發科</td><td>4030.0</td><td style="color:#ffa502">🟡 -1.70%</td><td>H:4250.0 L:3955.0</td><td>K55.0 D60.8 ➖</td><td>35.3</td><td>3880.0</td></tr>
+<tr><td><b>6139</b><br>亞翔</td><td>883.0</td><td style="color:var(--red-alert)">🔴 -5.25%</td><td>H:948.0 L:879.0</td><td>K50 D50 ➖</td><td>-</td><td>-</td></tr>
+</tbody>
         </table>
     </div>
 
