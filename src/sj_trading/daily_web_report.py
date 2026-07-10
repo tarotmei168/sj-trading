@@ -256,15 +256,53 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html=''):
     today = now.strftime('%Y-%m-%d')
     now_hm = now.strftime('%H:%M')
     
-    # ── SOX 指數 ──
-    sox_level = '🔥 偏多'  # 可從yfinance抓
-    sox_close = '12,900'
-    sox_chg = '+2.17%'
-    sox_icon = '🔺'
+    # ── SOX 指數（從 global_weather 抓） ──
+    try:
+        from global_weather import get_us_indexes, get_taiwan_futures_night
+        us = get_us_indexes()
+        fut = get_taiwan_futures_night()
+    except:
+        us = {}
+        fut = None
+    
+    sox_data = us.get('費城半導體', {})
+    if sox_data:
+        sox_close = f'{sox_data["close"]:,.0f}'
+        sox_chg = f'{sox_data["change"]:+.2f}%'
+        sox_icon = '🔺' if sox_data['change'] > 0 else '🔻'
+        if sox_data['change'] > 3:
+            sox_level = '🔥🔥 強多'
+        elif sox_data['change'] > 1:
+            sox_level = '🔥 偏多'
+        elif sox_data['change'] > -1:
+            sox_level = '➖ 中性'
+        elif sox_data['change'] > -3:
+            sox_level = '🔻 偏空'
+        else:
+            sox_level = '🔴🔴 強空'
+    else:
+        sox_close = '—'
+        sox_chg = '—'
+        sox_icon = '⚠️'
+        sox_level = '離線'
+    
+    # ── 台指期夜盤 ──
+    if fut:
+        fut_icon = '🔺' if fut['change'] > 0 else '🔻'
+        fut_str = f'台指期夜盤 {fut["close"]:,.0f} {fut_icon} {fut["change"]:+.2f}%'
+        if fut['change'] > 0.3:
+            fut_tone = '夜盤上漲 → 今日有望跳空開高'
+        elif fut['change'] < -0.3:
+            fut_tone = '夜盤下跌 → 今日可能開低'
+        else:
+            fut_tone = '夜盤平穩 → 正常開盤'
+    else:
+        fut_str = '台指期夜盤 — 離線'
+        fut_tone = '（以費半為主要判斷）'
     
     # ── 開盤基調 ──
     if not tone:
-        tone = '模擬模式（以費半+2.17%偏多為基調）'
+        tone = f'費半 {sox_chg} | {fut_str} → {fut_tone}'
     
     # ── 核心持股表格 ──
     def fmt_stock_row(sid, sname, snaps, tech):
@@ -482,12 +520,17 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html=''):
     </div>
 
     <!-- 費半 SOX（唯一指數）-->
+    <!-- SOX + 台指期夜盤 -->
     <div class="card info">
-        <div class="card-title">🇺🇸 費城半導體指數 (SOX)</div>
+        <div class="card-title">🇺🇸 費城半導體指數 (SOX) + 🇹🇼 台指期夜盤</div>
         <div class="sox-box">
             <div class="sox-name">費城半導體指數 · 台股風向球</div>
             <div class="sox-val">{sox_close}</div>
             <div class="sox-chg">{sox_icon} {sox_chg} {sox_level}</div>
+        </div>
+        <div style="background: #2a2a2a; padding: 12px; border-radius: 6px; text-align: center; margin-top: 10px; border: 1.5px solid #1e90ff;">
+            <div style="font-size: 18px; color: #ccc;">台指期夜盤（08:00 前最後報價）</div>
+            <div style="font-size: 24px; font-weight: bold; margin: 6px 0; color: #fff;">{fut_str if fut else '台指期夜盤 — 離線'}</div>
         </div>
         <div class="tone-bar">
             💡 開盤基調：{tone}

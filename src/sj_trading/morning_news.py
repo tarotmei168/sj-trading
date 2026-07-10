@@ -14,18 +14,29 @@ BASE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 CACHE_FILE = os.path.join(BASE, 'output', 'news_headlines.json')
 
 CATEGORIES = [
-    ('tw_macro', '🇹🇼 台灣總經'),
-    ('us_stock', '🌍 美股/國際'),
+    ('us_stock', '🇺🇸 美股/國際'),
     ('tw_stock', '📊 台股重點'),
     ('tech',     '🔬 科技脈動'),
+    ('tw_macro', '🇹🇼 台灣總經'),
 ]
 
 # 關鍵字 → 顏色分類
+# 中國新聞過濾 — 標題含這些字的直接跳過
+CHINA_FILTER = ['中國', '北京', '上海', '深圳', '港股', 'A股', '陸股', '滬指', '深指',
+                '中概', '人民幣', '習近平', '長鑫', '長江存儲', '華為', '中芯',
+                '茅台', '恆生', '上證']
+
+def should_filter_out(title):
+    for kw in CHINA_FILTER:
+        if kw in title:
+            return True
+    return False
+
 KEYWORD_RULES = [
     # ⭐ 股價催化劑（最優先標記）
     (['漲價', '調漲', '漲價效應'], '⭐漲價'),
     (['缺料', '缺貨', '供不應求', '產能吃緊'], '⭐缺貨'),
-    (['營收新高', '創新高', '歷史新高', '同期新高'], '⭐營收創高'),
+    (['營收創高', '營收新高', '創新高', '歷史新高', '同期新高'], '⭐營收創高'),
     (['EPS', '每股盈餘'], '⭐EPS'),
     (['股利', '股息', '殖利率', '現金股利'], '⭐股利'),
     (['三率三升', '毛利率', '營益率', '淨利率'], '⭐三率三升'),
@@ -37,7 +48,6 @@ KEYWORD_RULES = [
     (['川普', '特朗普', 'trump', 'Trump'], '🔴政治'),
     (['關稅', 'tariff', '關稅壁壘'], '🔴關稅'),
     (['制裁', '封鎖', '禁令', 'ban'], '🔴制裁'),
-    (['美中', '中美', '中國', '北京', '華盛頓'], '🔴地緣'),
     (['聯準會', 'Fed', '鮑爾', 'Powell', '升息', '降息'], '🔴FED'),
     # 產業大事 (橙色)
     (['晶片', 'chip', '半導體', '台積電', 'TSMC'], '🟠半導體'),
@@ -56,7 +66,7 @@ def tag_title(title):
                 break
     return tags
 
-def fetch_category(cat_id, limit=10):
+def fetch_category(cat_id, limit=12):
     url = f'https://news.cnyes.com/api/v3/news/category/{cat_id}?limit={limit}&page=1'
     try:
         req = urllib.request.Request(url, headers={'User-Agent': UA})
@@ -67,6 +77,9 @@ def fetch_category(cat_id, limit=10):
         for item in items:
             title = item.get('title', '').strip()
             if not title:
+                continue
+            # 過濾中國相關新聞
+            if should_filter_out(title):
                 continue
             result.append({
                 'title': title[:80],
@@ -189,20 +202,6 @@ def generate_html(news_data):
             html += f'<div class="news-item">{tags} {n["title"]}</div>\n'
         html += '</div>\n'
         html_parts.append(html)
-    
-    # 4. 台灣總經 (政治類剩下的)
-    if 'tw_macro' in cats:
-        macro = [
-            n for n in cats['tw_macro']['items']
-            if not any('🔴' in t for t in n['tags'])
-        ][:3]
-        if macro:
-            html = '<div class="card">\n'
-            html += '<div class="card-title">🇹🇼 台灣總經</div>\n'
-            for n in macro:
-                html += f'<div class="news-item">{n["title"]}</div>\n'
-            html += '</div>\n'
-            html_parts.append(html)
     
     return '\n'.join(html_parts)
 
