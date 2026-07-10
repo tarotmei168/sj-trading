@@ -349,22 +349,36 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html=''):
     if not price_rows:
         price_rows = '<tr><td colspan="8" style="text-align:center;color:#666;">⏳ 資料讀取中</td></tr>'
     
-    # ── 投信滲透率表格 ──
+    # ── 投信秘密建倉（從 trust_scan_latest.json 讀取全市場資料）──
     trust_rows = ''
-    for sid in CORE_IDS:
-        r = trust_rates.get(sid, {})
-        p_day = r.get('p_day', 0)
-        p_cum = r.get('p_cum', 0)
-        day_amt = r.get('day_amount', 0)
-        if not isinstance(p_day, (int, float)) or p_day == 0:
-            continue
-        nm = CORE_NAMES.get(sid, sid)
-        trust_rows += (
-            f'<tr><td>{sid}</td><td>{nm}</td>'
-            f'<td style="color:var(--red-alert);font-weight:bold;">{day_amt/10000:.0f}</td>'
-            f'<td>{p_day:.4f}%</td>'
-            f'<td>{p_cum:.4f}%</td></tr>\n'
-        )
+    trust_update_time = '—'
+    trust_scan_path = os.path.join(OUTPUT_DIR, 'trust_scan_latest.json')
+    if os.path.exists(trust_scan_path):
+        try:
+            with open(trust_scan_path, 'r', encoding='utf-8') as f:
+                trust_scan = json.load(f)
+            trust_update_time = trust_scan.get('update_time', '—')
+            for h in trust_scan.get('trust_top40', []):
+                sid = h['sid']
+                name = h['name']
+                days = h['days']
+                total = h['total_trust']
+                is_watch = h.get('is_watch', False)
+                tag = '【持股】' if is_watch else ''
+                if total >= 5000000:
+                    tag = '🔥🔥' + tag
+                elif total >= 2000000:
+                    tag = '🔥' + tag
+                trust_rows += (
+                    f'<tr><td>{sid}</td><td>{name}</td>'
+                    f'<td>{days}天</td>'
+                    f'<td style="color:var(--red-alert);font-weight:bold;">{total:>10,}</td>'
+                    f'<td>{tag}</td></tr>\n'
+                )
+                if len(trust_rows.split('<tr>')) >= 42:  # 最多顯示40筆
+                    break
+        except:
+            pass
     if not trust_rows:
         trust_rows = '<tr><td colspan="5" style="text-align:center;color:#666;">盤後16:30更新</td></tr>'
     
@@ -564,20 +578,20 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html=''):
         {linkage_rows}
     </div>
 
-    <!-- 投信秘密建倉（含股本滲透率 P_day + 累計控盤率 P_cum）-->
+    <!-- 投信秘密建倉（全市場掃描結果）-->
     <div class="card alert">
         <div class="card-title">
             🏦 投信法人秘密建倉
-            · 滲透率 P_day = V_day/(S_total×1000)×100%
-            · 累計控盤率 P_cum = sum(V_i)/(S_total×1000)×100%
+            · 全市場連續買超 >= 3天, 累計 > 50萬
+            · 更新時間: {trust_update_time}
         </div>
         <table>
             <thead>
                 <tr>
                     <th>代號</th><th>名稱</th>
-                    <th>淨買超(萬)</th>
-                    <th>P_day (%)</th>
-                    <th>P_cum (%)</th>
+                    <th>連買</th>
+                    <th>累計買超</th>
+                    <th>標記</th>
                 </tr>
             </thead>
             <tbody>{trust_rows}</tbody>

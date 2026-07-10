@@ -111,7 +111,7 @@
 
     <div class="header">
         <h1>🌤️ 全球股市天氣預報</h1>
-        <p>🦞 小龍蝦自動產出 | 2026-07-10 19:17 | FinMind + Shioaji 雙核心</p>
+        <p>🦞 小龍蝦自動產出 | 2026-07-10 20:41 | FinMind + Shioaji 雙核心</p>
     </div>
 
     <!-- 費半 SOX（唯一指數）-->
@@ -121,10 +121,10 @@
         <div class="sox-box">
             <div class="sox-name">費城半導體指數 · 台股風向球</div>
             <div class="sox-val">12,960</div>
-            <div class="sox-chg">🔺 +3.06% 🔥🔥 強多</div>
+            <div class="sox-chg">+ +3.06% 🔥🔥 強多</div>
         </div>
         <div style="background: #2a2a2a; padding: 12px; border-radius: 6px; text-align: center; margin-top: 10px; border: 1.5px solid #1e90ff;">
-            <div style="font-size: 18px; color: #ccc;">台指期夜盤（08:00 前最後報價）</div>
+            <div style="font-size: 18px; color: #ccc;">台指期指數</div>
             <div style="font-size: 24px; font-weight: bold; margin: 6px 0; color: #fff;">台指期夜盤 — 離線</div>
         </div>
         <div class="tone-bar">
@@ -190,26 +190,62 @@
 
     </div>
 
-    <!-- 投信秘密建倉（含股本滲透率 P_day + 累計控盤率 P_cum）-->
+    <!-- 投信秘密建倉（全市場掃描結果）-->
     <div class="card alert">
         <div class="card-title">
             🏦 投信法人秘密建倉
-            · 滲透率 P_day = V_day/(S_total×1000)×100%
-            · 累計控盤率 P_cum = sum(V_i)/(S_total×1000)×100%
+            · 全市場連續買超 >= 3天, 累計 > 50萬
+            · 更新時間: 07/10 18:34
         </div>
         <table>
             <thead>
                 <tr>
                     <th>代號</th><th>名稱</th>
-                    <th>淨買超(萬)</th>
-                    <th>P_day (%)</th>
-                    <th>P_cum (%)</th>
+                    <th>連買</th>
+                    <th>累計買超</th>
+                    <th>標記</th>
                 </tr>
             </thead>
-            <tbody><tr><td>3042</td><td>晶技</td><td style="color:var(--red-alert);font-weight:bold;">69</td><td>0.0001%</td><td>0.0001%</td></tr>
-<tr><td>2382</td><td>廣達</td><td style="color:var(--red-alert);font-weight:bold;">111</td><td>0.0001%</td><td>0.0002%</td></tr>
-<tr><td>8150</td><td>南茂</td><td style="color:var(--red-alert);font-weight:bold;">20</td><td>0.0001%</td><td>0.0005%</td></tr>
-<tr><td>2344</td><td>華邦電</td><td style="color:var(--red-alert);font-weight:bold;">-358</td><td>-0.0005%</td><td>-0.0012%</td></tr>
+            <tbody><tr><td>2886</td><td>兆豐金</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">28,258,239</td><td>🔥🔥</td></tr>
+<tr><td>2891</td><td>中信金</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">23,203,971</td><td>🔥🔥</td></tr>
+<tr><td>2356</td><td>英業達</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">21,312,873</td><td>🔥🔥</td></tr>
+<tr><td>2892</td><td>第一金</td><td>4天</td><td style="color:var(--red-alert);font-weight:bold;">20,773,183</td><td>🔥🔥</td></tr>
+<tr><td>1303</td><td>南亞</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">17,725,964</td><td>🔥🔥</td></tr>
+<tr><td>2352</td><td>佳世達</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;">16,833,000</td><td>🔥🔥</td></tr>
+<tr><td>2618</td><td>長榮航</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;">16,094,620</td><td>🔥🔥</td></tr>
+<tr><td>4904</td><td>遠傳</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;">15,852,860</td><td>🔥🔥</td></tr>
+<tr><td>1402</td><td>遠東新</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">14,797,149</td><td>🔥🔥</td></tr>
+<tr><td>3045</td><td>台灣大</td><td>4天</td><td style="color:var(--red-alert);font-weight:bold;">14,571,110</td><td>🔥🔥</td></tr>
+<tr><td>0050</td><td>元大台灣50</td><td>4天</td><td style="color:var(--red-alert);font-weight:bold;">14,065,000</td><td>🔥🔥</td></tr>
+<tr><td>3706</td><td>神達</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;">12,888,000</td><td>🔥🔥</td></tr>
+<tr><td>2347</td><td>聯強</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">12,761,010</td><td>🔥🔥</td></tr>
+<tr><td>2412</td><td>中華電</td><td>4天</td><td style="color:var(--red-alert);font-weight:bold;">11,796,504</td><td>🔥🔥</td></tr>
+<tr><td>3231</td><td>緯創</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;">11,763,997</td><td>🔥🔥【持股】</td></tr>
+<tr><td>3026</td><td>禾伸堂</td><td>4天</td><td style="color:var(--red-alert);font-weight:bold;"> 9,600,500</td><td>🔥🔥</td></tr>
+<tr><td>2382</td><td>廣達</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;"> 8,879,576</td><td>🔥🔥【持股】</td></tr>
+<tr><td>2890</td><td>永豐金</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;"> 8,402,982</td><td>🔥🔥</td></tr>
+<tr><td>2377</td><td>微星</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;"> 8,232,000</td><td>🔥🔥</td></tr>
+<tr><td>6191</td><td>精成科</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;"> 8,171,000</td><td>🔥🔥</td></tr>
+<tr><td>3711</td><td>日月光投控</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;"> 7,760,233</td><td>🔥🔥【持股】</td></tr>
+<tr><td>2885</td><td>元大金</td><td>4天</td><td style="color:var(--red-alert);font-weight:bold;"> 7,070,163</td><td>🔥🔥</td></tr>
+<tr><td>5469</td><td>瀚宇博</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;"> 6,770,000</td><td>🔥🔥</td></tr>
+<tr><td>8422</td><td>可寧衛*</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;"> 6,732,000</td><td>🔥🔥</td></tr>
+<tr><td>2610</td><td>華航</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;"> 6,464,477</td><td>🔥🔥</td></tr>
+<tr><td>2317</td><td>鴻海</td><td>4天</td><td style="color:var(--red-alert);font-weight:bold;"> 6,279,446</td><td>🔥🔥【持股】</td></tr>
+<tr><td>8046</td><td>南電</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;"> 5,607,639</td><td>🔥🔥</td></tr>
+<tr><td>2458</td><td>義隆</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;"> 5,328,874</td><td>🔥🔥</td></tr>
+<tr><td>3702</td><td>大聯大</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;"> 5,099,000</td><td>🔥🔥</td></tr>
+<tr><td>2408</td><td>南亞科</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;"> 4,545,191</td><td>🔥</td></tr>
+<tr><td>8070</td><td>長華*</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;"> 4,257,257</td><td>🔥</td></tr>
+<tr><td>6278</td><td>台表科</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;"> 4,139,000</td><td>🔥</td></tr>
+<tr><td>6213</td><td>聯茂</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;"> 4,073,900</td><td>🔥</td></tr>
+<tr><td>3037</td><td>欣興</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;"> 4,004,462</td><td>🔥</td></tr>
+<tr><td>2474</td><td>可成</td><td>4天</td><td style="color:var(--red-alert);font-weight:bold;"> 3,909,000</td><td>🔥</td></tr>
+<tr><td>2880</td><td>華南金</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;"> 3,302,711</td><td>🔥</td></tr>
+<tr><td>3023</td><td>信邦</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;"> 3,219,600</td><td>🔥</td></tr>
+<tr><td>3532</td><td>台勝科</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;"> 3,120,300</td><td>🔥</td></tr>
+<tr><td>2376</td><td>技嘉</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;"> 3,064,463</td><td>🔥</td></tr>
+<tr><td>3034</td><td>聯詠</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;"> 2,780,826</td><td>🔥</td></tr>
 </tbody>
         </table>
     </div>
@@ -243,10 +279,10 @@
 
 <div class="card info">
 <div class="card-title">🔬 科技產業</div>
+<div class="news-item"> SemiAnalysis ：記憶體價格仍有2-3倍上修空間、CPO大規模部署延至2029年</div>
 <div class="news-item"><span class="badge badge-blue">🟠財報</span> 大模型API市場的獲利困局：營收三級跳 為何虧損仍達百億美元？</div>
 <div class="news-item"><span class="badge badge-blue">🟠半導體</span> 台積電引爆矽光子革命：PIC產能三年擴增30倍 CPO供應鏈迎來商業化元年</div>
 <div class="news-item"><span class="badge badge-blue">🟠AI</span> 研調：Apple領跑Edge AI智慧手錶市場 2026年Q1滲透率達25%</div>
-<div class="news-item"><span class="badge badge-blue">🟠AI</span> 不用再等了！OpenAI全面開放GPT-5.6 最強模型正式登場</div>
 </div>
 
     

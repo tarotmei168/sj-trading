@@ -1,5 +1,5 @@
 {
-  "update_time": "2026-07-10 19:19",
+  "update_time": "2026-07-10 20:41",
   "categories": {
     "us_stock": {
       "label": "🇺🇸 美股/國際",
@@ -150,6 +150,11 @@
       "label": "🔬 科技脈動",
       "items": [
         {
+          "title": "SemiAnalysis ：記憶體價格仍有2-3倍上修空間、CPO大規模部署延至2029年",
+          "date": "",
+          "tags": []
+        },
+        {
           "title": "大模型API市場的獲利困局：營收三級跳 為何虧損仍達百億美元？",
           "date": "",
           "tags": [
@@ -193,11 +198,6 @@
         },
         {
           "title": "大摩上調2030年ABF供給缺口至22% 今明兩年價格漲幅最高可達20%",
-          "date": "",
-          "tags": []
-        },
-        {
-          "title": "Anthropic揭露Claude隱藏的思考空間「J-space」",
           "date": "",
           "tags": []
         }
