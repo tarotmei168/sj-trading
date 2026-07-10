@@ -27,11 +27,8 @@ td{padding:10px 6px;border-bottom:1px solid var(--border-color);vertical-align:m
 .badge-red{background:var(--red-alert)}
 .badge-blue{background:#1e90ff}
 .badge-orange{background:#ffa502}
-.badge-purple{background:#7b1fa2}
-.badge-green{background:var(--green-go)}
 .event-row{display:flex;justify-content:space-between;font-size:18px;padding:8px 0;border-bottom:1px solid var(--border-color)}
 .link-row{font-size:18px;padding:8px 0;border-bottom:1px solid #252525;line-height:1.5}
-.empty{text-align:center;padding:20px;color:#556677}
 .up{color:var(--red-alert);font-weight:bold}
 .down{color:var(--green-go);font-weight:bold}
 .footer{text-align:center;font-size:18px;color:#445566;margin-top:30px;padding-top:15px;border-top:1px solid #333}
@@ -39,13 +36,12 @@ td{padding:10px 6px;border-bottom:1px solid var(--border-color);vertical-align:m
 </style>
 </head>
 <body>
-
 <div class="header">
 <h1>🦞 小龍蝦行動總經操盤雷達</h1>
 <p>🌤️ 全球股市天氣預報 | 2026-07-10 08:30 | FinMind + Shioaji 雙核心</p>
 </div>
 
-<!-- ① 費半 SOX -->
+<!-- ① 費半 -->
 <div class="card info">
 <div class="card-title">🇺🇸 費城半導體指數 (SOX) · 台股唯一風向球</div>
 <div class="sox-box">
@@ -56,9 +52,9 @@ td{padding:10px 6px;border-bottom:1px solid var(--border-color);vertical-align:m
 <div class="tone-bar">💡 開盤基調：費半大漲，今日台股半導體族群開高，矽智財/先進封裝全力衝鋒</div>
 </div>
 
-<!-- ② 核心持股 -->
+<!-- ② 核心持股（無創意世芯智原廣達奇鋐創見） -->
 <div class="card">
-<div class="card-title">🔒 第1層：19檔持股技術監控</div>
+<div class="card-title">🔒 第1層：13檔核心持股技術監控</div>
 <table>
 <thead><tr><th>代號/名稱</th><th>現價</th><th>漲跌</th><th>高低</th><th>25天支撐</th><th>K/D</th><th>RSI</th><th>位階</th></tr></thead>
 <tbody>
@@ -79,7 +75,7 @@ td{padding:10px 6px;border-bottom:1px solid var(--border-color);vertical-align:m
 </table>
 </div>
 
-<!-- ③ 投信建倉（只顯示連日買超/潛力建倉股） -->
+<!-- ③ 投信建倉 -->
 <div class="card alert">
 <div class="card-title">🏦 投信法人秘密建倉 · 連日買超潛力股</div>
 <table>
@@ -91,26 +87,26 @@ td{padding:10px 6px;border-bottom:1px solid var(--border-color);vertical-align:m
 <tr><td>3035</td><td>智原</td><td class="up">+0.1</td><td>1天</td><td>0.0001%</td></tr>
 </tbody>
 </table>
-<p style="font-size:16px;color:var(--text-muted);margin-top:8px;">📌 盤後16:30更新 · 只顯示投信淨買超標的，負值(賣超)不列入</p>
+<p style="font-size:16px;color:var(--text-muted);margin-top:8px;">📌 盤後16:30更新 · 只顯示投信淨買超標的</p>
 </div>
 
-<!-- ④ 台美聯動牆（即時警報） -->
+<!-- ④ 聯動牆 -->
 <div class="card">
 <div class="card-title">🔗 台美全市場產業強聯動牆 · 即時警報</div>
 <p style="font-size:16px;color:var(--text-muted);margin:0 0 10px 0;">📡 以下為昨晚美股漲幅>2%對應的台股連動標的</p>
 <div class="link-row"><span class="badge badge-red">🔴</span> <b>台積電 ADR</b> +4.06% → 2330台積電現貨</div>
 <div class="link-row"><span class="badge badge-red">🔴</span> <b>艾司摩爾 ASML</b> +3.15% → CoWoS設備檢測股</div>
 <div class="link-row"><span class="badge badge-red">🔴🔴</span> <b>高通 QCOM</b> +5.80% → 2454聯發科填息</div>
-<div class="link-row"><span class="badge badge-red">🔴🔴</span> <b>超微 AMD</b> +6.61% → 3443創意 · 3661世芯 · 3035智原</div>
-<div class="link-row"><span class="badge badge-red">🔴🔴</span> <b>威騰 WDC</b> +7.14% → 2337旺宏 · 2451創見 · 2408南亞科</div>
-<div class="link-row"><span class="badge badge-red">🔴🔴</span> <b>日月光 ADR</b> +4.50% → 3711日月光投控 · 2449京元電子</div>
+<div class="link-row"><span class="badge badge-red">🔴🔴</span> <b>超微 AMD</b> +6.61% → 3443創意·3661世芯·3035智原</div>
+<div class="link-row"><span class="badge badge-red">🔴🔴</span> <b>威騰 WDC</b> +7.14% → 2337旺宏·2451創見·2408南亞科</div>
+<div class="link-row"><span class="badge badge-red">🔴🔴</span> <b>日月光 ADR</b> +4.50% → 3711日月光投控·2449京元電子</div>
 <div class="link-row"><span class="badge badge-red">🔴🔴</span> <b>特斯拉 TSLA</b> +6.69% → 電動車供應鏈</div>
 <div class="link-row"><span class="badge badge-orange">🟢🟢</span> <b>Rocket Lab RKLB</b> -7.34% → 低軌衛星警戒</div>
-<div class="link-row"><span class="badge badge-red">🔴🔴</span> <b>輝達 NVDA</b> +4.88% → 散熱 · 奇鋐 · 廣達 · ASIC</div>
-<div class="link-row"><span class="badge badge-red">🔴🔴</span> <b>美光 MU</b> +5.22% → 旺宏 · 華邦電 · 南亞科</div>
+<div class="link-row"><span class="badge badge-red">🔴🔴</span> <b>輝達 NVDA</b> +4.88% → 散熱·奇鋐·廣達·ASIC</div>
+<div class="link-row"><span class="badge badge-red">🔴🔴</span> <b>美光 MU</b> +5.22% → 旺宏·華邦電·南亞科</div>
 </div>
 
-<!-- ⑤ 未來14天事件（融合Fed/台灣50除權息法說/投信作帳） -->
+<!-- ⑤ 未來14天 -->
 <div class="card alert">
 <div class="card-title">📅 未來 14 天重要進程 · 除權息 · 法說 · FOMC · 總經 · 結算 · 作帳</div>
 <div class="event-row"><span>7/10(五)</span><span>🔥🔥 2317鴻海除息4.0元｜2382廣達除息6.0元</span></div>
@@ -149,7 +145,7 @@ td{padding:10px 6px;border-bottom:1px solid var(--border-color);vertical-align:m
 </p>
 </div>
 
-<!-- ⑥ 川普投顧 -->
+<!-- ⑥ 川普 -->
 <div class="card" style="border-left-color:#a29bfe;">
 <div class="card-title">🗣️ 川普投顧大砲特區</div>
 <p>持續監控川普對台灣晶片關稅與科技禁令言論 · 24H 核心監控</p>
@@ -159,6 +155,5 @@ td{padding:10px 6px;border-bottom:1px solid var(--border-color);vertical-align:m
 <div class="footer">
 🦞 小龍蝦自動產出 | 08:30 晨報 · 09:00~13:35 監控 · 16:30 更新 | 雙核心 FinMind+Shioaji | 全頁 18px
 </div>
-
 </body>
 </html>
