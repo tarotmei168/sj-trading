@@ -1,191 +1,259 @@
 <!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><title>小龍蝦系統全架構</title>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🦞 小龍蝦系統全架構 — 最高執行準則</title>
 <style>
-body{font-family:Microsoft JhengHei,Arial,sans-serif;margin:15px;background:#ffffff;color:#222222;font-size:20px}
-h1{color:#d32f2f;font-size:26px}
-h2{color:#d32f2f;font-size:22px;border-left:5px solid #d32f2f;padding-left:12px;margin-top:25px}
-h3{color:#d32f2f;font-size:20px}
-table{width:100%;border-collapse:collapse;margin:12px 0 25px 0;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
-th{background:#1976d2;color:#fff;padding:12px;text-align:left;font-size:20px}
-td{padding:12px;border-bottom:1px solid #ddd;font-size:20px;color:#222222}
-tr:hover{background:#e3f2fd}
-.fire{color:#d32f2f;font-weight:bold}
-.star{color:#f57c00;font-weight:bold}
-.ok{color:#2e7d32;font-weight:bold}
-.note{color:#888;font-size:20px}
-.tag{display:inline-block;padding:3px 8px;border-radius:4px;font-size:14px;margin:0 3px}
-.tag-fomc{background:#d32f2f;color:#fff}
-.tag-earnings{background:#1976d2;color:#fff}
-.tag-exdiv{background:#388e3c;color:#fff}
-.tag-trust{background:#7b1fa2;color:#fff}
-.tag-fa{background:#00838f;color:#fff}
-.summary{background:#f5f5f5;padding:18px;border-radius:6px;margin:15px 0;font-size:20px;border-left:5px solid #2ed573}
-.box{border:2px solid #d32f2f;border-radius:8px;padding:15px;margin:15px 0;background:#f5f5f5}
-.box-title{font-size:22px;font-weight:bold;color:#d32f2f;margin-bottom:10px}
+:root{--bg-dark:#121212;--card-bg:#1e1e1e;--primary-gold:#ffbe76;--red-alert:#ff6b6b;--green-go:#2ed573;--blue-info:#1e90ff;--text-main:#e0e0e0;--text-muted:#a0a0a0;--border:#333}
+*{box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft JhengHei",sans-serif;background:var(--bg-dark);color:var(--text-main);margin:0;padding:12px;font-size:18px;line-height:1.5}
+h1{color:var(--red-alert);font-size:24px;text-align:center}
+h2{color:var(--primary-gold);font-size:20px;margin:16px 0 10px;border-bottom:2px solid var(--border);padding-bottom:4px}
+h3{color:#ffa502;font-size:18px;margin:12px 0 8px}
+.section{background:var(--card-bg);border-radius:8px;padding:12px;margin-bottom:14px;border-left:5px solid var(--primary-gold)}
+.section.red{border-left-color:var(--red-alert)}
+.section.blue{border-left-color:var(--blue-info)}
+.section.green{border-left-color:var(--green-go)}
+table{width:100%;border-collapse:collapse;margin:8px 0;font-size:18px}
+th{background:#2d2d2d;color:var(--primary-gold);padding:8px;border:1px solid #444;text-align:left;font-size:18px}
+td{padding:8px;border:1px solid #444;font-size:18px}
+tr:hover{background:#252525}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;color:#fff;font-size:14px}
+.badge-r{background:var(--red-alert)}
+.badge-b{background:var(--blue-info)}
+.badge-g{background:var(--green-go)}
+.badge-p{background:#7b1fa2}
+.badge-o{background:#ffa502}
+.summary-box{background:#222;padding:15px;border-radius:6px;margin:10px 0;border-left:5px solid var(--green-go);font-size:18px}
+.footer{text-align:center;color:#445566;margin-top:20px;padding-top:10px;border-top:1px solid var(--border);font-size:18px}
+@media(max-width:480px){body{font-size:16px}table{font-size:14px}th{font-size:14px}td{font-size:14px}}
 </style>
 </head>
 <body>
 
-<h1>小龍蝦系統全架構</h1>
+<h1>🦞 小龍蝦行動總經操盤雷達</h1>
+<p style="text-align:center;color:var(--text-muted);font-size:18px">全系統架構（最高執行準則） | 更新: 2026-07-10 08:30</p>
 
-<div class="summary">
-<strong>已整合模組總表（全部運作中）</strong><br><br>
-🌤 第0層：總經氣象台 → <span class="ok">global_weather.py</span><br>
+<!-- ═══════════════ 已整合模組總表 ═══════════════ -->
+<div class="summary-box">
+<strong>✅ 已整合模組總表（全部運作中）</strong><br><br>
+🌤 <b>第0層：總經氣象台</b> → global_weather.py<br>
 &nbsp;&nbsp;↳ 美股大盤 + 費城半導體 SOX（台股=美股映射）<br>
-&nbsp;&nbsp;↳ 川普投顧政治緣政治（Yahoo財經每日爬）<br>
+&nbsp;&nbsp;↳ 川普投顧地緣政治（Yahoo財經每日爬）<br>
 &nbsp;&nbsp;↳ 未來14天重大事件：法說/FOMC/期貨結算/投信季底結帳/法人結帳<br>
-🔗 台美產業聯動40組：半導體/AI/蘋概/軍工/傳產（200檔涵蓋）→ <span class="ok">us_tw_mapping_matrix.py</span><br>
-🏦 投信買賣超（每天16:30更新）→ <span class="ok">daily_market_update.py</span><br>
-🗣 每月底法人作帳大作戰（投信+外資同時買）→ <span class="ok">global_weather.py</span><br>
-📰 產業大新聞關鍵字過濾：法說/財報/訂單/擴產等 → <span class="ok">news_filter.py</span><br>
-🔒 第1層核心持股 9檔30分K監控(08:30~13:35) → <span class="ok">day_monitor_loop.py</span><br>
-🎯 第2層潛力股 10檔同步監控(9~10點) → <span class="ok">day_monitor_loop.py</span><br>
-💾 3年日K資料庫（19檔+大盤）→ <span class="ok">database/ 目錄</span><br>
-⏰ 08:30 cron 晨報+盤中啟動 → <span class="ok">cron已設定</span><br>
-⏰ 16:30 cron 盤後資料庫更新 → <span class="ok">cron已設定</span><br>
+🔗 <b>台美產業聯動40組</b>：半導體/AI/蘋概/軍工/傳產（200檔涵蓋）→ us_tw_mapping_matrix.py<br>
+🏦 <b>投信買賣超</b>（每天16:30更新）→ daily_market_update.py<br>
+🗣 <b>每月底法人作帳大作戰</b>（投信+外資同時買）→ global_weather.py<br>
+📰 <b>產業大新聞關鍵字過濾</b>：法說/財報/訂單/擴產等 → news_filter.py<br>
+🔒 <b>第1層核心持股 9檔30分K監控</b>(08:30~13:35) → day_monitor_loop.py<br>
+🎯 <b>第2層潛力股 10檔同步監控</b>(9~10點) → day_monitor_loop.py<br>
+💾 <b>3年日K資料庫</b>（19檔+大盤）→ database/ 目錄<br>
+⏰ <b>08:30 cron</b> 晨報+盤中啟動 → cron已設定<br>
+⏰ <b>16:30 cron</b> 盤後資料庫更新 → cron已設定<br>
+🇺🇸 <b>Fed/美國總經日曆</b>：CPI · PCE · FOMC · 非農 · GDP · PPI → 整合進晨報<br>
+🏛️ <b>台灣50權值股除權息+法說</b> → 整合進晨報事件矩陣<br>
+📊 <b>40組完整台美連動表</b> → 已內嵌於 index.html 可摺疊面板
 </div>
 
-<div class="box">
-<div class="box-title">🌤 第0層：總經氣象台 (global_weather.py)</div>
-<p><strong>第一維度：大盤 = 台股+費城半導體SOX</strong><br>
-美股以半導體為核心，費半漲就打台灣半導體，其他指數（標普/那指）不特別關注</p>
-<p><strong>第二維度：未來14天重大事件</strong><br>
-除息、法說、FOMC、台指期結算、投信季底結帳、內資法人結帳大場面</p>
-<p><strong>第三維度：台美產業聯動40組 (us_tw_mapping_matrix.py)</strong><br>
-美股領頭羊波動>2%時自動跳出對應台股警報</p>
-<p><strong>第四：川普投顧大砲專區</strong><br>
-每天Yahoo財經爬川普+關稅+晶片相關重大發言，直接貼在晨報</p>
+<!-- ═══════════════ 時程排程 ═══════════════ -->
+<div class="section red">
+<h2>⏰ 時程排程</h2>
+<table><tr><th>時間</th><th>任務</th><th>指令</th></tr>
+<tr><td><b>08:30</b></td><td>晨報產出 + Git Push</td><td>daily_web_report.py</td></tr>
+<tr><td><b>08:30~13:35</b></td><td>盤中KD金叉監控</td><td>day_engine_notify.json</td></tr>
+<tr><td><b>16:30</b></td><td>全市場資料庫更新</td><td>daily_market_update.py</td></tr>
+<tr><td>非交易日</td><td colspan="2">全部跳過</td></tr>
+</table>
 </div>
 
-<div class="box">
-<div class="box-title">🔒 第1層：核心持股（硬持倉，全部監控不賣）</div>
-<p><strong>9檔硬倉：</strong> 2436偉詮電、2337旺宏、5351鈺創、3673 TPK-KY、3711日月光、4958臻鼎-KY、3042晶技、2454聯發科、2317鴻海</p>
-<p><strong>盤中監控：</strong> 08:30~13:35每15分鐘檢查15分K KD金叉/死叉，含RSI+量價+支撐</p>
-<p><strong>通知規則：</strong> 金叉警報(K/D差<1)4次、死叉4次、一般1次</p>
+<!-- ═══════════════ 總經風控閾值 ═══════════════ -->
+<div class="section red">
+<h2>🚨 總經風控閾值</h2>
+<table><tr><th>指標</th><th>閾值</th><th>行動</th></tr>
+<tr><td>VIX 恐慌指數</td><td>&gt;22</td><td>防禦性控管持倉提示</td></tr>
+<tr><td>美元兌新台幣</td><td>&gt;32.5</td><td>匯率警戒標籤</td></tr>
+<tr><td>外資期貨空單</td><td>&gt;30,000口</td><td>🔴 大盤高檔震盪</td></tr>
+<tr><td>台股成交量預估</td><td>09:30盤中</td><td>爆量下殺或無量飆高判斷</td></tr>
+<tr><td>川普關稅風向</td><td>—</td><td>16:30地緣政治利空警戒</td></tr>
+</table>
 </div>
 
-<div class="box">
-<div class="box-title">🎯 第2層：潛力股（部位零，等右側開槍）</div>
-<p><strong>10檔雷達：</strong> 3443創意、3661世芯-KY、3035智原、3231緯創、2382廣達、3017奇鋐、2451創見、8150南茂、2344華邦電、6770力積電</p>
-<p><strong>監控方式：</strong> 比核心股低一級，每15分鐘檢查15分K</p>
+<!-- ═══════════════ 第0層：總經氣象台 ═══════════════ -->
+<div class="section blue">
+<h2>🌤 第0層：總經氣象台 (global_weather.py)</h2>
+<p><b>第一維度：大盤 = 台股+費城半導體SOX</b><br>美股以半導體為核心，費半漲就打台灣半導體，其他指數（標普/那指）不特別關注</p>
+<p><b>第二維度：未來14天重大事件</b><br>除息、法說、FOMC、台指期結算、投信季底結帳、內資法人結帳大場面</p>
+<p><b>第三維度：台美產業聯動40組 (us_tw_mapping_matrix.py)</b><br>美股領頭羊波動>2%時自動跳出對應台股警報</p>
+<p><b>第四維度：川普投顧大砲專區</b><br>每天Yahoo財經爬川普+關稅+晶片相關重大發言</p>
+<p><b>第五維度：🇺🇸 Fed/美國總經關鍵日期</b><br>FOMC · CPI · PCE · 非農 · GDP · PPI · ISM · 傑克森霍爾年會</p>
+<p><b>第六維度：🏛️ 台灣50權值股除權息+法說會</b><br>台積電/聯發科/鴻海權重除息法說全部列入事件矩陣</p>
 </div>
 
-<div class="box">
-<div class="box-title">🏦 第3層：投信秘密建倉偵測 (daily_market_update.py)</div>
-<p><strong>每天16:30觸發：</strong></p>
+<!-- ═══════════════ 第1層：核心持股 ═══════════════ -->
+<div class="section red">
+<h2>🔒 第1層：核心持股（硬持倉，全部監控不賣）</h2>
+<p><b>9檔硬倉：</b> 2436偉詮電、2337旺宏、5351鈺創、3673 TPK-KY、3711日月光、4958臻鼎-KY、3042晶技、2454聯發科、2317鴻海</p>
+<p><b>盤中監控：</b> 08:30~13:35每15分鐘檢查15分K KD金叉/死叉，含RSI+量價+支撐</p>
+<p><b>通知規則：</b> 金叉警報(K/D差&lt;1)4次、死叉4次、一般1次</p>
+</div>
+
+<!-- ═══════════════ 第2層：潛力股 ═══════════════ -->
+<div class="section">
+<h2>🎯 第2層：潛力股（部位零，等右側開槍）</h2>
+<p><b>10檔雷達：</b> 3443創意、3661世芯-KY、3035智原、3231緯創、2382廣達、3017奇鋐、2451創見、8150南茂、2344華邦電、6770力積電</p>
+<p><b>監控方式：</b> 比核心股低一級，每15分鐘檢查15分K</p>
+</div>
+
+<!-- ═══════════════ 第3層：投信建倉 ═══════════════ -->
+<div class="section">
+<h2>🏦 第3層：投信秘密建倉偵測 (daily_market_update.py)</h2>
+<p><b>每天16:30觸發：</b></p>
 <p>1️⃣ 下載TWSE投信買賣超 → SITC_Accumulation.csv（連買天數）<br>
 2️⃣ 下載FinMind月營收 → 基本面DB<br>
 3️⃣ 篩出黑馬清單 → Potential_Candidates.txt</p>
-<p><strong>篩選條件：</strong> 投信連買1~3天 + 營收年增>20% + 60天橫盤<25%</p>
+<p><b>篩選條件：</b> 投信連買1~3天 + 營收年增>20% + 60天橫盤&lt;25%</p>
 </div>
 
-<div class="box">
-<div class="box-title">📡 永豐金 Shioaji API — 即時狙擊槍</div>
-<p><strong>用途 1：08:30 晨報即時報價校正</strong><br>
-api.snapshots → 核心持股現價、漲跌幅、最高/最低/成交量</p>
-<p><strong>用途 2：開盤基調判斷</strong><br>
-即時台積電漲跌 → 強多/偏多/中性/偏空/強空</p>
-<p><strong>用途 3：盤中 15分K KD 金叉/死叉監控</strong><br>
-(待 day_monitor_loop.py 整合)</p>
-<p><strong>用途 4：庫存持股對帳</strong><br>
-api.list_positions → 真實庫存成本 vs 市價（需 CA 憑證）</p>
+<!-- ═══════════════ 永豐金 Shioaji ═══════════════ -->
+<div class="section">
+<h2>📡 永豐金 Shioaji API — 即時狙擊槍</h2>
+<p><b>用途 1：</b>08:30 晨報即時報價校正 → api.snapshots → 核心持股現價、漲跌幅、最高/最低/成交量</p>
+<p><b>用途 2：</b>開盤基調判斷 → 即時台積電漲跌 → 強多/偏多/中性/偏空/強空</p>
+<p><b>用途 3：</b>盤中 15分K KD 金叉/死叉監控</p>
+<p><b>用途 4：</b>庫存持股對帳 → api.list_positions → 真實庫存成本 vs 市價（需CA憑證）</p>
 </div>
 
-<div class="box">
-<div class="box-title">📰 第4層：產業大新聞 (news_filter.py)</div>
-<p><strong>資料源：</strong> FinMind TaiwanStockNews（免費，需Token）</p>
-<p><strong>關鍵字過濾（五大類產業大新聞）：</strong><br>
-法說會、除息、財報、訂單、擴產、缺貨、漲價、調降、調升、法說、除權、掛牌、併購、套利</p>
-<p><strong>輸出：</strong> 每檔股票一條重點新聞，直接貼在晨報表格中</p>
-</div>
+<!-- ═══════════════ 台美產業連動40組完整表 ═══════════════ -->
+<div class="section red">
+<h2>🔗 台美產業連動矩陣 · 40組完整對照字典</h2>
 
-<div class="box">
-<div class="box-title">⏰ 排程任務（Cron）</div>
-<table>
-<tr><th>時間</th><th>任務</th><th>執行內容</th></tr>
-<tr><td><strong>08:30</strong></td><td>晨報+盤中啟動</td>
-<td>1. gen_web_report.py（含 Shioaji 即時報價）→ index.html<br>2. copy system_architecture.html → web/architecture.html<br>3. git push to GitHub Pages</td></tr>
-<tr><td><strong>16:30</strong></td><td>盤後資料全量更新</td>
-<td>1. 投信買賣超累積表 (SITC_Accumulation.csv)<br>2. 基本面資料庫更新<br>3. 黑馬精選清單 + AI主題更新</td></tr>
+<h3>📂 第1板塊：半導體與核心晶片（1~9組）</h3>
+<table><tr><th>#</th><th>產業</th><th>🇺🇸 美股</th><th>➡️ 🇹🇼 台股</th></tr>
+<tr><td>1</td><td>先進製程與晶圓代工</td><td>TSM · ASML</td><td>2330台積電 · 5347世界先進 · 2303聯電</td></tr>
+<tr><td>2</td><td>IC設計與手機晶片</td><td>QCOM</td><td>2454聯發科</td></tr>
+<tr><td>3</td><td>高速傳輸與矽光子CPO</td><td>MRVL · AVGO · INTC</td><td>6442光聖 · 3363上詮 · 3163波若威 · 3081聯亞</td></tr>
+<tr><td>4</td><td>ASIC與高階矽智財</td><td>NVDA · AMD · ARM</td><td>3443創意 · 3661世芯 · 3035智原 · 6643 M31</td></tr>
+<tr><td>5</td><td>記憶體晶片與模組</td><td>MU · WDC</td><td>2337旺宏 · 2451創見 · 3260威剛 · 2408南亞科 · 2344華邦電</td></tr>
+<tr><td>6</td><td>高階半導體設備</td><td>AMAT · LRCX · KLAC</td><td>3131弘塑 · 3583辛耘 · 6187萬潤 · 3680家登</td></tr>
+<tr><td>7</td><td>高階先進封裝</td><td>ASX · AMKR</td><td>3711日月光 · 2449京元電子 · 8150南茂</td></tr>
+<tr><td>8</td><td>成熟製程與利基型IC</td><td>TXN · STM</td><td>3034聯詠 · 2379瑞昱 · 8016矽創</td></tr>
+<tr><td>9</td><td>車用二極體與功率半導體</td><td>ON · IFNNY · NXPI</td><td>2481強茂 · 5425台半 · 3675德微 · 6435大中</td></tr>
+</table>
+
+<h3>📂 第2板塊：AI與次世代硬體（10~15組）</h3>
+<table><tr><th>#</th><th>產業</th><th>🇺🇸 美股</th><th>➡️ 🇹🇼 台股</th></tr>
+<tr><td>10</td><td>AI伺服器代工</td><td>SMCI · DELL · HPQ</td><td>2382廣達 · 3231緯創 · 6669緯穎 · 2356英業達 · 2317鴻海</td></tr>
+<tr><td>11</td><td>AI伺服器散熱</td><td>VRT</td><td>3017奇鋐 · 3324雙鴻 · 8996高力 · 3653健策</td></tr>
+<tr><td>12</td><td>伺服器機殼與導軌</td><td>SMCI供應鏈</td><td>2059川湖 · 6117迎廣 · 8210勤誠 · 3013晟銘電</td></tr>
+<tr><td>13</td><td>AI伺服器電源管理</td><td>ETN · VRT</td><td>2308台達電 · 6412群電 · 6282康舒</td></tr>
+<tr><td>14</td><td>高階PCB硬板</td><td>NVIDIA OAM</td><td>2368金像電 · 3044健鼎 · 3037欣興</td></tr>
+<tr><td>15</td><td>銅箔基板CCL高頻材料</td><td>GLW</td><td>6274台燿 · 6213聯茂 · 2383台光電</td></tr>
+</table>
+
+<h3>📂 第3板塊：電子零組件與周邊（16~25組）</h3>
+<table><tr><th>#</th><th>產業</th><th>🇺🇸 美股</th><th>➡️ 🇹🇼 台股</th></tr>
+<tr><td>16</td><td>被動元件</td><td>MURGY · TTDKY</td><td>2327國巨 · 2492華新科 · 6207雷科</td></tr>
+<tr><td>17</td><td>IC載板ABF/BT</td><td>IBIDNY</td><td>3037欣興 · 3189景碩 · 8046南電</td></tr>
+<tr><td>18</td><td>USB-PD與PC周邊晶片</td><td>INTC · MSFT</td><td>2436偉詮電 · 5269祥碩 · 4966譜瑞-KY</td></tr>
+<tr><td>19</td><td>石英震盪器與頻率元件</td><td>KYOCY</td><td>3042晶技 · 2484希華</td></tr>
+<tr><td>20</td><td>軟性印刷電路板FPC</td><td>AAPL</td><td>4958臻鼎-KY · 6269台郡</td></tr>
+<tr><td>21</td><td>LED與第三代半導體</td><td>WOLF</td><td>3714富采 · 8261富鼎 · 3707漢磊</td></tr>
+<tr><td>22</td><td>觸控面板</td><td>AAPL供應鏈</td><td>3673 TPK-KY · 6456 GIS-KY</td></tr>
+<tr><td>23</td><td>連接器與高階傳輸線</td><td>APH</td><td>3665貿聯-KY · 2392正崴 · 6197佳必琪</td></tr>
+<tr><td>24</td><td>光學鏡頭</td><td>AAPL</td><td>3008大立光 · 3406玉晶光 · 3362先進光</td></tr>
+<tr><td>25</td><td>網通設備Wi-Fi 7</td><td>CSCO · ANET</td><td>6285啟碁 · 2345智邦 · 5388中磊 · 4906正文</td></tr>
+</table>
+
+<h3>📂 第4板塊：重電/綠能/航太/軍工（26~29組）</h3>
+<table><tr><th>#</th><th>產業</th><th>🇺🇸 美股</th><th>➡️ 🇹🇼 台股</th></tr>
+<tr><td>26</td><td>重電四雄</td><td>GE · ETN</td><td>1519華城 · 1503士電 · 1513中興電 · 1514亞力</td></tr>
+<tr><td>27</td><td>綠能風力發電</td><td>NEE · FSLR</td><td>9958世紀鋼 · 6806森崴能源 · 6869雲豹能源</td></tr>
+<tr><td>28</td><td>航太零組件與軍工</td><td>LMT · RTX · BA</td><td>2634漢翔 · 8033雷虎 · 8222寶一 · 6753龍德造船</td></tr>
+<tr><td>29</td><td>自動化設備與機器人</td><td>FANUY · ROK</td><td>2395研華 · 6414樺漢 · 2359所羅門 · 3030德律</td></tr>
+</table>
+
+<h3>📂 第5板塊：電動車/衛星/電商（30~32組）</h3>
+<table><tr><th>#</th><th>產業</th><th>🇺🇸 美股</th><th>➡️ 🇹🇼 台股</th></tr>
+<tr><td>30</td><td>電動車供應鏈</td><td>TSLA</td><td>2258鴻華先進 · 4528江興鍛 · 1536和大 · 3715定穎投控</td></tr>
+<tr><td>31</td><td>低軌道衛星</td><td>RKLB · SpaceX</td><td>3491昇達科 · 2313華通 · 3138耀登</td></tr>
+<tr><td>32</td><td>網際網路與電商</td><td>AMZN · BABA</td><td>8454富邦媒 · 8044網家 · 6763綠界科技</td></tr>
+</table>
+
+<h3>📂 第6板塊：傳統產業/週期/生技（33~40組）</h3>
+<table><tr><th>#</th><th>產業</th><th>🇺🇸 美股</th><th>➡️ 🇹🇼 台股</th></tr>
+<tr><td>33</td><td>鋼鐵工業</td><td>NUE · STLD</td><td>2002中鋼 · 2006東和鋼鐵 · 2014中鴻</td></tr>
+<tr><td>34</td><td>水泥營建</td><td>CAT</td><td>1101台泥 · 1102亞泥</td></tr>
+<tr><td>35</td><td>航運貨櫃散裝</td><td>AMKBY · BDI</td><td>2603長榮 · 2609陽明 · 2615萬海 · 2606裕民 · 2605新興</td></tr>
+<tr><td>36</td><td>航空觀光</td><td>DAL · UAL</td><td>2610華航 · 2618長榮航</td></tr>
+<tr><td>37</td><td>塑膠石化</td><td>XOM · CVX</td><td>1301台塑 · 1303南亞 · 1326台化 · 6505台塑化</td></tr>
+<tr><td>38</td><td>紡織成衣</td><td>NKE · LULU</td><td>1476儒鴻 · 1477聚陽</td></tr>
+<tr><td>39</td><td>生技新藥與CDMO</td><td>PFE · LLY · MRNA</td><td>6446藥華藥 · 1795美時 · 6472保瑞 · 6589台康生技</td></tr>
+<tr><td>40</td><td>隱形眼鏡與醫材</td><td>ALC · COO</td><td>1565精華 · 6491晶碩</td></tr>
 </table>
 </div>
 
-<div class="box">
-<div class="box-title">🗄 本地資料庫 (database/)</div>
-<table>
-<tr><th>檔案</th><th>內容</th></tr>
-<tr><td>taiwan_stock_info.csv</td><td>全市場4,276檔股票代號/名稱/產業</td></tr>
-<tr><td>TAIEX_daily_kline.csv</td><td>大盤加權指數3年日K（727筆）</td></tr>
-<tr><td>{代號}_3y.csv</td><td>19檔監控標的×3年日K（每檔~720筆）</td></tr>
-<tr><td>SITC_Accumulation.csv</td><td>投信買賣超累積表（連買天數）</td></tr>
-<tr><td>Fundamentals_Database.csv</td><td>基本面資料庫（月營收年增）</td></tr>
-<tr><td>ai_themes.json</td><td>AI產業聯想結構（DeepSeek）</td></tr>
-<tr><td>news_filtered.json</td><td>新聞過濾結果（FinMind）</td></tr>
+<!-- ═══════════════ 數據源 ═══════════════ -->
+<div class="section">
+<h2>💻 數據源架構（雙核心）</h2>
+<h3>📦 FinMind（盤後大數據）</h3>
+<table><tr><th>API</th><th>用途</th><th>頻率</th></tr>
+<tr><td>taiwan_stock_info</td><td>全市場4,276檔基本資料</td><td>每月</td></tr>
+<tr><td>TaiwanStockInstitutionalInvestorsBuySell</td><td>投信/外資買賣超</td><td>每日16:30</td></tr>
+<tr><td>TaiwanStockMonthRevenue</td><td>月營收年增率</td><td>每月10號</td></tr>
+<tr><td>TAIEX</td><td>大盤加權指數日K</td><td>每日</td></tr>
+<tr><td>TaiwanStockNews</td><td>產業新聞過濾</td><td>每日</td></tr>
+</table>
+<p>離線備援: database/代號_3y.csv 本機日K</p>
+
+<h3>📡 永豐金 Shioaji（即時）</h3>
+<table><tr><th>功能</th><th>方法</th><th>說明</th></tr>
+<tr><td>即時快照</td><td>api.snapshots()</td><td>現價/漲跌/高低/量</td></tr>
+<tr><td>開盤基調</td><td>check_market_tone()</td><td>台積電即時判斷多空</td></tr>
+<tr><td>庫存對帳</td><td>api.list_positions()</td><td>需CA憑證</td></tr>
+<tr><td>盤中監控</td><td>15分K/kbar</td><td>待整合</td></tr>
+</table>
+<p>API Key缺失時自動模擬模式</p>
+</div>
+
+<!-- ═══════════════ 晨報版型 ═══════════════ -->
+<div class="section red">
+<h2>📋 晨報版型規範</h2>
+<table><tr><th>項目</th><th>要求</th></tr>
+<tr><td>字體</td><td><b>18px</b> 全頁統一</td></tr>
+<tr><td>色系</td><td>深色 #121212 / 卡片 #1e1e1e / 金字 #ffbe76</td></tr>
+<tr><td>指數</td><td><b>只留費城半導體 SOX</b></td></tr>
+<tr><td>響應式</td><td>mobile-first</td></tr>
+</table>
+
+<h3>📋 必備區塊（由上到下）</h3>
+<table><tr><th>順序</th><th>區塊</th><th>內容</th></tr>
+<tr><td>1</td><td>🇺🇸 費半指數</td><td>收盤+漲跌幅+開盤基調</td></tr>
+<tr><td>2</td><td>🔒 核心持股</td><td>KD/RSI/支撐/漲跌</td></tr>
+<tr><td>3</td><td>📅 未來14天事件</td><td>除息/法說/結算/季底/FOMC/美國總經</td></tr>
+<tr><td>4</td><td>🇺🇸 Fed/總經日曆</td><td>CPI/PCE/FOMC/非農/GDP/PPI</td></tr>
+<tr><td>5</td><td>🔗 台美聯動40組</td><td>半導體/AI/傳產全產業摺疊面板</td></tr>
+<tr><td>6</td><td>🏛️ 台灣50除權息+法說</td><td>權值股除權息法說行事曆</td></tr>
+<tr><td>7</td><td>🏦 投信季底作帳</td><td>Q2/Q3季底結帳節奏+策略</td></tr>
+<tr><td>8</td><td>🏦 投信建倉</td><td>P_day + P_cum</td></tr>
+<tr><td>9</td><td>🗣️ 川普投顧</td><td>關稅/政治言論</td></tr>
 </table>
 </div>
 
-<div class="box">
-<div class="box-title">📁 核心程式碼 (src/sj_trading/)</div>
-<table>
-<tr><th>檔案</th><th>功能</th></tr>
-<tr><td>global_weather.py</td><td>總經天氣：費半、14天事件、川普、40組聯動</td></tr>
-<tr><td>us_tw_mapping_matrix.py</td><td>台美產業聯動40組（美股65支+台股200支）</td></tr>
-<tr><td>day_monitor_loop.py</td><td>盤中15分K監控(08:30~13:35)，每15分鐘檢查19檔</td></tr>
-<tr><td>daily_market_update.py</td><td>16:30盤後更新：投信+營收+黑馬清單+AI主題</td></tr>
-<tr><td>news_filter.py</td><td>FinMind新聞關鍵字過濾（五大類產業大新聞）</td></tr>
-<tr><td>morning_report_v2.py</td><td>完整晨報產生器（4層架構）</td></tr>
-<tr><td>full_report_now.py</td><td>立即產出晨報（手動執行用）</td></tr>
-<tr><td>ticker_fix.py</td><td>台股代碼自動修正(.TW/.TWO)，90筆對照表</td></tr>
-<tr><td>optimize_strategy.py</td><td>每檔最佳參數回測系統</td></tr>
-<tr><td>pure_data_download.py</td><td>FinMind純淨日K下載器（與三竹對齊）</td></tr>
-<tr><td>lobster_pipeline.py</td><td>龍蝦管線（量化，迴歸相關）</td></tr>
-<tr><td>shioaji_helper.py</td><td>永豐金API輔助模組（即時快照+登入管理）</td></tr>
-<tr><td>calc_tech.py</td><td>技術指標計算（KD/RSI/25天支撐）</td></tr>
-<tr><td>calc_trust_rate.py</td><td>投信滲透率P_day + 累計控盤率P_cum</td></tr>
+<!-- ═══════════════ GitHub ═══════════════ -->
+<div class="section green">
+<h2>📤 GitHub 部署</h2>
+<table><tr><th>項目</th><th>內容</th></tr>
+<tr><td>遠端倉庫</td><td>github.com/tarotmei168/sj-trading.git</td></tr>
+<tr><td>Pages</td><td>https://tarotmei168.github.io/sj-trading/</td></tr>
+<tr><td>發布目錄</td><td>web/index.html · web/architecture.html</td></tr>
+<tr><td>發布方式</td><td>08:30 &amp; 16:30 auto git push</td></tr>
 </table>
 </div>
 
-<div class="box">
-<div class="box-title">🔗 台美產業聯動40組一覽</div>
-<table>
-<tr><th>#</th><th>產業</th><th>代表美股</th><th>代表台股</th></tr>
-<tr><td>1</td><td>先進製程&設備材料</td><td>TSM / ASML</td><td>2330台積電 / 347世芯-KY / 303聯電</td></tr>
-<tr><td>2</td><td>IC設計&手機晶片</td><td>QCOM</td><td>2454聯發科</td></tr>
-<tr><td>3</td><td>光通訊CPO</td><td>MRVL / AVGO / INTC</td><td>6442光聖 / 363上詮 / 163波若威 / 081聯亞</td></tr>
-<tr><td>4</td><td>ASIC/IP</td><td>NVDA / AMD / ARM</td><td>3443創意 / 3661世芯 / 3035智原 / 643 M31</td></tr>
-<tr><td>5</td><td>記憶體</td><td>MU / WDC</td><td>2337旺宏 / 2451創見 / 260威剛 / 408南亞科 / 344華邦電</td></tr>
-<tr><td>6</td><td>半導體設備</td><td>AMAT / LRCX / KLAC</td><td>3131弘塑 / 3583辛耘 / 187潤弘 / 680家登</td></tr>
-<tr><td>7</td><td>先進封裝</td><td>ASX / AMKR</td><td>3711日月光 / 449京元電 / 150南茂</td></tr>
-<tr><td>8</td><td>類比IC</td><td>TXN / STM</td><td>3034聯詠 / 379矽創 / 016致新</td></tr>
-<tr><td>9</td><td>車用半導體</td><td>ON / IFNNY / NXPI</td><td>2481強茂 / 425台半 / 675德微 / 435大中</td></tr>
-<tr><td>10</td><td>AI伺服器&代工</td><td>SMCI / DELL / HPQ</td><td>2382廣達 / 231緯創 / 669緯穎 / 356英業達 / 317鴻海</td></tr>
-<tr><td>11</td><td>散熱</td><td>VRT</td><td>3017奇鋐 / 324雙鴻 / 996高力 / 653建準</td></tr>
-<tr><td>12</td><td>機殼導軌</td><td>SMCI</td><td>2059川湖 / 117迎廣 / 210華擎 / 013勤誠</td></tr>
-<tr><td>13</td><td>電源管理</td><td>ETN / VRT</td><td>2308台達電 / 412群電 / 282康舒</td></tr>
-<tr><td>14</td><td>高速PCB</td><td>輝達供應鏈</td><td>2368金像電 / 044楠梓電 / 037台光電</td></tr>
-<tr><td>15</td><td>CCL高頻材料</td><td>騰輝</td><td>6274台燿 / 213聯茂 / 383台光電</td></tr>
-<tr><td>16</td><td>被動元件</td><td>村田 / TDK</td><td>2327國巨 / 492華新科 / 207興勤</td></tr>
-<tr><td>17</td><td>ABF載板</td><td>Ibiden/Shinko</td><td>3037欣興 / 189景碩 / 046南電</td></tr>
-<tr><td>18</td><td>PC周邊IC</td><td>INTC / MSFT</td><td>2436偉詮電 / 269祥碩 / 966譜瑞</td></tr>
-<tr><td>19</td><td>石英元件</td><td>京瓷</td><td>3042晶技 / 484希華</td></tr>
-<tr><td>20</td><td>FPC軟板</td><td>AAPL</td><td>4958臻鼎 / 269台郡</td></tr>
-<tr><td>21~40</td><td colspan="3">第二頁：散熱/觸控/PA光學/網通/車電/綠能/軍工/機器人/低軌衛星/鋼鐵/水泥/航運/塑膠/紡織/營建/金融</td></tr>
-</table>
+<div class="footer">
+🦞 小龍蝦系統全架構 | 最高執行準則 | 2026-07-10 08:30
 </div>
-
-<div class="box">
-<div class="box-title">📢 通知規則</div>
-<table>
-<tr><th>訊號類型</th><th>發送次數</th></tr>
-<tr><td>金叉警報（K/D差值<1）</td><td><strong>4次</strong></td></tr>
-<tr><td>買入訊號（GC）</td><td><strong>4次</strong></td></tr>
-<tr><td>賣出死叉（DC）</td><td><strong>4次</strong></td></tr>
-<tr><td>一般資訊更新</td><td>1次</td></tr>
-</table>
-</div>
-
-<p class="note" style="margin-top:30px;font-size:16px">小龍蝦系統 | 雙核心 FinMind + 永豐金 Shioaji | 2026-07-08</p>
 
 </body>
 </html>
