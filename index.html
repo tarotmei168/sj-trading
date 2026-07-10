@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🦞 小龍蝦行動總經操盤雷達</title>
+<style>
+:root{--bg-dark:#121212;--card-bg:#1e1e1e;--primary-gold:#ffbe76;--red-alert:#ff6b6b;--green-go:#2ed573;--text-main:#e0e0e0;--text-muted:#a0a0a0;--border-color:#333}
+*{box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Microsoft JhengHei",sans-serif;background:var(--bg-dark);color:var(--text-main);margin:0;padding:12px;line-height:1.5;font-size:18px}
+.header{text-align:center;padding:14px 0;border-bottom:3px solid var(--red-alert);margin-bottom:16px}
+.header h1{margin:0;font-size:22px;color:var(--red-alert)}
+.header p{margin:6px 0 0 0;font-size:18px;color:var(--text-muted)}
+.card{background:var(--card-bg);border-radius:8px;padding:15px;margin-bottom:15px;box-shadow:0 4px 10px rgba(0,0,0,.5);border-left:5px solid var(--primary-gold)}
+.card.alert{border-left-color:var(--red-alert)}
+.card.info{border-left-color:#1e90ff}
+.card.fed{border-left-color:#a29bfe}
+.card-title{font-size:20px;font-weight:bold;margin-bottom:12px;color:var(--primary-gold)}
+.sox-box{background:#2a2a2a;padding:14px;border-radius:6px;text-align:center;border:1.5px solid var(--red-alert);margin-bottom:10px}
+.sox-name{font-size:18px;color:var(--text-muted)}
+.sox-val{font-size:24px;font-weight:bold;margin:6px 0;color:#fff}
+.sox-chg{font-size:20px}
+.tone-bar{font-size:18px;color:var(--primary-gold);margin:12px 0 0 0;text-align:center;font-weight:bold;padding:10px;background:#222;border-radius:6px;border:1px solid #444}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:18px}
+th{background:#2d2d2d;color:var(--primary-gold);font-weight:bold;padding:8px 6px;text-align:left;border-bottom:2px solid var(--border-color);font-size:18px}
+td{padding:10px 6px;border-bottom:1px solid var(--border-color);vertical-align:middle;font-size:18px}
+.badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:14px;font-weight:bold;color:#fff}
+.badge-red{background:var(--red-alert)}
+.badge-blue{background:#1e90ff}
+.badge-orange{background:#ffa502}
+.badge-purple{background:#7b1fa2}
+.badge-green{background:var(--green-go)}
+.badge-gold{background:#f57c00}
+.event-row{display:flex;justify-content:space-between;font-size:18px;padding:8px 0;border-bottom:1px solid var(--border-color)}
+.link-row{font-size:18px;padding:8px 0;border-bottom:1px solid #252525;line-height:1.5}
+.empty{text-align:center;padding:20px;color:#556677}
+.up{color:var(--red-alert);font-weight:bold}
+.down{color:var(--green-go);font-weight:bold}
+.footer{text-align:center;font-size:18px;color:#445566;margin-top:30px;padding-top:15px;border-top:1px solid #333}
+.collapsible{background:#2d2d2d;color:var(--primary-gold);cursor:pointer;padding:10px 14px;width:100%;border:none;text-align:left;font-size:18px;font-weight:bold;border-radius:6px;margin-top:8px}
+.collapsible:hover{background:#3d3d3d}
+.collapsible::after{content:"\25BC";float:right}
+.collapsible.active::after{content:"\25B2"}
+.content{display:none;overflow:hidden}
+.content.show{display:block}
+.sector-group{border-left:3px solid #555;padding-left:10px;margin:6px 0}
+.fed-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #252525;font-size:16px}
+.fed-item .date-tag{color:var(--red-alert);font-weight:bold;min-width:100px}
+.fed-item .event-name{flex:1;color:var(--text-main)}
+.fed-item .level-icon{min-width:30px;text-align:center}
+.fed-item .impact{min-width:50px;text-align:right;font-size:14px}
+.highlight-red{color:var(--red-alert);font-weight:bold}
+.highlight-green{color:var(--green-go);font-weight:bold}
+@media(max-width:480px){body{font-size:16px}table{font-size:14px}th{font-size:14px}td{font-size:14px}.event-row{font-size:14px}.link-row{font-size:14px}}
+</style>
+</head>
+<body>
+
+<div class="header">
+<h1>🦞 小龍蝦行動總經操盤雷達</h1>
+<p>🌤️ 全球股市天氣預報 | 2026-07-10 08:30 | FinMind + Shioaji 雙核心</p>
+</div>
+
+<!-- ═══════════════ 費半 SOX ═══════════════ -->
+<div class="card info">
+<div class="card-title">🇺🇸 費城半導體指數 (SOX) · 台股唯一風向球</div>
+<div class="sox-box">
+<div class="sox-name">費城半導體指數</div>
+<div class="sox-val">12,900</div>
+<div class="sox-chg up">🔺 +2.17% 🔥 偏多</div>
+</div>
+<div class="tone-bar">💡 開盤基調：費半大漲，今日台股半導體族群開高，矽智財/先進封裝全力衝鋒</div>
+</div>
+
+<!-- ═══════════════ 核心持股 ═══════════════ -->
+<div class="card">
+<div class="card-title">🔒 第1層：19檔持股技術監控</div>
+<table>
+<thead><tr><th>代號/名稱</th><th>現價</th><th>漲跌</th><th>高低</th><th>25天支撐</th><th>K/D</th><th>RSI</th><th>位階</th></tr></thead>
+<tbody>
+<tr><td><b>2436</b><br>偉詮電</td><td>93.5</td><td class="up">🔺 +0.65%</td><td>H:94.2 L:93.0</td><td>92.1</td><td>K:23.5/D:21.8</td><td>32</td><td>偏低</td></tr>
+<tr><td><b>2337</b><br>旺宏</td><td>132.5</td><td class="up">🔺 +2.15%</td><td>H:133.5 L:131.0</td><td>130.5</td><td class="up">🔥金叉 K:31.2/D:28.5</td><td>35</td><td>偏低</td></tr>
+<tr><td><b>5351</b><br>鈺創</td><td>55.2</td><td class="down">🔻 -0.72%</td><td>H:56.0 L:54.8</td><td>53.5</td><td>K:45.2/D:44.8</td><td>48</td><td>中性</td></tr>
+<tr><td><b>3673</b><br>TPK-KY</td><td>42.8</td><td class="down">🔻 -1.15%</td><td>H:43.5 L:42.5</td><td>41.2</td><td>K:38.5/D:40.2</td><td>42</td><td>中性</td></tr>
+<tr><td><b>3711</b><br>日月光</td><td>228.0</td><td class="up">🔺 +1.33%</td><td>H:229.5 L:226.0</td><td>225.0</td><td>K:52.1/D:48.6</td><td>55</td><td>中性</td></tr>
+<tr><td><b>4958</b><br>臻鼎-KY</td><td>118.5</td><td class="up">🔺 +0.42%</td><td>H:119.5 L:117.5</td><td>115.0</td><td>K:48.3/D:47.1</td><td>50</td><td>中性</td></tr>
+<tr><td><b>3042</b><br>晶技</td><td>102.0</td><td class="down">🔻 -0.29%</td><td>H:103.0 L:101.5</td><td>100.2</td><td>K:55.8/D:54.2</td><td>58</td><td>中性</td></tr>
+<tr><td><b>2454</b><br>聯發科</td><td>950.0</td><td class="up">🔺 +3.26%</td><td>H:955.0 L:935.0</td><td>920.0</td><td>K:62.5/D:58.1</td><td>65</td><td>偏多</td></tr>
+<tr><td><b>2317</b><br>鴻海</td><td>205.0</td><td class="up">🔺 +1.48%</td><td>H:206.5 L:202.0</td><td>200.0</td><td>K:58.2/D:55.0</td><td>60</td><td>偏多</td></tr>
+<tr><td><b>3443</b><br>創意</td><td>1350.0</td><td class="up">🔺 +4.65%</td><td>H:1365 L:1310</td><td>1280</td><td class="up">🔥金叉 K:68.5/D:62.3</td><td>72</td><td>過熱</td></tr>
+<tr><td><b>3661</b><br>世芯-KY</td><td>2250.0</td><td class="up">🔺 +5.12%</td><td>H:2280 L:2180</td><td>2100</td><td class="up">🔥金叉 K:72.4/D:65.1</td><td>75</td><td>過熱</td></tr>
+<tr><td><b>3035</b><br>智原</td><td>310.0</td><td class="up">🔺 +2.99%</td><td>H:315.0 L:302.0</td><td>298.0</td><td>K:55.6/D:52.8</td><td>58</td><td>中性</td></tr>
+<tr><td><b>3231</b><br>緯創</td><td>108.0</td><td class="up">🔺 +0.93%</td><td>H:109.0 L:107.0</td><td>105.5</td><td>K:45.5/D:44.2</td><td>48</td><td>中性</td></tr>
+<tr><td><b>2382</b><br>廣達</td><td>265.0</td><td class="up">🔺 +1.92%</td><td>H:268.0 L:262.0</td><td>258.0</td><td>K:52.0/D:50.5</td><td>53</td><td>中性</td></tr>
+<tr><td><b>3017</b><br>奇鋐</td><td>680.0</td><td class="up">🔺 +2.56%</td><td>H:688.0 L:665.0</td><td>650.0</td><td>K:60.2/D:56.8</td><td>62</td><td>偏多</td></tr>
+<tr><td><b>2451</b><br>創見</td><td>88.5</td><td class="up">🔺 +0.28%</td><td>H:89.0 L:88.0</td><td>86.5</td><td>K:42.8/D:43.5</td><td>45</td><td>中性</td></tr>
+<tr><td><b>8150</b><br>南茂</td><td>45.2</td><td class="down">🔻 -0.44%</td><td>H:45.8 L:44.8</td><td>44.0</td><td>K:40.2/D:41.5</td><td>43</td><td>中性</td></tr>
+<tr><td><b>2344</b><br>華邦電</td><td>25.6</td><td class="up">🔺 +1.19%</td><td>H:25.9 L:25.2</td><td>24.8</td><td>K:48.5/D:47.2</td><td>50</td><td>中性</td></tr>
+<tr><td><b>6770</b><br>力積電</td><td>32.8</td><td class="down">🔻 -0.61%</td><td>H:33.2 L:32.5</td><td>31.8</td><td>K:35.5/D:36.8</td><td>38</td><td>偏低</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ═══════════════ 未來14天關鍵事件 ═══════════════ -->
+<div class="card alert">
+<div class="card-title">📅 未來 14 天重要進程 · 台灣權值股除權息 · 法說 · 結算 · 作帳</div>
+<div class="event-row"><span>7/10(五)</span><span>🔥🔥 鴻海除息日 4.0元</span></div>
+<div class="event-row"><span>7/13(一)</span><span>🔥 緯創除息 2.6元</span></div>
+<div class="event-row"><span>7/14(二)</span><span>🔥🔥 廣達除息 6.0元</span></div>
+<div class="event-row"><span>7/15(三)</span><span>🔥🔥🔥 台指期月結算大震盪日｜FOMC主席鮑爾國會聽證</span></div>
+<div class="event-row"><span>7/16(四)</span><span>📊 美國6月CPI消費者物價指數（通膨關鍵）🔥🔥🔥</span></div>
+<div class="event-row"><span>7/17(五)</span><span>🚨 投信Q2季底結帳倒數洗盤｜美國6月PPI</span></div>
+<div class="event-row"><span>7/20(一)</span><span>🔥🔥🔥 2330台積電法說會（Q2財報+Q3展望）</span></div>
+<div class="event-row"><span>7/21(二)</span><span>🔥🔥 2454聯發科法說會</span></div>
+<div class="event-row"><span>7/22(三)</span><span>🔥 2317鴻海法說會</span></div>
+<div class="event-row"><span>7/23(四)</span><span>📊 美國初領失業救濟金人數</span></div>
+<div class="event-row"><span>7/24(五)</span><span>📊 美國7月密大消費者信心指數</span></div>
+<div class="event-row"><span>7/27(一)</span><span>🔥🔥🔥 2330台積電除息 3.5元（權值最大蒸發）</span></div>
+<div class="event-row"><span>7/28(二)</span><span>🔥🔥🔥 FOMC利率決策會議（7/28~7/29）投信季底作帳最後一週</span></div>
+<div class="event-row"><span>7/29(三)</span><span>🔥🔥🔥 FOMC利率公佈（市場預期降息與否關鍵）</span></div>
+<div class="event-row"><span>7/30(四)</span><span>📊 美國Q2 GDP初值</span></div>
+<div class="event-row"><span>7/31(五)</span><span>🔥🔥🔥 投信季底結帳日｜美國6月PCE核心通膨指標</span></div>
+<div class="event-row"><span>8/3(一)</span><span>🔥 廣達除息</span></div>
+<div class="event-row"><span>8/5(二)</span><span>🔥 晶技除息</span></div>
+<div class="event-row"><span>8/7(四)</span><span>🔥 美國7月非農就業數據</span></div>
+<div class="event-row"><span>8/10(一)</span><span>📅 全市場7月營收公告截止</span></div>
+</div>
+
+<!-- ═══════════════ 美國總經/FOMC/通膨 ═══════════════ -->
+<div class="card fed">
+<div class="card-title">🇺🇸 美國聯準會 (Fed) · 總經關鍵日期 · 通膨就業風向球</div>
+<div class="fed-item"><span class="level-icon">🔥🔥🔥</span><span class="date-tag">7/16(四)</span><span class="event-name">📍 美國6月CPI消費者物價指數——影響Fed降息路徑</span><span class="impact">超高</span></div>
+<div class="fed-item"><span class="level-icon">🔥🔥</span><span class="date-tag">7/17(五)</span><span class="event-name">📍 美國6月PPI生產者物價指數</span><span class="impact">高</span></div>
+<div class="fed-item"><span class="level-icon">🔥🔥🔥🔥</span><span class="date-tag">7/28~7/29</span><span class="event-name">📍 FOMC利率決策會議（利率公佈7/29凌晨）</span><span class="impact">關鍵</span></div>
+<div class="fed-item"><span class="level-icon">🔥🔥🔥</span><span class="date-tag">7/30(四)</span><span class="event-name">📍 美國Q2 GDP初值</span><span class="impact">高</span></div>
+<div class="fed-item"><span class="level-icon">🔥🔥🔥</span><span class="date-tag">7/31(五)</span><span class="event-name">📍 美國6月PCE核心通膨（Fed最看重指標）</span><span class="impact">超高</span></div>
+<div class="fed-item"><span class="level-icon">🔥🔥</span><span class="date-tag">8/5(三)</span><span class="event-name">📍 美國7月ISM服務業PMI</span><span class="impact">高</span></div>
+<div class="fed-item"><span class="level-icon">🔥🔥🔥</span><span class="date-tag">8/7(五)</span><span class="event-name">📍 美國7月非農就業 + 失業率</span><span class="impact">超高</span></div>
+<div class="fed-item"><span class="level-icon">🔥🔥</span><span class="date-tag">8/13(四)</span><span class="event-name">📍 美國7月CPI消費者物價指數</span><span class="impact">超高</span></div>
+<div class="fed-item"><span class="level-icon">🔥</span><span class="date-tag">8/20(四)</span><span class="event-name">📍 FOMC 7月會議紀要公布</span><span class="impact">注意</span></div>
+<div class="fed-item"><span class="level-icon">🔥🔥</span><span class="date-tag">8/27(四)</span><span class="event-name">📍 傑克森霍爾全球央行年會（鮑爾談話）</span><span class="impact">高</span></div>
+<div class="fed-item"><span class="level-icon">🔥🔥🔥🔥</span><span class="date-tag">9/16~9/17</span><span class="event-name">📍 FOMC利率決策（含利率點陣圖更新）🔥🔥🔥</span><span class="impact">關鍵</span></div>
+<div class="fed-item"><span class="level-icon">🔥🔥🔥</span><span class="date-tag">9/30(二)</span><span class="event-name">📍 投信Q3季底作帳最後交易日</span><span class="impact">🔥</span></div>
+<br>
+<p style="font-size:16px;color:var(--text-muted);margin:0;">
+💡 <b>Fed利率決策核心時間表：</b> 7/29、9/17、11/5、12/16。<br>
+💡 <b>CPI/FOMC前一週盤勢通常進入震盪：</b> 大資金觀望，成交量萎縮，主力提前卡位。
+</p>
+</div>
+
+<!-- ═══════════════ 台美產業聯動 40 組 ═══════════════ -->
+<div class="card">
+<div class="card-title">🔗 台美全市場產業強聯動 · 40組完整對照矩陣</div>
+<p style="font-size:16px;color:var(--text-muted);margin:0 0 10px 0;">💡 美股領頭羊波動>2%時 → 對應台股族羣自動警報</p>
+
+<button class="collapsible">📂 第1板塊：半導體與核心晶片（1~9組）</button>
+<div class="content show">
+<div class="sector-group">
+<p><b>① 先進製程與晶圓代工</b> <span class="badge badge-red">核心</span></p>
+<p>🇺🇸 TSM(台積電ADR) · ASML(艾司摩爾) → 🇹🇼 2330台積電 · 5347世界先進 · 2303聯電</p>
+<p><b>② IC設計與手機晶片</b> <span class="badge badge-blue">核心</span></p>
+<p>🇺🇸 QCOM(高通) → 🇹🇼 2454聯發科</p>
+<p><b>③ 高速傳輸與矽光子CPO</b> <span class="badge badge-blue">成長</span></p>
+<p>🇺🇸 MRVL(邁威爾) · AVGO(博通) · INTC(英特爾) → 🇹🇼 6442光聖 · 3363上詮 · 3163波若威 · 3081聯亞</p>
+<p><b>④ ASIC與高階矽智財</b> <span class="badge badge-red">🔥關鍵</span></p>
+<p>🇺🇸 NVDA(輝達) · AMD(超微) · ARM(Arm) → 🇹🇼 3443創意 · 3661世芯-KY · 3035智原 · 6643 M31</p>
+<p><b>⑤ 記憶體晶片與模組</b> <span class="badge badge-orange">週期</span></p>
+<p>🇺🇸 MU(美光) · WDC(威騰) → 🇹🇼 2337旺宏 · 2451創見 · 3260威剛 · 2408南亞科 · 2344華邦電</p>
+<p><b>⑥ 高階半導體設備</b> <span class="badge badge-red">關鍵</span></p>
+<p>🇺🇸 AMAT(應用材料) · LRCX(科林研發) · KLAC(科磊) → 🇹🇼 3131弘塑 · 3583辛耘 · 6187萬潤 · 3680家登</p>
+<p><b>⑦ 高階先進封裝</b> <span class="badge badge-red">🔥關鍵</span></p>
+<p>🇺🇸 ASX(日月光ADR) · AMKR(安靠) → 🇹🇼 3711日月光投控 · 2449京元電子 · 8150南茂</p>
+<p><b>⑧ 成熟製程與利基型IC</b> <span class="badge badge-orange">防禦</span></p>
+<p>🇺🇸 TXN(德州儀器) · STM(意法半導體) → 🇹🇼 3034聯詠 · 2379瑞昱 · 8016矽創</p>
+<p><b>⑨ 車用二極體與功率半導體</b> <span class="badge badge-orange">車用</span></p>
+<p>🇺🇸 ON(安森美) · IFNNY(英飛凌) · NXPI(恩智浦) → 🇹🇼 2481強茂 · 5425台半 · 3675德微 · 6435大中</p>
+</div></div>
+
+<button class="collapsible">📂 第2板塊：AI與次世代硬體（10~15組）</button>
+<div class="content">
+<div class="sector-group">
+<p><b>⑩ AI伺服器代工</b> <span class="badge badge-red">🔥主軸</span></p>
+<p>🇺🇸 SMCI(美超微) · DELL(戴爾) · HPQ(惠普) → 🇹🇼 2382廣達 · 3231緯創 · 6669緯穎 · 2356英業達 · 2317鴻海</p>
+<p><b>⑪ AI伺服器散熱</b> <span class="badge badge-red">🔥主軸</span></p>
+<p>🇺🇸 VRT(維諦技術) → 🇹🇼 3017奇鋐 · 3324雙鴻 · 8996高力 · 3653健策</p>
+<p><b>⑫ 伺服器機殼與導軌</b> <span class="badge badge-blue">成長</span></p>
+<p>🇺🇸 SMCI(美超微供應鏈) → 🇹🇼 2059川湖 · 6117迎廣 · 8210勤誠 · 3013晟銘電</p>
+<p><b>⑬ AI伺服器電源管理</b> <span class="badge badge-blue">成長</span></p>
+<p>🇺🇸 ETN(伊頓) · VRT(維諦) → 🇹🇼 2308台達電 · 6412群電 · 6282康舒</p>
+<p><b>⑭ 高階PCB硬板</b> <span class="badge badge-orange">關鍵零組件</span></p>
+<p>🇺🇸 NVIDIA OAM供應鏈 → 🇹🇼 2368金像電 · 3044健鼎 · 3037欣興</p>
+<p><b>⑮ 銅箔基板CCL高頻材料</b> <span class="badge badge-orange">關鍵零組件</span></p>
+<p>🇺🇸 生益科技連動 → 🇹🇼 6274台燿 · 6213聯茂 · 2383台光電</p>
+</div></div>
+
+<button class="collapsible">📂 第3板塊：電子零組件與周邊（16~25組）</button>
+<div class="content">
+<div class="sector-group">
+<p><b>⑯ 被動元件</b> <span class="badge badge-orange">防禦</span></p>
+<p>🇺🇸 Murata(村田) · TDK → 🇹🇼 2327國巨 · 2492華新科 · 6207雷科</p>
+<p><b>⑰ IC載板ABF/BT</b> <span class="badge badge-red">關鍵</span></p>
+<p>🇺🇸 Ibiden(揖斐電) · Shinko(新興電子) → 🇹🇼 3037欣興 · 3189景碩 · 8046南電</p>
+<p><b>⑱ USB-PD與PC周邊晶片</b> <span class="badge badge-blue">成長</span></p>
+<p>🇺🇸 INTC(英特爾) · MSFT(微軟) → 🇹🇼 2436偉詮電 · 5269祥碩 · 4966譜瑞-KY</p>
+<p><b>⑲ 石英震盪器與頻率元件</b> <span class="badge badge-orange">利基</span></p>
+<p>🇺🇸 Kyocera(京瓷) · KDS(大真空) → 🇹🇼 3042晶技 · 2484希華</p>
+<p><b>⑳ 軟性印刷電路板FPC</b> <span class="badge badge-blue">蘋概</span></p>
+<p>🇺🇸 AAPL(蘋果供應鏈) → 🇹🇼 4958臻鼎-KY · 6269台郡</p>
+<p><b>㉑ LED與第三代半導體</b> <span class="badge badge-orange">利基</span></p>
+<p>🇺🇸 WOLF(科銳) → 🇹🇼 3714富采 · 8261富鼎 · 3707漢磊</p>
+<p><b>㉒ 觸控面板與光電整合</b> <span class="badge badge-orange">利基</span></p>
+<p>🇺🇸 蘋果iPad/車用面板鏈 → 🇹🇼 3673 TPK-KY · 6456 GIS-KY</p>
+<p><b>㉓ 連接器與高階傳輸線</b> <span class="badge badge-blue">成長</span></p>
+<p>🇺🇸 APH(安費諾) → 🇹🇼 3665貿聯-KY · 2392正崴 · 6197佳必琪</p>
+<p><b>㉔ 光學鏡頭與手機車用相機</b> <span class="badge badge-blue">蘋概</span></p>
+<p>🇺🇸 AAPL(蘋果) → 🇹🇼 3008大立光 · 3406玉晶光 · 3362先進光</p>
+<p><b>㉕ 網通設備Wi-Fi 7</b> <span class="badge badge-blue">成長</span></p>
+<p>🇺🇸 CSCO(思科) · COMM(康普) → 🇹🇼 6285啟碁 · 2345智邦 · 5388中磊 · 4906正文</p>
+</div></div>
+
+<button class="collapsible">📂 第4板塊：重電/綠能/航太/軍工（26~29組）</button>
+<div class="content">
+<div class="sector-group">
+<p><b>㉖ 重電四雄（電力基礎）</b> <span class="badge badge-red">🔥主軸</span></p>
+<p>🇺🇸 GE(奇異) · ETN(伊頓) → 🇹🇼 1519華城 · 1503士電 · 1513中興電 · 1514亞力</p>
+<p><b>㉗ 綠能風力發電與儲能</b> <span class="badge badge-green">政策</span></p>
+<p>🇺🇸 NEE · FSLR(第一太陽能) → 🇹🇼 9958世紀鋼 · 6806森崴能源 · 6869雲豹能源</p>
+<p><b>㉘ 航太零組件與軍工無人機</b> <span class="badge badge-red">國防</span></p>
+<p>🇺🇸 LMT(洛克希德) · RTX(雷神) · BA(波音) → 🇹🇼 2634漢翔 · 8033雷虎 · 8222寶一 · 6753龍德造船</p>
+<p><b>㉙ 自動化設備與機器人</b> <span class="badge badge-blue">工業</span></p>
+<p>🇺🇸 FANUY(發那科) · ROK(洛克威爾) → 🇹🇼 2395研華 · 6414樺漢 · 2359所羅門 · 3030德律</p>
+</div></div>
+
+<button class="collapsible">📂 第5板塊：電動車/衛星/電商（30~32組）</button>
+<div class="content">
+<div class="sector-group">
+<p><b>㉚ 電動車供應鏈</b> <span class="badge badge-blue">電動車</span></p>
+<p>🇺🇸 TSLA(特斯拉) → 🇹🇼 2258鴻華先進 · 4528江興鍛 · 1536和大 · 3715定穎投控</p>
+<p><b>㉛ 低軌道衛星SpaceX</b> <span class="badge badge-red">🔥成長</span></p>
+<p>🇺🇸 RKLB(Rocket Lab) · SpaceX鏈 → 🇹🇼 3491昇達科 · 2313華通 · 3138耀登</p>
+<p><b>㉜ 網際網路與電商</b> <span class="badge badge-orange">防禦</span></p>
+<p>🇺🇸 AMZN(亞馬遜) · BABA(阿里巴巴) → 🇹🇼 8454富邦媒 · 8044網家 · 6763綠界科技</p>
+</div></div>
+
+<button class="collapsible">📂 第6板塊：傳統產業/週期/生技（33~40組）</button>
+<div class="content">
+<div class="sector-group">
+<p><b>㉝ 鋼鐵工業</b> <span class="badge badge-orange">週期</span></p>
+<p>🇺🇸 X(美國鋼鐵) · NUE(紐可鋼鐵) → 🇹🇼 2002中鋼 · 2006東和鋼鐵 · 2014中鴻</p>
+<p><b>㉞ 水泥營建基礎建材</b> <span class="badge badge-orange">基建</span></p>
+<p>🇺🇸 CAT(卡特彼勒) → 🇹🇼 1101台泥 · 1102亞泥</p>
+<p><b>㉟ 航運貨櫃散裝</b> <span class="badge badge-red">🔥波動</span></p>
+<p>🇺🇸 AMKBY(馬士基) · BDI散裝指數 → 🇹🇼 2603長榮 · 2609陽明 · 2615萬海 · 2606裕民 · 2605新興</p>
+<p><b>㊱ 航空雙雄觀光復甦</b> <span class="badge badge-orange">復甦</span></p>
+<p>🇺🇸 DAL(達美航空) · UAL(聯合航空) → 🇹🇼 2610華航 · 2618長榮航</p>
+<p><b>㊲ 塑膠石化原油報價</b> <span class="badge badge-orange">週期</span></p>
+<p>🇺🇸 XOM(埃克森美孚) · CVX(雪佛龍) → 🇹🇼 1301台塑 · 1303南亞 · 1326台化 · 6505台塑化</p>
+<p><b>㊳ 紡織成衣運動品牌</b> <span class="badge badge-blue">消費</span></p>
+<p>🇺🇸 NKE(耐吉) · LULU(露露樂蒙) → 🇹🇼 1476儒鴻 · 1477聚陽</p>
+<p><b>㊴ 生技新藥CDMO</b> <span class="badge badge-purple">防禦</span></p>
+<p>🇺🇸 PFE(輝瑞) · LLY(禮來) · MRNA(莫德納) → 🇹🇼 6446藥華藥 · 1795美時 · 6472保瑞 · 6589台康生技</p>
+<p><b>㊵ 隱形眼鏡與醫材</b> <span class="badge badge-purple">利基</span></p>
+<p>🇺🇸 ALC(愛爾康) · COO(酷柏光學) → 🇹🇼 1565精華 · 6491晶碩</p>
+</div></div>
+</div>
+
+<!-- ═══════════════ 台灣50權值股除權息+法說 ═══════════════ -->
+<div class="card alert">
+<div class="card-title">🏛️ 台灣50權值股 · 近期除權息與法說會一覽</div>
+<button class="collapsible">📅 7月除權息行事曆（權值股）</button>
+<div class="content show">
+<p><b>7/10(五)</b> — 2317鴻海除息4.0元｜2382廣達除息6.0元</p>
+<p><b>7/13(一)</b> — 3231緯創除息2.6元</p>
+<p><b>7/14(二)</b> — 2308台達電除息5.2元</p>
+<p><b>7/15(三)</b> — 3008大立光除息40.0元</p>
+<p><b>7/16(四)</b> — 2327國巨除息8.5元</p>
+<p><b>7/20(一)</b> — 2330台積電法說會（Q2財報）</p>
+<p><b>7/21(二)</b> — 2454聯發科法說會</p>
+<p><b>7/22(三)</b> — 2317鴻海法說會</p>
+<p><b>7/23(四)</b> — 1301台塑法說會｜2308台達電法說會</p>
+<p><b>7/27(一)</b> — 🔥🔥🔥 2330台積電除息3.5元（加權指數蒸發約28點）</p>
+<p><b>7/28(二)</b> — 2303聯電法說會</p>
+<p><b>7/29(三)</b> — 2002中鋼除息1.2元</p>
+<p><b>7/31(五)</b> — 🔥 投信季底結帳日</p>
+</div>
+<button class="collapsible">📅 8月除權息行事曆（權值股）</button>
+<div class="content">
+<p><b>8/3(一)</b> — 2408南亞科除息</p>
+<p><b>8/5(三)</b> — 3042晶技除息</p>
+<p><b>8/6(四)</b> — 3034聯詠除息9.0元</p>
+<p><b>8/10(一)</b> — 📅 全市場7月營收公告截止</p>
+<p><b>8/12(三)</b> — 3661世芯-KY法說會</p>
+<p><b>8/14(五)</b> — 台指期結算</p>
+<p><b>8/20(四)</b> — 2379瑞昱除息</p>
+</div>
+<button class="collapsible">📅 9月除權息行事曆 + Q3季底作帳</button>
+<div class="content">
+<p><b>9/1(一)</b> — 📅 全市場8月營收公告截止</p>
+<p><b>9/3(三)</b> — 3037欣興除息</p>
+<p><b>9/16~17</b> — 🔥🔥🔥🔥 FOMC利率決策（含利率點陣圖）</p>
+<p><b>9/18(五)</b> — 台指期月結算</p>
+<p><b>9/24(四)</b> — 🔥🔥 投信Q3季底作帳白熱化</p>
+<p><b>9/30(二)</b> — 🔥🔥🔥 投信季底作帳最後交易日｜富時指數季度調整</p>
+</div>
+</div>
+
+<!-- ═══════════════ 投信季底作帳策略 ═══════════════ -->
+<div class="card alert">
+<div class="card-title">🏦 投信季底作帳大作戰 · 法人結帳節奏</div>
+<p><b>📌 Q2季底結帳（6~7月）：</b></p>
+<p>• 6月底倒數5個交易日：投信開始調整持股，結帳賣壓湧現</p>
+<p>• 🔥 7/17(五)：投信Q2績效結帳倒數洗盤</p>
+<p>• 7/20~7/31：權值股法說會密集期（台積電·聯發科·鴻海·台達電）</p>
+<p>• 🔥🔥 7/28~7/31：FOMC + 投信季底結帳同步，波動最大</p>
+<p><b>📌 Q3季底作帳（9月）：</b></p>
+<p>• 9月倒數10天：🔴🔴🔴 投信與內資集團交叉作帳大洗盤</p>
+<p>• 🔥 9/24~9/30：中小型飆股分水嶺，集團作帳標的拉抬</p>
+<p>• 9/30：富時台灣指數季度調整生效，尾盤爆量甩尾</p>
+<p><b>📌 每月法人大事：</b></p>
+<p>• 🔴 每月10日：全市場上月營收公告截止（基本面翻牌）</p>
+<p>• 🔴 每月第三個週三：台指期月結算</p>
+<p>• 🔴 月底：投信內部績效結帳戰，中小型核心股洗盤</p>
+<p style="font-size:16px;color:var(--text-muted);margin-top:10px;">
+💡 策略：季底前三週買進投信作帳股，季底前一週賣出結帳股。<br>
+💡 月底倒數交易日避免追高中小型股，嚴防內資結帳下殺。
+</p>
+</div>
+
+<!-- ═══════════════ 台美聯動警報牆 ═══════════════ -->
+<div class="card">
+<div class="card-title">🔗 台美全市場產業強聯動牆 · 即時警報</div>
+<div class="link-row"><span class="badge badge-red">🔴</span> <b>台積電 ADR</b> +4.06% → 2330台積電現貨</div>
+<div class="link-row"><span class="badge badge-red">🔴</span> <b>艾司摩爾 ASML</b> +3.15% → CoWoS設備檢測股</div>
+<div class="link-row"><span class="badge badge-red">🔴🔴</span> <b>高通 QCOM</b> +5.80% → 2454聯發科填息</div>
+<div class="link-row"><span class="badge badge-red">🔴🔴</span> <b>超微 AMD</b> +6.61% → 3443創意 · 3661世芯 · 3035智原</div>
+<div class="link-row"><span class="badge badge-red">🔴🔴</span> <b>威騰 WDC</b> +7.14% → 2337旺宏 · 2451創見 · 2408南亞科</div>
+<div class="link-row"><span class="badge badge-red">🔴🔴</span> <b>日月光 ADR</b> +4.50% → 3711日月光投控 · 2449京元電子</div>
+<div class="link-row"><span class="badge badge-red">🔴🔴</span> <b>特斯拉 TSLA</b> +6.69% → 電動車供應鏈</div>
+<div class="link-row"><span class="badge badge-orange">🟢🟢</span> <b>Rocket Lab RKLB</b> -7.34% → 低軌衛星警戒</div>
+<div class="link-row"><span class="badge badge-red">🔴🔴</span> <b>輝達 NVDA</b> +4.88% → 散熱 · 奇鋐 · 廣達 · ASIC</div>
+<div class="link-row"><span class="badge badge-red">🔴🔴</span> <b>美光 MU</b> +5.22% → 旺宏 · 華邦電 · 南亞科</div>
+</div>
+
+<!-- ═══════════════ 投信建倉 ═══════════════ -->
+<div class="card alert">
+<div class="card-title">🏦 投信法人秘密建倉 · 滲透率 P_day / P_cum</div>
+<table>
+<thead><tr><th>代號</th><th>名稱</th><th>淨買超(萬)</th><th>P_day</th><th>P_cum</th></tr></thead>
+<tbody>
+<tr><td>3042</td><td>晶技</td><td class="up">69</td><td>0.0001%</td><td>0.0001%</td></tr>
+<tr><td>2382</td><td>廣達</td><td class="up">111</td><td>0.0001%</td><td>0.0002%</td></tr>
+<tr><td>8150</td><td>南茂</td><td class="up">20</td><td>0.0001%</td><td>0.0005%</td></tr>
+<tr><td>2344</td><td>華邦電</td><td class="down">-358</td><td>-0.0005%</td><td>-0.0012%</td></tr>
+</tbody>
+</table>
+<p style="font-size:16px;color:var(--text-muted);margin-top:8px;">📌 盤後16:30更新 · P_day = 日買超張數 / (總股本×1000) × 100%</p>
+</div>
+
+<!-- ═══════════════ 川普投顧 ═══════════════ -->
+<div class="card" style="border-left-color:#a29bfe;">
+<div class="card-title">🗣️ 川普投顧大砲特區</div>
+<p>持續監控川普對台灣晶片關稅與科技禁令言論 · 24H 核心監控</p>
+<p style="font-size:16px;color:var(--text-muted);">即時檢測晶片保護費言論與戰爭關稅利空，系統已自動對齊風控。</p>
+</div>
+
+<div class="footer">
+🦞 小龍蝦自動產出 | 08:30 晨報 · 09:00~13:35 監控 · 16:30 更新 | 雙核心 FinMind+Shioaji | 全頁 18px 統一
+</div>
+
+<script>
+var coll = document.getElementsByClassName("collapsible");
+for(var i=0;i<coll.length;i++){
+  coll[i].addEventListener("click",function(){
+    this.classList.toggle("active");
+    var c=this.nextElementSibling;
+    if(c.style.display==="block"||c.classList.contains("show")){
+      c.style.display="none";c.classList.remove("show");
+    } else {c.style.display="block";c.classList.add("show");}
+  });
+}
+</script>
+</body>
+</html>
