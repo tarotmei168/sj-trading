@@ -35,18 +35,51 @@ def get_us_indexes():
         pass
     return result
 
-def get_taiwan_futures_night():
-    """台指期夜盤（用永豐API或yfinance替代）"""
+def get_taiwan_futures():
+    """台指期即時指數 — 抓當下最新報價（不分日夜盤）"""
+    
+    # 方式1：用 Shioaji 永豐 API 抓即時
     try:
-        import yfinance as yf
-        t = yf.Ticker("TX00.TW")  # 台指期
-        df = t.history(period="5d")
-        if df is not None and len(df) >= 2:
-            closes = df["Close"].values
-            change = (closes[-1] / closes[-2] - 1) * 100
-            return {"close": round(closes[-1], 2), "change": round(change, 2)}
+        import sys, os
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from shioaji_helper import ShioajiClient
+        sjc = ShioajiClient()
+        if sjc.login():
+            contract = sjc.api.Contracts.Futures.TX  # 台指期近月
+            snap = sjc.api.snapshots([contract])
+            if snap and len(snap) > 0:
+                close = snap[0].close
+                ref = snap[0].reference_price
+                if ref and ref > 0:
+                    change = (close / ref - 1) * 100
+                    sjc.logout()
+                    return {"close": round(close, 2), "change": round(change, 2), "source": "永豐即時"}
+            sjc.logout()
     except:
         pass
+    
+    # 方式2：用 yfinance 抓台指期即時（最新一根 K 線）
+    for sym in ["TX00.TW", "^TX00", "TW00.TF"]:
+        try:
+            import yfinance as yf
+            import io, contextlib
+            with contextlib.redirect_stderr(io.StringIO()):
+                t = yf.Ticker(sym)
+                # 用 1d 或 1h 抓最新
+                df = t.history(period="2d", interval="1h")
+                if df is not None and len(df) >= 2:
+                    closes = df["Close"].values
+                    change = (closes[-1] / closes[-2] - 1) * 100
+                    return {"close": round(closes[-1], 2), "change": round(change, 2), "source": "yfinance即時"}
+                # fallback to daily
+                df = t.history(period="5d")
+                if df is not None and len(df) >= 2:
+                    closes = df["Close"].values
+                    change = (closes[-1] / closes[-2] - 1) * 100
+                    return {"close": round(closes[-1], 2), "change": round(change, 2), "source": "yfinance日K"}
+        except:
+            continue
+    
     return None
 
 # ═══════════════════════════════════════════════

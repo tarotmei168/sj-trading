@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 🦞 daily_web_report.py — 小龍蝦行動總經操盤雷達
 ==================================================
@@ -258,9 +258,9 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html=''):
     
     # ── SOX 指數（從 global_weather 抓） ──
     try:
-        from global_weather import get_us_indexes, get_taiwan_futures_night
+        from global_weather import get_us_indexes, get_taiwan_futures
         us = get_us_indexes()
-        fut = get_taiwan_futures_night()
+        fut = get_taiwan_futures()
     except:
         us = {}
         fut = None
@@ -269,7 +269,7 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html=''):
     if sox_data:
         sox_close = f'{sox_data["close"]:,.0f}'
         sox_chg = f'{sox_data["change"]:+.2f}%'
-        sox_icon = '🔺' if sox_data['change'] > 0 else '🔻'
+        sox_icon = '+' if sox_data['change'] > 0 else '-'
         if sox_data['change'] > 3:
             sox_level = '🔥🔥 強多'
         elif sox_data['change'] > 1:
@@ -283,21 +283,22 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html=''):
     else:
         sox_close = '—'
         sox_chg = '—'
-        sox_icon = '⚠️'
+        sox_icon = '-'
         sox_level = '離線'
     
-    # ── 台指期夜盤 ──
+    # ── 台指期指數 ──
     if fut:
-        fut_icon = '🔺' if fut['change'] > 0 else '🔻'
-        fut_str = f'台指期夜盤 {fut["close"]:,.0f} {fut_icon} {fut["change"]:+.2f}%'
+        fut_icon = '+' if fut['change'] > 0 else '-'
+        source = fut.get('source', '即時')
+        fut_str = f'台指期 {fut["close"]:,.0f} {fut_icon} {fut["change"]:+.2f}% ({source})'
         if fut['change'] > 0.3:
-            fut_tone = '夜盤上漲 → 今日有望跳空開高'
+            fut_tone = '台指期上漲 → 今日偏多'
         elif fut['change'] < -0.3:
-            fut_tone = '夜盤下跌 → 今日可能開低'
+            fut_tone = '台指期下跌 → 今日偏空'
         else:
-            fut_tone = '夜盤平穩 → 正常開盤'
+            fut_tone = '台指期平穩 → 正常開盤'
     else:
-        fut_str = '台指期夜盤 — 離線'
+        fut_str = '台指期 — 離線'
         fut_tone = '（以費半為主要判斷）'
     
     # ── 開盤基調 ──
@@ -529,8 +530,8 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html=''):
             <div class="sox-chg">{sox_icon} {sox_chg} {sox_level}</div>
         </div>
         <div style="background: #2a2a2a; padding: 12px; border-radius: 6px; text-align: center; margin-top: 10px; border: 1.5px solid #1e90ff;">
-            <div style="font-size: 18px; color: #ccc;">台指期夜盤（08:00 前最後報價）</div>
-            <div style="font-size: 24px; font-weight: bold; margin: 6px 0; color: #fff;">{fut_str if fut else '台指期夜盤 — 離線'}</div>
+            <div style="font-size: 18px; color: #ccc;">台指期指數</div>
+            <div style="font-size: 24px; font-weight: bold; margin: 6px 0; color: #fff;">{fut_str if fut is not None and fut else '台指期夜盤 — 離線'}</div>
         </div>
         <div class="tone-bar">
             💡 開盤基調：{tone}
