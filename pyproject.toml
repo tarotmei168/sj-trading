@@ -1,0 +1,19 @@
+[project]
+name = "sj-trading"
+version = "0.1.0"
+description = "Shioaji Trading Demo"
+requires-python = ">=3.9"
+dependencies = [
+    "shioaji>=1.2.0",
+    "python-dotenv>=1.2.0",
+]
+
+[project.scripts]
+version = "sj_trading:show_version"
+login_test = "sj_trading:login_test"
+stock_testing = "sj_trading.testing_flow:testing_stock_ordering"
+download_30k = "sj_trading.kbar_downloader:main"
+read_30k = "sj_trading.kbar_downloader:main"
+
+[tool.uv]
+package = true

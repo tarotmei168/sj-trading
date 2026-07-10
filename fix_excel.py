@@ -1,0 +1,8 @@
+c = open('report_to_excel.py','r',encoding='utf-8').read()
+c = c.replace("color='DDD'", "color='00DDDDDD'")
+c = c.replace("color='1A237E'", "color='001A237E'")
+c = c.replace("end_color='283593'", "end_color='00283593'")
+c = c.replace("color='2E7D32'", "color='002E7D32'")
+c = c.replace("color='C62828'", "color='00C62828'")
+open('report_to_excel.py','w',encoding='utf-8').write(c)
+print('fixed')

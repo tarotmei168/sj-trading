@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>小龍蝦台股三合一選股</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'PingFang TC','Microsoft JhengHei',sans-serif; background:#F2F2F7; padding:12px; }
+.header { background:linear-gradient(135deg,#1A2B4C,#2E4A7D); color:#fff; border-radius:10px; padding:15px; margin-bottom:12px; text-align:center; }
+.header h1 { font-size:17px; }
+.header p { font-size:11px; opacity:0.8; }
+.news-bar { background:#fff; border-radius:10px; margin-bottom:12px; padding:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+.news-item { padding:6px 0; border-bottom:1px solid #eee; font-size:12px; line-height:1.4; }
+.news-item.critical { background:#FFF0F0; margin:0 -10px; padding:6px 10px; border-left:3px solid #FF3B30; }
+.news-time { color:#8E8E93; font-size:10px; }
+.news-title { font-weight:500; }
+.tag-rel { display:inline-block; background:#E3F2FD; color:#1565C0; padding:1px 6px; border-radius:3px; font-size:10px; margin-top:2px; }
+.section { background:#fff; border-radius:10px; margin-bottom:10px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+.section-title { background:#1A2B4C; color:#fff; padding:10px 12px; font-size:13px; font-weight:bold; }
+table { width:100%; border-collapse:collapse; font-size:12px; }
+th { background:#1A2B4C; color:#fff; padding:6px 4px; text-align:center; font-size:10px; }
+td { padding:8px 4px; text-align:center; border-bottom:1px solid #E5E5EA; }
+tr:nth-child(even) { background:#F8F9FA; }
+tr:hover { background:#E8F0FE; }
+.up { color:#FF3B30; }
+.down { color:#34C759; }
+.green { color:#34C759; }
+.red { color:#FF3B30; }
+small { font-size:11px; color:#555; }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>🦞 小龍蝦台股三合一選股</h1>
+    <p>07/04 10:20 | 📊 基本面+KD技術+資金流向</p>
+</div>
+
+<div class="news-bar">
+    <div style="font-weight:bold;font-size:13px;margin-bottom:6px;">📡 鉅亨網即時新聞</div>
+    <div class="news-item ">
+            <div class="news-time">07/04 09:45</div>
+            <div class="news-title">📰 虛擬資產專法過關、勞動基金5月大賺5869億元、中國記憶體廠示警 本周大事回顧</div>
+            <span class="tag-rel">台積電 長榮航</span>
+        </div><div class="news-item ">
+            <div class="news-time">07/04 09:43</div>
+            <div class="news-title">📰 〈熱門股〉晶技Q2營收改寫史上第三強 股價周漲29%創新高</div>
+            <span class="tag-rel">晶技</span>
+        </div><div class="news-item ">
+            <div class="news-time">07/04 09:41</div>
+            <div class="news-title">📰 〈熱門股〉智邦AI加速卡與交換器展望能見度直達後年 周漲14%攻上2800元新高</div>
+            
+        </div><div class="news-item ">
+            <div class="news-time">07/04 09:39</div>
+            <div class="news-title">📰 〈熱門股〉晶碩Q2營收21億元創單季高 周漲逾1成股價創15個月新高</div>
+            
+        </div><div class="news-item ">
+            <div class="news-time">07/04 09:37</div>
+            <div class="news-title">📰 〈熱門股〉布局晶圓製造國家隊 00913今年來報酬128%奪原型ETF冠軍</div>
+            
+        </div><div class="news-item ">
+            <div class="news-time">07/04 09:00</div>
+            <div class="news-title">📰 佳世達6月營收186.71億元月增8% Q2同步繳季增</div>
+            
+        </div><div class="news-item ">
+            <div class="news-time">07/04 08:49</div>
+            <div class="news-title">📰 樺漢子公司超恩公開收購博來科技 獲投審司核准</div>
+            
+        </div><div class="news-item ">
+            <div class="news-time">07/03 20:40</div>
+            <div class="news-title">📰 中國信託ATM全新進駐金門7-ELEVEN 鋪機量突破8000台居全台之冠</div>
+            
+        </div><div class="news-item ">
+            <div class="news-time">07/03 20:24</div>
+            <div class="news-title">📰 北富銀小富翁帳戶衝破32.7萬戶 資產規模逼近1500億元</div>
+            
+        </div><div class="news-item ">
+            <div class="news-time">07/03 19:54</div>
+            <div class="news-title">📰 觀光署：今年度觀光核心策略採「產值掛帥、質量並進」發展</div>
+            
+        </div><div class="news-item ">
+            <div class="news-time">07/03 19:54</div>
+            <div class="news-title">📰 觀光署：今年度觀光核心策略採「產值掛帥、質量並進」發展</div>
+            
+        </div><div class="news-item ">
+            <div class="news-time">07/03 18:34</div>
+            <div class="news-title">📰 賴清德：台灣寵物鏈產值達800億元 未來將持續帶動毛小孩產業發展</div>
+            
+        </div><div class="news-item ">
+            <div class="news-time">07/03 16:23</div>
+            <div class="news-title">📰 台日聯手搶攻車用與半導體版圖！日東電工斥44.83億元高雄新廠竣工</div>
+            
+        </div><div class="news-item ">
+            <div class="news-time">07/03 15:24</div>
+            <div class="news-title">📰 國營油電糖水年終領4.4個月？經濟部親揭真相：非人人「領好領滿」</div>
+            
+        </div><div class="news-item ">
+            <div class="news-time">07/02 20:14</div>
+            <div class="news-title">📰 國科會舉辦AI講習 推行政部門使用AI技術避免觸法</div>
+            
+        </div><div class="news-item ">
+            <div class="news-time">07/02 19:59</div>
+            <div class="news-title">📰 航港局舉辦演練導入無人機輔助 確保東部船舶應變及救援效率</div>
+            
+        </div><div class="news-item ">
+            <div class="news-time">07/02 17:05</div>
+            <div class="news-title">📰 電電公會海外園區火力全開 龔明鑫：波蘭年底前動土 並鎖定墨、美、印佈局</div>
+            
+        </div><div class="news-item ">
+            <div class="news-time">07/02 14:16</div>
+            <div class="news-title">📰 11.5萬人迎退休金活水！政院祭勞退新舊制銜接「雙軌」制 國營及公部門先行</div>
+            
+        </div><div class="news-item critical">
+            <div class="news-time">07/02 13:28</div>
+            <div class="news-title">🚨 CRITICAL 政院拍板！明年軍公教調薪5.88%至11.56% 委任1職等起薪破3.8萬元</div>
+            
+        </div><div class="news-item ">
+            <div class="news-time">07/01 20:40</div>
+            <div class="news-title">📰 1300噸問題油品曝光！泰山9款、福壽3款油品上榜15項退貨清單看這裡</div>
+            
+        </div>
+</div>
+
+<div class="section">
+    <div class="section-title">🏆 高EPS績優股 TOP8</div>
+    <table>
+        <tr><th>股票</th><th>股價</th><th>EPS/PE</th><th>KD</th><th>區間</th><th>題材</th><th>訊號</th><th>評分</th></tr>
+        <tr>
+            <td><b>聯發科</b><br><small></small></td>
+            <td>4195.0</td>
+            <td><small>EPS82.62<br>PE35.14</small></td>
+            <td><small>K=27.05 D=26.26<br><span class="green">偏低檔</span></small></td>
+            <td><small>3825.0-4380.0<br>位置67.0%</small></td>
+            <td><small>AI/手機晶片</small></td>
+            <td class="down">🟢 進</td>
+            <td>9/10</td>
+        </tr><tr>
+            <td><b>台積電</b><br><small></small></td>
+            <td>2445.0</td>
+            <td><small>EPS75.52<br>PE32.36</small></td>
+            <td><small>K=48.48 D=43.57<br><span class="green">中檔</span></small></td>
+            <td><small>2325.0-2505.0<br>位置67.0%</small></td>
+            <td><small>AI晶片/先進製程</small></td>
+            <td class="down">🟢 進</td>
+            <td>9/10</td>
+        </tr><tr>
+            <td><b>弘塑</b><br><small></small></td>
+            <td>3785.0</td>
+            <td><small>EPS52.89<br>PE71.57</small></td>
+            <td><small>K=26.82 D=37.93<br><span class="red">偏低檔</span></small></td>
+            <td><small>3300.0-4045.0<br>位置65.0%</small></td>
+            <td><small>先進封裝</small></td>
+            <td class="down">🔵 等</td>
+            <td>8/10</td>
+        </tr><tr>
+            <td><b>亞翔</b><br><small></small></td>
+            <td>948.0</td>
+            <td><small>EPS36.1<br>PE26.26</small></td>
+            <td><small>K=42.02 D=49.52<br><span class="red">中檔</span></small></td>
+            <td><small>862.0-987.0<br>位置69.0%</small></td>
+            <td><small>半導體擴廠/AI</small></td>
+            <td class="down">🔴 觀</td>
+            <td>8/10</td>
+        </tr><tr>
+            <td><b>南電</b><br><small></small></td>
+            <td>1185.0</td>
+            <td><small>EPS26.68<br>PE44.42</small></td>
+            <td><small>K=84.12 D=81.02<br><span class="green">超高檔</span></small></td>
+            <td><small>1035.0-1285.0<br>位置60.0%</small></td>
+            <td><small>ABF載板</small></td>
+            <td class="down">🟡 持</td>
+            <td>6/10</td>
+        </tr><tr>
+            <td><b>長榮</b><br><small></small></td>
+            <td>195.0</td>
+            <td><small>EPS21.21<br>PE8.91</small></td>
+            <td><small>K=52.93 D=58.54<br><span class="red">中檔</span></small></td>
+            <td><small>180.5-197.5<br>位置85.0%</small></td>
+            <td><small>運價反彈</small></td>
+            <td class="down">🔴 觀</td>
+            <td>9/10</td>
+        </tr><tr>
+            <td><b>台達電</b><br><small></small></td>
+            <td>2075.0</td>
+            <td><small>EPS19.63<br>PE29.99</small></td>
+            <td><small>K=94.22 D=89.7<br><span class="green">超高檔</span></small></td>
+            <td><small>1790.0-2075.0<br>位置100.0%</small></td>
+            <td><small>AI伺服器電源</small></td>
+            <td class="down">🟡 持</td>
+            <td>6/10</td>
+        </tr><tr>
+            <td><b>鴻海</b><br><small></small></td>
+            <td>240.5</td>
+            <td><small>EPS18.58<br>PE12.82</small></td>
+            <td><small>K=82.85 D=72.57<br><span class="green">超高檔</span></small></td>
+            <td><small>236.0-255.5<br>位置23.0%</small></td>
+            <td><small>AI伺服器/蘋果/電動車</small></td>
+            <td class="down">🟡 持</td>
+            <td>8/10</td>
+        </tr>
+    </table>
+</div>
+
+<div class="section">
+    <div class="section-title">🔥 成交量熱門股 (永豐金動態池) (20檔)</div>
+    <table>
+        <tr><th>股票</th><th>股價</th><th>EPS/PE</th><th>KD</th><th>區間</th><th>題材</th><th>訊號</th><th>評分</th></tr>
+        <tr>
+            <td><b>台積電</b><br><small></small></td>
+            <td>2445.0</td>
+            <td><small>EPS75.52<br>PE32.36</small></td>
+            <td><small>K=48.48 D=43.57<br><span class="green">中檔</span></small></td>
+            <td><small>2325.0-2505.0<br>位置67.0%</small></td>
+            <td><small>AI晶片/先進製程</small></td>
+            <td class="down">🟢 進</td>
+            <td>9/10</td>
+        </tr><tr>
+            <td><b>聯發科</b><br><small></small></td>
+            <td>4195.0</td>
+            <td><small>EPS82.62<br>PE35.14</small></td>
+            <td><small>K=27.05 D=26.26<br><span class="green">偏低檔</span></small></td>
+            <td><small>3825.0-4380.0<br>位置67.0%</small></td>
+            <td><small>AI/手機晶片</small></td>
+            <td class="down">🟢 進</td>
+            <td>9/10</td>
+        </tr><tr>
+            <td><b>長榮</b><br><small></small></td>
+            <td>195.0</td>
+            <td><small>EPS21.21<br>PE8.91</small></td>
+            <td><small>K=52.93 D=58.54<br><span class="red">中檔</span></small></td>
+            <td><small>180.5-197.5<br>位置85.0%</small></td>
+            <td><small>運價反彈</small></td>
+            <td class="down">🔴 觀</td>
+            <td>9/10</td>
+        </tr><tr>
+            <td><b>陽明</b><br><small></small></td>
+            <td>52.4</td>
+            <td><small>EPS10.14<br>PE5.43</small></td>
+            <td><small>K=40.49 D=41.66<br><span class="red">中檔</span></small></td>
+            <td><small>50.1-53.6<br>位置66.0%</small></td>
+            <td><small>運價反彈</small></td>
+            <td class="down">🔴 觀</td>
+            <td>9/10</td>
+        </tr><tr>
+            <td><b>鴻海</b><br><small></small></td>
+            <td>240.5</td>
+            <td><small>EPS18.58<br>PE12.82</small></td>
+            <td><small>K=82.85 D=72.57<br><span class="green">超高檔</span></small></td>
+            <td><small>236.0-255.5<br>位置23.0%</small></td>
+            <td><small>AI伺服器/蘋果/電動車</small></td>
+            <td class="down">🟡 持</td>
+            <td>8/10</td>
+        </tr><tr>
+            <td><b>日月光</b><br><small></small></td>
+            <td>682.0</td>
+            <td><small>EPS6.89<br>PE24.09</small></td>
+            <td><small>K=25.06 D=24.54<br><span class="green">偏低檔</span></small></td>
+            <td><small>611.0-729.0<br>位置60.0%</small></td>
+            <td><small>先進封裝/AI</small></td>
+            <td class="up">✅ Now!</td>
+            <td>8/10</td>
+        </tr><tr>
+            <td><b>中鋼</b><br><small></small></td>
+            <td>18.95</td>
+            <td><small>EPS0.32<br>PE56.25</small></td>
+            <td><small>K=73.96 D=72.05<br><span class="green">偏高檔</span></small></td>
+            <td><small>18.55-19.25<br>位置57.0%</small></td>
+            <td><small>鋼價</small></td>
+            <td class="up">✅ Now!</td>
+            <td>7/10</td>
+        </tr><tr>
+            <td><b>南電</b><br><small></small></td>
+            <td>1185.0</td>
+            <td><small>EPS26.68<br>PE44.42</small></td>
+            <td><small>K=84.12 D=81.02<br><span class="green">超高檔</span></small></td>
+            <td><small>1035.0-1285.0<br>位置60.0%</small></td>
+            <td><small>ABF載板</small></td>
+            <td class="down">🟡 持</td>
+            <td>6/10</td>
+        </tr><tr>
+            <td><b>廣達</b><br><small></small></td>
+            <td>377.0</td>
+            <td><small>EPS12.21<br>PE16.67</small></td>
+            <td><small>K=92.6 D=90.25<br><span class="green">超高檔</span></small></td>
+            <td><small>357.0-378.0<br>位置95.0%</small></td>
+            <td><small>AI伺服器</small></td>
+            <td class="down">🟡 持</td>
+            <td>6/10</td>
+        </tr><tr>
+            <td><b>台達電</b><br><small></small></td>
+            <td>2075.0</td>
+            <td><small>EPS19.63<br>PE29.99</small></td>
+            <td><small>K=94.22 D=89.7<br><span class="green">超高檔</span></small></td>
+            <td><small>1790.0-2075.0<br>位置100.0%</small></td>
+            <td><small>AI伺服器電源</small></td>
+            <td class="down">🟡 持</td>
+            <td>6/10</td>
+        </tr><tr>
+            <td><b>緯創</b><br><small></small></td>
+            <td>159.0</td>
+            <td><small>EPS5.7<br>PE27.58</small></td>
+            <td><small>K=46.53 D=54.2<br><span class="red">中檔</span></small></td>
+            <td><small>153.0-162.0<br>位置67.0%</small></td>
+            <td><small>AI伺服器</small></td>
+            <td class="down">🔴 觀</td>
+            <td>6/10</td>
+        </tr><tr>
+            <td><b>中華電</b><br><small></small></td>
+            <td>141.0</td>
+            <td><small>EPS4.53<br>PE30.03</small></td>
+            <td><small>K=14.81 D=25.82<br><span class="red">極低檔</span></small></td>
+            <td><small>141.0-145.0<br>位置0.0%</small></td>
+            <td><small>5G</small></td>
+            <td class="down">🔵 等</td>
+            <td>6/10</td>
+        </tr><tr>
+            <td><b>長榮航</b><br><small></small></td>
+            <td>43.85</td>
+            <td><small>EPS2.63<br>PE16.27</small></td>
+            <td><small>K=38.35 D=43.07<br><span class="red">偏低檔</span></small></td>
+            <td><small>43.15-45.0<br>位置38.0%</small></td>
+            <td><small>客運復甦</small></td>
+            <td class="down">🔴 觀</td>
+            <td>5/10</td>
+        </tr><tr>
+            <td><b>新光金</b><br><small></small></td>
+            <td>?</td>
+            <td><small>EPS0.89<br>PE32.58</small></td>
+            <td><small>無KD<br><span class="red">無資料</span></small></td>
+            <td><small>?-?<br>位置?</small></td>
+            <td><small>金融</small></td>
+            <td class="down">🔴 觀</td>
+            <td>5/10</td>
+        </tr><tr>
+            <td><b>第一金</b><br><small></small></td>
+            <td>32.4</td>
+            <td><small>EPS1.73<br>PE18.5</small></td>
+            <td><small>K=27.74 D=39.25<br><span class="red">偏低檔</span></small></td>
+            <td><small>32.0-33.35<br>位置30.0%</small></td>
+            <td><small>金融</small></td>
+            <td class="down">🔵 等</td>
+            <td>5/10</td>
+        </tr><tr>
+            <td><b>欣興</b><br><small></small></td>
+            <td>969.0</td>
+            <td><small>EPS7.54<br>PE137.63</small></td>
+            <td><small>K=70.7 D=61.94<br><span class="green">偏高檔</span></small></td>
+            <td><small>926.0-1115.0<br>位置23.0%</small></td>
+            <td><small>ABF/AI</small></td>
+            <td class="down">🟡 持</td>
+            <td>5/10</td>
+        </tr><tr>
+            <td><b>台塑</b><br><small></small></td>
+            <td>62.1</td>
+            <td><small>EPS1.41<br>PE34.04</small></td>
+            <td><small>K=56.6 D=59.41<br><span class="red">中檔</span></small></td>
+            <td><small>52.1-64.0<br>位置84.0%</small></td>
+            <td><small>塑化</small></td>
+            <td class="down">🔴 觀</td>
+            <td>5/10</td>
+        </tr><tr>
+            <td><b>華邦電</b><br><small></small></td>
+            <td>184.5</td>
+            <td><small>EPS0.27<br>PE681.48</small></td>
+            <td><small>K=55.72 D=60.26<br><span class="red">中檔</span></small></td>
+            <td><small>176.0-225.0<br>位置17.0%</small></td>
+            <td><small>記憶體/車用</small></td>
+            <td class="down">🔴 觀</td>
+            <td>4/10</td>
+        </tr><tr>
+            <td><b>力積電</b><br><small></small></td>
+            <td>73.4</td>
+            <td><small>EPS0.42<br>PE172.38</small></td>
+            <td><small>K=53.18 D=60.86<br><span class="red">中檔</span></small></td>
+            <td><small>70.3-85.2<br>位置21.0%</small></td>
+            <td><small>成熟製程</small></td>
+            <td class="down">🔴 觀</td>
+            <td>4/10</td>
+        </tr><tr>
+            <td><b>景碩</b><br><small></small></td>
+            <td>833.0</td>
+            <td><small>EPS3.91<br>PE211.35</small></td>
+            <td><small>K=83.77 D=70.65<br><span class="green">超高檔</span></small></td>
+            <td><small>770.0-939.0<br>位置37.0%</small></td>
+            <td><small>ABF載板</small></td>
+            <td class="down">🟡 持</td>
+            <td>4/10</td>
+        </tr>
+    </table>
+</div>
+
+<div class="section">
+    <div class="section-title">💰 高EPS低股價潛力股 (6檔)</div>
+    <table>
+        <tr><th>股票</th><th>股價</th><th>EPS/PE</th><th>KD</th><th>區間</th><th>題材</th><th>訊號</th><th>評分</th></tr>
+        <tr>
+            <td><b>亞翔</b><br><small></small></td>
+            <td>948.0</td>
+            <td><small>EPS36.1<br>PE26.26</small></td>
+            <td><small>K=42.02 D=49.52<br><span class="red">中檔</span></small></td>
+            <td><small>862.0-987.0<br>位置69.0%</small></td>
+            <td><small>半導體擴廠/AI</small></td>
+            <td class="down">🔴 觀</td>
+            <td>8/10</td>
+        </tr><tr>
+            <td><b>長榮</b><br><small></small></td>
+            <td>195.0</td>
+            <td><small>EPS21.21<br>PE8.91</small></td>
+            <td><small>K=52.93 D=58.54<br><span class="red">中檔</span></small></td>
+            <td><small>180.5-197.5<br>位置85.0%</small></td>
+            <td><small>運價反彈</small></td>
+            <td class="down">🔴 觀</td>
+            <td>9/10</td>
+        </tr><tr>
+            <td><b>台達電</b><br><small></small></td>
+            <td>2075.0</td>
+            <td><small>EPS19.63<br>PE29.99</small></td>
+            <td><small>K=94.22 D=89.7<br><span class="green">超高檔</span></small></td>
+            <td><small>1790.0-2075.0<br>位置100.0%</small></td>
+            <td><small>AI伺服器電源</small></td>
+            <td class="down">🟡 持</td>
+            <td>6/10</td>
+        </tr><tr>
+            <td><b>鴻海</b><br><small></small></td>
+            <td>240.5</td>
+            <td><small>EPS18.58<br>PE12.82</small></td>
+            <td><small>K=82.85 D=72.57<br><span class="green">超高檔</span></small></td>
+            <td><small>236.0-255.5<br>位置23.0%</small></td>
+            <td><small>AI伺服器/蘋果/電動車</small></td>
+            <td class="down">🟡 持</td>
+            <td>8/10</td>
+        </tr><tr>
+            <td><b>廣達</b><br><small></small></td>
+            <td>377.0</td>
+            <td><small>EPS12.21<br>PE16.67</small></td>
+            <td><small>K=92.6 D=90.25<br><span class="green">超高檔</span></small></td>
+            <td><small>357.0-378.0<br>位置95.0%</small></td>
+            <td><small>AI伺服器</small></td>
+            <td class="down">🟡 持</td>
+            <td>6/10</td>
+        </tr><tr>
+            <td><b>陽明</b><br><small></small></td>
+            <td>52.4</td>
+            <td><small>EPS10.14<br>PE5.43</small></td>
+            <td><small>K=40.49 D=41.66<br><span class="red">中檔</span></small></td>
+            <td><small>50.1-53.6<br>位置66.0%</small></td>
+            <td><small>運價反彈</small></td>
+            <td class="down">🔴 觀</td>
+            <td>9/10</td>
+        </tr>
+    </table>
+</div>
+
+<div class="section">
+    <div class="section-title">📦 庫存股監控 (8檔)</div>
+    <table>
+        <tr><th>股票</th><th>股價</th><th>EPS/PE</th><th>KD</th><th>區間</th><th>題材</th><th>訊號</th><th>評分</th></tr>
+        <tr>
+            <td><b>晶技</b><br><small></small></td>
+            <td>249.0</td>
+            <td><small>EPS5.23<br>PE47.64</small></td>
+            <td><small>K=93.08 D=85.04<br><span class="green">超高檔</span></small></td>
+            <td><small>180.5-249.0<br>位置100.0%</small></td>
+            <td><small>網通/車用/iPhone</small></td>
+            <td class="down">🟡 持</td>
+            <td>5/10</td>
+        </tr><tr>
+            <td><b>旺宏</b><br><small></small></td>
+            <td>142.5</td>
+            <td><small>EPS-0.41<br></small></td>
+            <td><small>K=39.26 D=48.14<br><span class="red">偏低檔</span></small></td>
+            <td><small>135.0-174.5<br>位置19.0%</small></td>
+            <td><small>記憶體復甦</small></td>
+            <td class="down">🔴 觀</td>
+            <td>3/10</td>
+        </tr><tr>
+            <td><b>偉詮電</b><br><small></small></td>
+            <td>75.9</td>
+            <td><small>EPS3.47<br>PE21.85</small></td>
+            <td><small>K=53.73 D=62.66<br><span class="red">中檔</span></small></td>
+            <td><small>69.7-77.4<br>位置81.0%</small></td>
+            <td><small>USB PD</small></td>
+            <td class="down">🔴 觀</td>
+            <td>6/10</td>
+        </tr><tr>
+            <td><b>鈺創</b><br><small></small></td>
+            <td>81.8</td>
+            <td><small>EPS0.96<br>PE85.51</small></td>
+            <td><small>K=26.13 D=40.17<br><span class="red">偏低檔</span></small></td>
+            <td><small>77.6-94.1<br>位置25.0%</small></td>
+            <td><small>AI邊緣運算</small></td>
+            <td class="down">🔵 等</td>
+            <td>4/10</td>
+        </tr><tr>
+            <td><b>TPK-KY</b><br><small></small></td>
+            <td>82.4</td>
+            <td><small>EPS-5.31<br></small></td>
+            <td><small>K=18.18 D=19.71<br><span class="red">極低檔</span></small></td>
+            <td><small>74.1-88.8<br>位置56.0%</small></td>
+            <td><small>摺疊手機</small></td>
+            <td class="down">🔵 等</td>
+            <td>3/10</td>
+        </tr><tr>
+            <td><b>日月光</b><br><small></small></td>
+            <td>682.0</td>
+            <td><small>EPS6.89<br>PE24.09</small></td>
+            <td><small>K=25.06 D=24.54<br><span class="green">偏低檔</span></small></td>
+            <td><small>611.0-729.0<br>位置60.0%</small></td>
+            <td><small>先進封裝/AI</small></td>
+            <td class="up">✅ Now!</td>
+            <td>8/10</td>
+        </tr><tr>
+            <td><b>臻鼎-KY</b><br><small></small></td>
+            <td>613.0</td>
+            <td><small>EPS9.62<br>PE49.11</small></td>
+            <td><small>K=89.49 D=87.84<br><span class="green">超高檔</span></small></td>
+            <td><small>561.0-659.0<br>位置53.0%</small></td>
+            <td><small>AI伺服器/蘋果</small></td>
+            <td class="down">🟡 持</td>
+            <td>5/10</td>
+        </tr><tr>
+            <td><b>南茂</b><br><small></small></td>
+            <td>105.0</td>
+            <td><small>EPS1.19<br>PE88.24</small></td>
+            <td><small>K=49.73 D=41.47<br><span class="green">中檔</span></small></td>
+            <td><small>90.4-112.5<br>位置66.0%</small></td>
+            <td><small>記憶體復甦</small></td>
+            <td class="down">🟢 進</td>
+            <td>5/10</td>
+        </tr>
+    </table>
+</div>
+<div class="section">
+            <div class="section-title">AI/先進封裝 (14檔)</div>
+            <table><tr><th>股票</th><th>股價</th><th>EPS/PE</th><th>KD</th><th>區間</th><th>題材</th><th>訊號</th><th>評分</th></tr>
+            <tr>
+            <td><b>台積電</b><br><small></small></td>
+            <td>2445.0</td>
+            <td><small>EPS75.52<br>PE32.36</small></td>
+            <td><small>K=48.48 D=43.57<br><span class="green">中檔</span></small></td>
+            <td><small>2325.0-2505.0<br>位置67.0%</small></td>
+            <td><small>AI晶片/先進製程</small></td>
+            <td class="down">🟢 進</td>
+            <td>9/10</td>
+        </tr><tr>
+            <td><b>聯發科</b><br><small></small></td>
+            <td>4195.0</td>
+            <td><small>EPS82.62<br>PE35.14</small></td>
+            <td><small>K=27.05 D=26.26<br><span class="green">偏低檔</span></small></td>
+            <td><small>3825.0-4380.0<br>位置67.0%</small></td>
+            <td><small>AI/手機晶片</small></td>
+            <td class="down">🟢 進</td>
+            <td>9/10</td>
+        </tr><tr>
+            <td><b>鴻海</b><br><small></small></td>
+            <td>240.5</td>
+            <td><small>EPS18.58<br>PE12.82</small></td>
+            <td><small>K=82.85 D=72.57<br><span class="green">超高檔</span></small></td>
+            <td><small>236.0-255.5<br>位置23.0%</small></td>
+            <td><small>AI伺服器/蘋果/電動車</small></td>
+            <td class="down">🟡 持</td>
+            <td>8/10</td>
+        </tr><tr>
+            <td><b>日月光</b><br><small></small></td>
+            <td>682.0</td>
+            <td><small>EPS6.89<br>PE24.09</small></td>
+            <td><small>K=25.06 D=24.54<br><span class="green">偏低檔</span></small></td>
+            <td><small>611.0-729.0<br>位置60.0%</small></td>
+            <td><small>先進封裝/AI</small></td>
+            <td class="up">✅ Now!</td>
+            <td>8/10</td>
+        </tr><tr>
+            <td><b>弘塑</b><br><small></small></td>
+            <td>3785.0</td>
+            <td><small>EPS52.89<br>PE71.57</small></td>
+            <td><small>K=26.82 D=37.93<br><span class="red">偏低檔</span></small></td>
+            <td><small>3300.0-4045.0<br>位置65.0%</small></td>
+            <td><small>先進封裝</small></td>
+            <td class="down">🔵 等</td>
+            <td>8/10</td>
+        </tr><tr>
+            <td><b>亞翔</b><br><small></small></td>
+            <td>948.0</td>
+            <td><small>EPS36.1<br>PE26.26</small></td>
+            <td><small>K=42.02 D=49.52<br><span class="red">中檔</span></small></td>
+            <td><small>862.0-987.0<br>位置69.0%</small></td>
+            <td><small>半導體擴廠/AI</small></td>
+            <td class="down">🔴 觀</td>
+            <td>8/10</td>
+        </tr><tr>
+            <td><b>辛耘</b><br><small></small></td>
+            <td>851.0</td>
+            <td><small>EPS14.76<br>PE57.67</small></td>
+            <td><small>K=6.64 D=10.68<br><span class="red">極低檔</span></small></td>
+            <td><small>800.0-946.0<br>位置35.0%</small></td>
+            <td><small>AI/先進封裝</small></td>
+            <td class="down">🔵 等</td>
+            <td>7/10</td>
+        </tr><tr>
+            <td><b>廣達</b><br><small></small></td>
+            <td>377.0</td>
+            <td><small>EPS12.21<br>PE16.67</small></td>
+            <td><small>K=92.6 D=90.25<br><span class="green">超高檔</span></small></td>
+            <td><small>357.0-378.0<br>位置95.0%</small></td>
+            <td><small>AI伺服器</small></td>
+            <td class="down">🟡 持</td>
+            <td>6/10</td>
+        </tr><tr>
+            <td><b>緯創</b><br><small></small></td>
+            <td>159.0</td>
+            <td><small>EPS5.7<br>PE27.58</small></td>
+            <td><small>K=46.53 D=54.2<br><span class="red">中檔</span></small></td>
+            <td><small>153.0-162.0<br>位置67.0%</small></td>
+            <td><small>AI伺服器</small></td>
+            <td class="down">🔴 觀</td>
+            <td>6/10</td>
+        </tr><tr>
+            <td><b>台達電</b><br><small></small></td>
+            <td>2075.0</td>
+            <td><small>EPS19.63<br>PE29.99</small></td>
+            <td><small>K=94.22 D=89.7<br><span class="green">超高檔</span></small></td>
+            <td><small>1790.0-2075.0<br>位置100.0%</small></td>
+            <td><small>AI伺服器電源</small></td>
+            <td class="down">🟡 持</td>
+            <td>6/10</td>
+        </tr><tr>
+            <td><b>南電</b><br><small></small></td>
+            <td>1185.0</td>
+            <td><small>EPS26.68<br>PE44.42</small></td>
+            <td><small>K=84.12 D=81.02<br><span class="green">超高檔</span></small></td>
+            <td><small>1035.0-1285.0<br>位置60.0%</small></td>
+            <td><small>ABF載板</small></td>
+            <td class="down">🟡 持</td>
+            <td>6/10</td>
+        </tr><tr>
+            <td><b>國巨</b><br><small></small></td>
+            <td>1045.0</td>
+            <td><small>EPS12.71<br>PE82.2</small></td>
+            <td><small>K=61.18 D=55.87<br><span class="green">偏高檔</span></small></td>
+            <td><small>979.0-1220.0<br>位置27.0%</small></td>
+            <td><small>MLCC/車用</small></td>
+            <td class="down">🟡 持</td>
+            <td>6/10</td>
+        </tr><tr>
+            <td><b>欣興</b><br><small></small></td>
+            <td>969.0</td>
+            <td><small>EPS7.54<br>PE137.63</small></td>
+            <td><small>K=70.7 D=61.94<br><span class="green">偏高檔</span></small></td>
+            <td><small>926.0-1115.0<br>位置23.0%</small></td>
+            <td><small>ABF/AI</small></td>
+            <td class="down">🟡 持</td>
+            <td>5/10</td>
+        </tr><tr>
+            <td><b>景碩</b><br><small></small></td>
+            <td>833.0</td>
+            <td><small>EPS3.91<br>PE211.35</small></td>
+            <td><small>K=83.77 D=70.65<br><span class="green">超高檔</span></small></td>
+            <td><small>770.0-939.0<br>位置37.0%</small></td>
+            <td><small>ABF載板</small></td>
+            <td class="down">🟡 持</td>
+            <td>4/10</td>
+        </tr>
+            </table></div><div class="section">
+            <div class="section-title">蘋概股 (3檔)</div>
+            <table><tr><th>股票</th><th>股價</th><th>EPS/PE</th><th>KD</th><th>區間</th><th>題材</th><th>訊號</th><th>評分</th></tr>
+            <tr>
+            <td><b>鴻海</b><br><small></small></td>
+            <td>240.5</td>
+            <td><small>EPS18.58<br>PE12.82</small></td>
+            <td><small>K=82.85 D=72.57<br><span class="green">超高檔</span></small></td>
+            <td><small>236.0-255.5<br>位置23.0%</small></td>
+            <td><small>AI伺服器/蘋果/電動車</small></td>
+            <td class="down">🟡 持</td>
+            <td>8/10</td>
+        </tr><tr>
+            <td><b>臻鼎-KY</b><br><small></small></td>
+            <td>613.0</td>
+            <td><small>EPS9.62<br>PE49.11</small></td>
+            <td><small>K=89.49 D=87.84<br><span class="green">超高檔</span></small></td>
+            <td><small>561.0-659.0<br>位置53.0%</small></td>
+            <td><small>AI伺服器/蘋果</small></td>
+            <td class="down">🟡 持</td>
+            <td>5/10</td>
+        </tr><tr>
+            <td><b>晶技</b><br><small></small></td>
+            <td>249.0</td>
+            <td><small>EPS5.23<br>PE47.64</small></td>
+            <td><small>K=93.08 D=85.04<br><span class="green">超高檔</span></small></td>
+            <td><small>180.5-249.0<br>位置100.0%</small></td>
+            <td><small>網通/車用/iPhone</small></td>
+            <td class="down">🟡 持</td>
+            <td>5/10</td>
+        </tr>
+            </table></div><div class="section">
+            <div class="section-title">記憶體 (5檔)</div>
+            <table><tr><th>股票</th><th>股價</th><th>EPS/PE</th><th>KD</th><th>區間</th><th>題材</th><th>訊號</th><th>評分</th></tr>
+            <tr>
+            <td><b>南茂</b><br><small></small></td>
+            <td>105.0</td>
+            <td><small>EPS1.19<br>PE88.24</small></td>
+            <td><small>K=49.73 D=41.47<br><span class="green">中檔</span></small></td>
+            <td><small>90.4-112.5<br>位置66.0%</small></td>
+            <td><small>記憶體復甦</small></td>
+            <td class="down">🟢 進</td>
+            <td>5/10</td>
+        </tr><tr>
+            <td><b>華邦電</b><br><small></small></td>
+            <td>184.5</td>
+            <td><small>EPS0.27<br>PE681.48</small></td>
+            <td><small>K=55.72 D=60.26<br><span class="red">中檔</span></small></td>
+            <td><small>176.0-225.0<br>位置17.0%</small></td>
+            <td><small>記憶體/車用</small></td>
+            <td class="down">🔴 觀</td>
+            <td>4/10</td>
+        </tr><tr>
+            <td><b>鈺創</b><br><small></small></td>
+            <td>81.8</td>
+            <td><small>EPS0.96<br>PE85.51</small></td>
+            <td><small>K=26.13 D=40.17<br><span class="red">偏低檔</span></small></td>
+            <td><small>77.6-94.1<br>位置25.0%</small></td>
+            <td><small>AI邊緣運算</small></td>
+            <td class="down">🔵 等</td>
+            <td>4/10</td>
+        </tr><tr>
+            <td><b>力積電</b><br><small></small></td>
+            <td>73.4</td>
+            <td><small>EPS0.42<br>PE172.38</small></td>
+            <td><small>K=53.18 D=60.86<br><span class="red">中檔</span></small></td>
+            <td><small>70.3-85.2<br>位置21.0%</small></td>
+            <td><small>成熟製程</small></td>
+            <td class="down">🔴 觀</td>
+            <td>4/10</td>
+        </tr><tr>
+            <td><b>旺宏</b><br><small></small></td>
+            <td>142.5</td>
+            <td><small>EPS-0.41<br></small></td>
+            <td><small>K=39.26 D=48.14<br><span class="red">偏低檔</span></small></td>
+            <td><small>135.0-174.5<br>位置19.0%</small></td>
+            <td><small>記憶體復甦</small></td>
+            <td class="down">🔴 觀</td>
+            <td>3/10</td>
+        </tr>
+            </table></div><div class="section">
+            <div class="section-title">金融 (2檔)</div>
+            <table><tr><th>股票</th><th>股價</th><th>EPS/PE</th><th>KD</th><th>區間</th><th>題材</th><th>訊號</th><th>評分</th></tr>
+            <tr>
+            <td><b>第一金</b><br><small></small></td>
+            <td>32.4</td>
+            <td><small>EPS1.73<br>PE18.5</small></td>
+            <td><small>K=27.74 D=39.25<br><span class="red">偏低檔</span></small></td>
+            <td><small>32.0-33.35<br>位置30.0%</small></td>
+            <td><small>金融</small></td>
+            <td class="down">🔵 等</td>
+            <td>5/10</td>
+        </tr><tr>
+            <td><b>新光金</b><br><small></small></td>
+            <td>?</td>
+            <td><small>EPS0.89<br>PE32.58</small></td>
+            <td><small>無KD<br><span class="red">無資料</span></small></td>
+            <td><small>?-?<br>位置?</small></td>
+            <td><small>金融</small></td>
+            <td class="down">🔴 觀</td>
+            <td>5/10</td>
+        </tr>
+            </table></div><div class="section">
+            <div class="section-title">傳產/航運 (5檔)</div>
+            <table><tr><th>股票</th><th>股價</th><th>EPS/PE</th><th>KD</th><th>區間</th><th>題材</th><th>訊號</th><th>評分</th></tr>
+            <tr>
+            <td><b>長榮</b><br><small></small></td>
+            <td>195.0</td>
+            <td><small>EPS21.21<br>PE8.91</small></td>
+            <td><small>K=52.93 D=58.54<br><span class="red">中檔</span></small></td>
+            <td><small>180.5-197.5<br>位置85.0%</small></td>
+            <td><small>運價反彈</small></td>
+            <td class="down">🔴 觀</td>
+            <td>9/10</td>
+        </tr><tr>
+            <td><b>陽明</b><br><small></small></td>
+            <td>52.4</td>
+            <td><small>EPS10.14<br>PE5.43</small></td>
+            <td><small>K=40.49 D=41.66<br><span class="red">中檔</span></small></td>
+            <td><small>50.1-53.6<br>位置66.0%</small></td>
+            <td><small>運價反彈</small></td>
+            <td class="down">🔴 觀</td>
+            <td>9/10</td>
+        </tr><tr>
+            <td><b>中鋼</b><br><small></small></td>
+            <td>18.95</td>
+            <td><small>EPS0.32<br>PE56.25</small></td>
+            <td><small>K=73.96 D=72.05<br><span class="green">偏高檔</span></small></td>
+            <td><small>18.55-19.25<br>位置57.0%</small></td>
+            <td><small>鋼價</small></td>
+            <td class="up">✅ Now!</td>
+            <td>7/10</td>
+        </tr><tr>
+            <td><b>長榮航</b><br><small></small></td>
+            <td>43.85</td>
+            <td><small>EPS2.63<br>PE16.27</small></td>
+            <td><small>K=38.35 D=43.07<br><span class="red">偏低檔</span></small></td>
+            <td><small>43.15-45.0<br>位置38.0%</small></td>
+            <td><small>客運復甦</small></td>
+            <td class="down">🔴 觀</td>
+            <td>5/10</td>
+        </tr><tr>
+            <td><b>台塑</b><br><small></small></td>
+            <td>62.1</td>
+            <td><small>EPS1.41<br>PE34.04</small></td>
+            <td><small>K=56.6 D=59.41<br><span class="red">中檔</span></small></td>
+            <td><small>52.1-64.0<br>位置84.0%</small></td>
+            <td><small>塑化</small></td>
+            <td class="down">🔴 觀</td>
+            <td>5/10</td>
+        </tr>
+            </table></div></body></html>

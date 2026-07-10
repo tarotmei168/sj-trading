@@ -1,0 +1,5 @@
+content = open('src/sj_trading/backtest_kd.py','r',encoding='utf-8').read()
+content = content.replace('api_key=***', 'api_key=os.environ[')
+content = content.replace(']SJ_API_KEY"]', '["SJ_API_KEY"]')
+open('src/sj_trading/backtest_kd.py','w',encoding='utf-8').write(content)
+print('fixed')

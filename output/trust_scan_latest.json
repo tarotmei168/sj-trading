@@ -1,0 +1,376 @@
+{
+  "update_time": "07/10 18:34",
+  "scan_dates": [
+    "20260709",
+    "20260708",
+    "20260707",
+    "20260706",
+    "20260703"
+  ],
+  "trust_top40": [
+    {
+      "sid": "2886",
+      "name": "兆豐金",
+      "days": 5,
+      "total_trust": 28258239,
+      "total_foreign": 7055773,
+      "is_watch": false
+    },
+    {
+      "sid": "2891",
+      "name": "中信金",
+      "days": 5,
+      "total_trust": 23203971,
+      "total_foreign": -44555546,
+      "is_watch": false
+    },
+    {
+      "sid": "2356",
+      "name": "英業達",
+      "days": 5,
+      "total_trust": 21312873,
+      "total_foreign": -17187609,
+      "is_watch": false
+    },
+    {
+      "sid": "2892",
+      "name": "第一金",
+      "days": 4,
+      "total_trust": 20773183,
+      "total_foreign": 44577858,
+      "is_watch": false
+    },
+    {
+      "sid": "1303",
+      "name": "南亞",
+      "days": 5,
+      "total_trust": 17725964,
+      "total_foreign": -33394162,
+      "is_watch": false
+    },
+    {
+      "sid": "2352",
+      "name": "佳世達",
+      "days": 3,
+      "total_trust": 16833000,
+      "total_foreign": -25987844,
+      "is_watch": false
+    },
+    {
+      "sid": "2618",
+      "name": "長榮航",
+      "days": 3,
+      "total_trust": 16094620,
+      "total_foreign": 102976642,
+      "is_watch": false
+    },
+    {
+      "sid": "4904",
+      "name": "遠傳",
+      "days": 3,
+      "total_trust": 15852860,
+      "total_foreign": -17284376,
+      "is_watch": false
+    },
+    {
+      "sid": "1402",
+      "name": "遠東新",
+      "days": 5,
+      "total_trust": 14797149,
+      "total_foreign": -26884387,
+      "is_watch": false
+    },
+    {
+      "sid": "3045",
+      "name": "台灣大",
+      "days": 4,
+      "total_trust": 14571110,
+      "total_foreign": -5075202,
+      "is_watch": false
+    },
+    {
+      "sid": "0050",
+      "name": "元大台灣50",
+      "days": 4,
+      "total_trust": 14065000,
+      "total_foreign": -109933420,
+      "is_watch": false
+    },
+    {
+      "sid": "3706",
+      "name": "神達",
+      "days": 3,
+      "total_trust": 12888000,
+      "total_foreign": -20157694,
+      "is_watch": false
+    },
+    {
+      "sid": "2347",
+      "name": "聯強",
+      "days": 5,
+      "total_trust": 12761010,
+      "total_foreign": -29412017,
+      "is_watch": false
+    },
+    {
+      "sid": "2412",
+      "name": "中華電",
+      "days": 4,
+      "total_trust": 11796504,
+      "total_foreign": -33457248,
+      "is_watch": false
+    },
+    {
+      "sid": "3231",
+      "name": "緯創",
+      "days": 3,
+      "total_trust": 11763997,
+      "total_foreign": -33660192,
+      "is_watch": true
+    },
+    {
+      "sid": "3026",
+      "name": "禾伸堂",
+      "days": 4,
+      "total_trust": 9600500,
+      "total_foreign": -4580546,
+      "is_watch": false
+    },
+    {
+      "sid": "2382",
+      "name": "廣達",
+      "days": 5,
+      "total_trust": 8879576,
+      "total_foreign": -16776571,
+      "is_watch": true
+    },
+    {
+      "sid": "2890",
+      "name": "永豐金",
+      "days": 5,
+      "total_trust": 8402982,
+      "total_foreign": 43499216,
+      "is_watch": false
+    },
+    {
+      "sid": "2377",
+      "name": "微星",
+      "days": 5,
+      "total_trust": 8232000,
+      "total_foreign": 10732107,
+      "is_watch": false
+    },
+    {
+      "sid": "6191",
+      "name": "精成科",
+      "days": 3,
+      "total_trust": 8171000,
+      "total_foreign": -7473955,
+      "is_watch": false
+    },
+    {
+      "sid": "3711",
+      "name": "日月光投控",
+      "days": 5,
+      "total_trust": 7760233,
+      "total_foreign": -30100117,
+      "is_watch": true
+    },
+    {
+      "sid": "2885",
+      "name": "元大金",
+      "days": 4,
+      "total_trust": 7070163,
+      "total_foreign": 3486450,
+      "is_watch": false
+    },
+    {
+      "sid": "5469",
+      "name": "瀚宇博",
+      "days": 5,
+      "total_trust": 6770000,
+      "total_foreign": -7700022,
+      "is_watch": false
+    },
+    {
+      "sid": "8422",
+      "name": "可寧衛*",
+      "days": 3,
+      "total_trust": 6732000,
+      "total_foreign": -11615117,
+      "is_watch": false
+    },
+    {
+      "sid": "2610",
+      "name": "華航",
+      "days": 5,
+      "total_trust": 6464477,
+      "total_foreign": -26246571,
+      "is_watch": false
+    },
+    {
+      "sid": "2317",
+      "name": "鴻海",
+      "days": 4,
+      "total_trust": 6279446,
+      "total_foreign": -20766181,
+      "is_watch": true
+    },
+    {
+      "sid": "8046",
+      "name": "南電",
+      "days": 5,
+      "total_trust": 5607639,
+      "total_foreign": -3937275,
+      "is_watch": false
+    },
+    {
+      "sid": "2458",
+      "name": "義隆",
+      "days": 5,
+      "total_trust": 5328874,
+      "total_foreign": -402523,
+      "is_watch": false
+    },
+    {
+      "sid": "3702",
+      "name": "大聯大",
+      "days": 3,
+      "total_trust": 5099000,
+      "total_foreign": -6974200,
+      "is_watch": false
+    },
+    {
+      "sid": "2408",
+      "name": "南亞科",
+      "days": 3,
+      "total_trust": 4545191,
+      "total_foreign": 6597485,
+      "is_watch": false
+    },
+    {
+      "sid": "8070",
+      "name": "長華*",
+      "days": 3,
+      "total_trust": 4257257,
+      "total_foreign": -4514146,
+      "is_watch": false
+    },
+    {
+      "sid": "6278",
+      "name": "台表科",
+      "days": 5,
+      "total_trust": 4139000,
+      "total_foreign": -10204371,
+      "is_watch": false
+    },
+    {
+      "sid": "6213",
+      "name": "聯茂",
+      "days": 5,
+      "total_trust": 4073900,
+      "total_foreign": -11223548,
+      "is_watch": false
+    },
+    {
+      "sid": "3037",
+      "name": "欣興",
+      "days": 3,
+      "total_trust": 4004462,
+      "total_foreign": -31152033,
+      "is_watch": false
+    },
+    {
+      "sid": "2474",
+      "name": "可成",
+      "days": 4,
+      "total_trust": 3909000,
+      "total_foreign": -5780157,
+      "is_watch": false
+    },
+    {
+      "sid": "2880",
+      "name": "華南金",
+      "days": 3,
+      "total_trust": 3302711,
+      "total_foreign": 14197847,
+      "is_watch": false
+    },
+    {
+      "sid": "3023",
+      "name": "信邦",
+      "days": 5,
+      "total_trust": 3219600,
+      "total_foreign": -5712457,
+      "is_watch": false
+    },
+    {
+      "sid": "3532",
+      "name": "台勝科",
+      "days": 5,
+      "total_trust": 3120300,
+      "total_foreign": -1627665,
+      "is_watch": false
+    },
+    {
+      "sid": "2376",
+      "name": "技嘉",
+      "days": 5,
+      "total_trust": 3064463,
+      "total_foreign": -2766191,
+      "is_watch": false
+    },
+    {
+      "sid": "3034",
+      "name": "聯詠",
+      "days": 5,
+      "total_trust": 2780826,
+      "total_foreign": -1879477,
+      "is_watch": false
+    }
+  ],
+  "watch_sold": [
+    {
+      "sid": "8150",
+      "name": "南茂",
+      "trust_net": -1000,
+      "foreign_net": 9364709
+    },
+    {
+      "sid": "2317",
+      "name": "鴻海",
+      "trust_net": -37567,
+      "foreign_net": 5743125
+    },
+    {
+      "sid": "3017",
+      "name": "奇鋐",
+      "trust_net": -27837,
+      "foreign_net": 21317
+    },
+    {
+      "sid": "3042",
+      "name": "晶技",
+      "trust_net": -1000,
+      "foreign_net": 79451
+    },
+    {
+      "sid": "2454",
+      "name": "聯發科",
+      "trust_net": -214657,
+      "foreign_net": -689137
+    },
+    {
+      "sid": "3231",
+      "name": "緯創",
+      "trust_net": -1073841,
+      "foreign_net": -5413591
+    },
+    {
+      "sid": "6770",
+      "name": "力積電",
+      "trust_net": -621000,
+      "foreign_net": -14793479
+    }
+  ]
+}

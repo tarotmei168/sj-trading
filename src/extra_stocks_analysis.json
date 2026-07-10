@@ -1,0 +1,16 @@
+{
+  "3042": {
+    "name": "晶技",
+    "category": "庫存",
+    "best": {
+      "pnl": 144.09,
+      "k": 3,
+      "buy": 40,
+      "sell": 80,
+      "trades": 2,
+      "wins": 2
+    },
+    "status": {
+      "k_current": 92.26,
+      "d_current": 82.69,
+      "golden_now": 

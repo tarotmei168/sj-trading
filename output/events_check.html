@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>台股未來1年關鍵事件總表</title>
+<style>
+  body{font-family:sans-serif;margin:20px;background:#f5f5f5}
+  h1{color:#d32f2f;border-bottom:3px solid #d32f2f;padding-bottom:8px}
+  h2{color:#1976d2;margin-top:30px}
+  table{width:100%;border-collapse:collapse;margin:10px 0 25px 0;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+  th{background:#1976d2;color:#fff;padding:12px;text-align:left;font-size:18px}
+  td{padding:10px 12px;border-bottom:1px solid #eee;font-size:18px}
+  tr:hover{background:#e3f2fd}
+  .fire{color:#d32f2f;font-weight:bold}
+  .star{color:#f57c00;font-weight:bold}
+  .note{color:#888}
+  .ok{color:#2e7d32}
+  .today{background:#fff3e0}
+  .tag{display:inline-block;padding:2px 6px;border-radius:3px;font-size:16px;margin:0 3px}
+  .tag-fomc{background:#d32f2f;color:#fff}
+  .tag-earnings{background:#1976d2;color:#fff}
+  .tag-futures{background:#f57c00;color:#fff}
+  .tag-exdiv{background:#388e3c;color:#fff}
+  .tag-trust{background:#7b1fa2;color:#fff}
+  .tag-fa{background:#00838f;color:#fff}
+  .tag-trump{background:#880e4f;color:#fff}
+  .summary{background:#e8f5e9;padding:15px;border-radius:5px;margin:15px 0}
+</style>
+</head>
+<body>
+
+<h1>📅 台股未來1年關鍵事件總表</h1>
+
+<div class="summary">
+  <strong>✅ 已整合至晨報的模組：</strong><br>
+  🇺🇸 費城半導體SOX（台股最重要美股指標） — <span class="ok">✅ global_weather.py</span><br>
+  🇹🇼 台指期夜盤 — <span class="ok">✅ global_weather.py</span><br>
+  🔗 台美產業聯動40組（半導體/AI/零組件/重電/軍工/傳產共200檔） — <span class="ok">✅ global_weather.py us_tw_mapping_matrix.py LINKAGE_MAP</span><br>
+  📅 未來14天事件 — <span class="ok">✅ global_weather.py KNOWN_EVENTS_2026</span><br>
+  🏦 投信買賣超(每天16:30更新) — <span class="ok">✅ daily_market_update.py</span><br>
+  🏦 投信季底結帳/作帳 — <span class="ok">✅ KNOWN_EVENTS_2026 (7/17, 7/31)</span><br>
+  📊 6月營收截止 — <span class="ok">✅ KNOWN_EVENTS_2026 (7/9)</span><br>
+  🎯 除權息 — <span class="ok">✅ KNOWN_EVENTS_2026</span><br>
+  📈 台指期結算 — <span class="ok">✅ KNOWN_EVENTS_2026 (7/15)</span><br>
+  💬 法說會 — <span class="ok">✅ 台積電7/20, 聯發科7/21</span><br>
+  🌐 FOMC利率決策 — <span class="ok">✅ 7/30</span><br>
+  🚨 每月底法人結帳大作帳（每月最後3交易日）— <span class="ok">✅ global_weather.py KNOWN_EVENTS_2026</span><br>
+  🗳 川普投顧地緣政治特區 — <span class="ok">✅ global_weather.py</span><br></div>
+
+<h2>📌 未來14天重點（已在高亮晨報中）</h2>
+<table>
+  <tr><th>日期</th><th>週</th><th>事件</th><th>重要性</th><th>影響範圍</th></tr>
+  <tr class="today"><td>7/7</td><td>二</td><td>旺宏除息5.5元</td><td><span class="tag tag-exdiv">除權息</span></td><td>2337旺宏</td></tr>
+  <tr><td>7/8</td><td>三</td><td>聯發科/南亞科除息</td><td><span class="tag tag-exdiv">除權息</span></td><td>2454聯發科、2408南亞科</td></tr>
+  <tr><td>7/8</td><td>三</td><td>台指期結算前一週</td><td><span class="tag tag-futures">期貨</span></td><td>加權指數波動加劇</td></tr>
+  <tr><td>7/9</td><td>四</td><td>6月營收截止公告</td><td><span class="tag tag-earnings">財報</span></td><td>創意、鴻海、臻鼎等營收創高股</td></tr>
+  <tr><td>7/15</td><td>三</td><td>台指期週結算</td><td><span class="tag tag-futures">期貨</span></td><td>外資布局變動</td></tr>
+  <tr><td>7/17</td><td>五</td><td>投信季底結帳倒數</td><td><span class="tag tag-trust">投信</span></td><td>投信持股可能結帳賣壓</td></tr>
+  <tr><td><span class="fire">7/20</span></td><td>一</td><td><span class="fire">🔥台積電法說會</span></td><td><span class="tag tag-fa">法說</span></td><td>全台股半導體族群！</td></tr>
+  <tr><td><span class="fire">7/21</span></td><td>二</td><td><span class="fire">🔥聯發科法說會</span></td><td><span class="tag tag-fa">法說</span></td><td>ASIC/IP族群</td></tr>
+  <tr><td><span class="fire">7/30</span></td><td>四</td><td><span class="fire">🔥🔥FOMC利率決策</span></td><td><span class="tag tag-fomc">總經</span></td><td>全球股市波動</td></tr>
+  <tr><td>7/31</td><td>五</td><td>投信季底結帳日</td><td><span class="tag tag-trust">投信</span></td><td>投信作帳股最後交易日</td></tr>
+</table>
+
+<!-- ====== 完整年度事件表 ====== -->
+<h2>📋 完整年度事件</h2>
+
+<h3>🇺🇸 費城半導體SOX（每季財報影響台股半導體）</h3>
+<table>
+  <tr><th>時間</th><th>事件</th><th>連動台股</th><th>重要性</th></tr>
+  <tr><td>7月中</td><td>美股Q2財報季開跑</td><td>ASIC/記憶體/伺服器</td><td><span class="fire">🔥</span></td></tr>
+  <tr><td>7月下旬</td><td>NVIDIA/AMD/美光財報</td><td>3443創意/3661世芯/2337旺宏</td><td><span class="fire">🔥🔥</span></td></tr>
+  <tr><td>8月中旬</td><td>美股Q2財報季高峰</td><td>所有科技股</td><td><span class="fire">🔥</span></td></tr>
+  <tr><td>10月中旬</td><td>美股Q3財報季開跑</td><td>所有科技股</td><td><span class="fire">🔥</span></td></tr>
+  <tr><td>1月中旬</td><td>美股Q4財報季</td><td>所有科技股</td><td><span class="fire">🔥</span></td></tr>
+</table>
+
+<h3>🇹🇼 台股除權息旺季（7~9月）</h3>
+<table>
+  <tr><th>日期</th><th>公司</th><th>代號</th><th>重要性</th></tr>
+  <tr><td>7/7</td><td>旺宏</td><td>2337</td><td>⭐⭐ 完成</td></tr>
+  <tr><td>7/8</td><td>聯發科、南亞科</td><td>2454、2408</td><td>⭐⭐⭐</td></tr>
+  <tr><td>7/10~7/15</td><td>創意、智原</td><td>3443、3035</td><td>⭐⭐</td></tr>
+  <tr><td>7月中下旬</td><td>台積電、日月光</td><td>2330、3711</td><td>⭐⭐⭐</td></tr>
+  <tr><td>8月初</td><td>廣達、緯創</td><td>2382、3231</td><td>⭐⭐</td></tr>
+  <tr><td>8月中</td><td>鴻海、臻鼎</td><td>2317、4958</td><td>⭐⭐</td></tr>
+  <tr><td>8月底~9月</td><td>晶技、奇鋐等</td><td>3042、3017</td><td>⭐</td></tr>
+</table>
+
+<h3>🏦 投信季底作帳/結帳（每季末）</h3>
+<table>
+  <tr><th>月份</th><th>事件</th><th>說明</th><th>重要性</th></tr>
+  <tr><td>7/17~7/31</td><td>Q2投信季底結帳</td><td>投信持股最後調整，結帳賣壓</td><td><span class="fire">🔥🔥</span></td></tr>
+  <tr><td>9月下旬</td><td>Q3投信季底作帳</td><td>投信拉抬績效股</td><td><span class="fire">🔥</span></td></tr>
+  <tr><td>12月下旬</td><td>Q4投信季底作帳</td><td>全年績效最後衝刺</td><td><span class="fire">🔥🔥</span></td></tr>
+  <tr><td>3月下旬</td><td>Q1投信季底作帳</td><td>新季度布局</td><td>⭐</td></tr>
+</table>
+
+<h3>🌐 FOMC利率決策（2026年剩餘）</h3>
+<table>
+  <tr><th>日期</th><th>事件</th><th>市場影響</th><th>重要性</th></tr>
+  <tr><td><span class="fire">7/30</span></td><td>FOMC利率決策</td><td>全球股市波動，特別是科技股</td><td><span class="fire">🔥🔥🔥</span></td></tr>
+  <tr><td>9/17</td><td>FOMC利率決策</td><td>市場升降息預期</td><td><span class="fire">🔥🔥</span></td></tr>
+  <tr><td>11/5</td><td>FOMC利率決策</td><td>市場升降息預期</td><td><span class="fire">🔥🔥</span></td></tr>
+  <tr><td>12/16</td><td>FOMC利率決策+點陣圖</td><td>全年最後一次，影響明年預期</td><td><span class="fire">🔥🔥🔥</span></td></tr>
+</table>
+
+<h3>📈 台指期結算日（每月第3週三）</h3>
+<table>
+  <tr><th>月份</th><th>結算日</th><th>重要性</th></tr>
+  <tr><td>7月</td><td>7/15（三）</td><td><span class="star">⭐</span></td></tr>
+  <tr><td>8月</td><td>8/12（三）</td><td><span class="star">⭐</span></td></tr>
+  <tr><td>9月</td><td>9/16（三）</td><td><span class="star">⭐</span></td></tr>
+  <tr><td>10月</td><td>10/14（三）</td><td><span class="star">⭐</span></td></tr>
+  <tr><td>11月</td><td>11/18（三）</td><td><span class="star">⭐</span></td></tr>
+  <tr><td>12月</td><td>12/16（三）</td><td><span class="star">⭐</span></td></tr>
+</table>
+
+<h3>💬 重要公司法說會</h3>
+<table>
+  <tr><th>日期</th><th>公司</th><th>代號</th><th>重要性</th></tr>
+  <tr><td><span class="fire">7/20</span></td><td><span class="fire">台積電</span></td><td>2330</td><td><span class="fire">🔥🔥🔥</span> 法說風向球，影響全台股</td></tr>
+  <tr><td><span class="fire">7/21</span></td><td><span class="fire">聯發科</span></td><td>2454</td><td><span class="fire">🔥🔥</span> ASIC/IP展望</td></tr>
+  <tr><td>7月底</td><td>日月光、矽力</td><td>3711、6415</td><td>⭐⭐半導體封測</td></tr>
+  <tr><td>8月初</td><td>鴻海、廣達</td><td>2317、2382</td><td>⭐⭐ AI伺服器出貨</td></tr>
+  <tr><td>8月中</td><td>創意、世芯</td><td>3443、3661</td><td>⭐⭐ ASIC設計服務</td></tr>
+  <tr><td>8月底</td><td>國巨、華新科</td><td>2327、2492</td><td>⭐ 被動元件</td></tr>
+  <tr><td>9月</td><td>晶技、臻鼎</td><td>3042、4958</td><td>⭐ 蘋概/石英</td></tr>
+</table>
+
+<h3>🗳️ 川普關鍵言論與地緣政治（全年持續追蹤）</h3>
+<table>
+  <tr><th>議題</th><th>影響</th><th>連動台股</th><th>重要性</th></tr>
+  <tr><td>對台晶片關稅</td><td>半導體關稅提高→台積電/聯發科波動</td><td>2330/2454/3443</td><td><span class="fire">🔥🔥🔥</span></td></tr>
+  <tr><td>對中關稅壁壘</td><td>供應鏈轉移→台廠受惠/受害</td><td>2317/2382/3231</td><td><span class="fire">🔥🔥</span></td></tr>
+  <tr><td>科技禁令</td><td>AI晶片出口限制→ASIC/記憶體波動</td><td>3443/3661/2337</td><td><span class="fire">🔥🔥</span></td></tr>
+  <tr><td>戰爭言論</td><td>地緣風險→避險情緒升溫</td><td>全市場</td><td><span class="fire">🔥</span></td></tr>
+  <tr><td>美元政策</td><td>美元強弱→外資動向</td><td>權值股</td><td><span class="fire">🔥</span></td></tr>
+</table>
+
+<h3>📊 財報月營收公告（每月10日）</h3>
+<table>
+  <tr><th>月份</th><th>公告截止日</th><th>重要性</th></tr>
+  <tr><td>7月（6月營收）</td><td>7/9</td><td><span class="fire">🔥🔥</span> ⬅ 明天！</td></tr>
+  <tr><td>8月（7月營收）</td><td>8/10</td><td><span class="star">⭐</span></td></tr>
+  <tr><td>9月（8月營收）</td><td>9/10</td><td><span class="star">⭐</span></td></tr>
+  <tr><td>10月（9月營收）</td><td>10/10</td><td><span class="star">⭐</span></td></tr>
+  <tr><td>11月（10月營收）</td><td>11/10</td><td><span class="star">⭐</span></td></tr>
+  <tr><td>12月（11月營收）</td><td>12/10</td><td><span class="star">⭐</span></td></tr>
+</table>
+
+<h3>🏭 半導體重要展會</h3>
+<table>
+  <tr><th>日期</th><th>展會</th><th>影響</th></tr>
+  <tr><td>7月</td><td>SEMICON Taiwan 先行場</td><td>半導體設備族群</td></tr>
+  <tr><td>9月</td><td>SEMICON Taiwan（正式）</td><td>CoWoS/先進封裝題材</td></tr>
+  <tr><td>11月</td><td>台積電供應鏈論壇</td><td>先進封裝/設備</td></tr>
+  <tr><td>1月（2027）</td><td>CES</td><td>AI/機器人/電動車</td></tr>
+</table>
+
+<h3>💡 投信秘密建倉旺季（每次季初）</h3>
+<table>
+  <tr><th>月份</th><th>說明</th><th>監控標的</th></tr>
+  <tr><td>7月初</td><td>Q3投信新佈局</td><td><span class="fire">🔥</span> 現在正是時候！</td></tr>
+  <tr><td>10月初</td><td>Q4投信新佈局</td><td>⭐</td></tr>
+  <tr><td>1月初</td><td>新年度投信佈局</td><td><span class="fire">🔥</span></td></tr>
+  <tr><td>4月初</td><td>Q2投信新佈局</td><td>⭐</td></tr>
+</table>
+
+<!-- 已整合模組列表 -->
+<h2>✅ 已整合至晨報的功能</h2>
+<table>
+  <tr><th>模組</th><th>檔案</th><th>狀態</th></tr>
+  <tr><td>美股四大指數</td><td>global_weather.py</td><td><span class="ok">✅</span></td></tr>
+  <tr><td>台指期夜盤</td><td>global_weather.py</td><td><span class="ok">✅</span>（TX00.TW暫缺，不影響）</td></tr>
+  <tr><td>未來14天事件</td><td>global_weather.py KNOWN_EVENTS_2026</td><td><span class="ok">✅</span></td></tr>
+  <tr><td>台美產業聯動</td><td>global_weather.py us_tw_mapping_matrix.py LINKAGE_MAP</td><td><span class="ok">✅</span> 40組連動</td></tr>
+  <tr><td>投信買賣超</td><td>daily_market_update.py</td><td><span class="ok">✅</span> 每天16:30</td></tr>
+  <tr><td>投信連買天數</td><td>SITC_Accumulation.csv</td><td><span class="ok">✅</span></td></tr>
+  <tr><td>營收公告/年增率</td><td>FinMind TaiwanStockMonthRevenue</td><td><span class="ok">✅</span></td></tr>
+  <tr><td>除權息追蹤</td><td>KNOWN_EVENTS_2026</td><td><span class="ok">✅</span></td></tr>
+  <tr><td>台指期結算</td><td>KNOWN_EVENTS_2026</td><td><span class="ok">✅</span></td></tr>
+  <tr><td>法說會追蹤</td><td>KNOWN_EVENTS_2026</td><td><span class="ok">✅</span></td></tr>
+  <tr><td>FOMC/總經</td><td>KNOWN_EVENTS_2026</td><td><span class="ok">✅</span></td></tr>
+  <tr><td>川普言論追蹤</td><td>global_weather.py（文字描述）</td><td><span class="ok">✅</span></td></tr>
+  <tr><td>新聞過濾引擎</td><td>news_filter.py</td><td><span class="ok">✅</span></td></tr>
+  <tr><td>盤中15分K監控</td><td>day_monitor_loop.py</td><td><span class="ok">✅</span></td></tr>
+</table>
+
+<h3 style="color:#d32f2f">🚨 月底法人結帳大作帳（每月最後3個交易日）</h3>
+<table>
+  <tr><th>月份</th><th>警戒期</th><th>操作策略</th><th>重要性</th></tr>
+  <tr class="today"><td>7月</td><td>7/29~7/31</td><td>投信Q2季底結帳，持股可能最後拉抬或倒貨</td><td><span class="fire">🔥🔥🔥</span></td></tr>
+  <tr><td>8月</td><td>8/27~8/29</td><td>月底法人調節，作帳行情</td><td><span class="star">⭐</span></td></tr>
+  <tr><td>9月</td><td>9/28~9/30</td><td>Q3季底作帳，投信衝刺績效</td><td><span class="fire">🔥🔥</span></td></tr>
+  <tr><td>10月</td><td>10/29~10/31</td><td>月底法人調節</td><td><span class="star">⭐</span></td></tr>
+  <tr><td>11月</td><td>11/26~11/28</td><td>月底法人調節</td><td><span class="star">⭐</span></td></tr>
+  <tr><td>12月</td><td>12/29~12/31</td><td>全年最後作帳/結帳🔥</td><td><span class="fire">🔥🔥🔥</span></td></tr>
+</table>
+
+<h3 style="color:#880e4f">🔗 台美产业联动墙（40组完整版）</h3>
+<table>
+  <tr><th>组</th><th>产业</th><th>🇺🇸美股</th><th>🇹🇼台股</th><th>连动说明</th></tr>
+  <tr><td>1</td><td>先進製程與晶圓代工</td><td>TSM(台積電ADR) / ASML(艾司摩爾)</td><td>2330(台積電) / 5347(世界先進) / 2303(聯電)</td><td>半導體核心，影響台股開盤最直接</td></tr>
+  <tr><td>2</td><td>IC設計與手機晶片</td><td>QCOM(高通)</td><td>2454(聯發科)</td><td>手機晶片雙雄連動</td></tr>
+  <tr><td>3</td><td>高速傳輸與矽光子CPO</td><td>MRVL(邁威爾) / AVGO(博通) / INTC(英特爾)</td><td>6442(光聖) / 3363(上詮) / 3163(波若威) / 3081(聯亞)</td><td>矽光子/CPO新題材連動</td></tr>
+  <tr><td>4</td><td>ASIC與高階矽智財</td><td>NVDA(輝達) / AMD(超微) / ARM(Arm)</td><td>3443(創意) / 3661(世芯-KY) / 3035(智原) / 6643(M31)</td><td>ASIC/IP核心連動群</td></tr>
+  <tr><td>5</td><td>記憶體晶片與模組</td><td>MU(美光) / WDC(威騰)</td><td>2337(旺宏) / 2451(創見) / 3260(威剛) / 2408(南亞科) / 2344(華邦電)</td><td>記憶體報價連動</td></tr>
+  <tr><td>6</td><td>高階半導體設備</td><td>AMAT(應用材料) / LRCX(科林研發) / KLAC(科磊)</td><td>3131(弘塑) / 3583(辛耘) / 6187(萬潤) / 3680(家登)</td><td>設備股連動</td></tr>
+  <tr><td>7</td><td>高階先進封裝</td><td>ASX(日月光ADR) / AMKR(安靠)</td><td>3711(日月光投控) / 2449(京元電子) / 8150(南茂)</td><td>封裝測試連動</td></tr>
+  <tr><td>8</td><td>成熟製程與利基型IC</td><td>TXN(德州儀器) / STM(意法半導體)</td><td>3034(聯詠) / 2379(瑞昱) / 8016(矽創)</td><td>利基IC連動</td></tr>
+  <tr><td>9</td><td>車用二極體與功率半導體</td><td>ON(安森美) / IFNNY(英飛凌) / NXPI(恩智浦)</td><td>2481(強茂) / 5425(台半) / 3675(德微) / 6435(大中)</td><td>車用半導體連動</td></tr>
+  <tr><td>10</td><td>AI伺服器代工</td><td>SMCI(美超微) / DELL(戴爾) / HPQ(惠普)</td><td>2382(廣達) / 3231(緯創) / 6669(緯穎) / 2356(英業達) / 2317(鴻海)</td><td>AI伺服器出貨連動</td></tr>
+  <tr><td>11</td><td>AI伺服器散熱</td><td>VRT(維諦技術)</td><td>3017(奇鋐) / 3324(雙鴻) / 8996(高力) / 3653(健策)</td><td>散熱題材連動</td></tr>
+  <tr><td>12</td><td>伺服器機殼與導軌</td><td>SMCI(美超微供應鏈)</td><td>2059(川湖) / 6117(迎廣) / 8210(勤誠) / 3013(晟銘電)</td><td>機殼/導軌連動</td></tr>
+  <tr><td>13</td><td>AI伺服器電源管理</td><td>ETN(伊頓) / VRT(維諦)</td><td>2308(台達電) / 6412(群電) / 6282(康舒)</td><td>電源供應器連動</td></tr>
+  <tr><td>14</td><td>高階PCB硬板</td><td>NVDA_OAM(輝達供應鏈)</td><td>2368(金像電) / 3044(健鼎) / 3037(欣興)</td><td>PCB連動</td></tr>
+  <tr><td>15</td><td>銅箔基板CCL</td><td>SYT(台耀)</td><td>6274(台燿) / 6213(聯茂) / 2383(台光電)</td><td>CCL高頻材料連動</td></tr>
+  <tr><td>16</td><td>被動元件</td><td>MRTAF(村田) / TTDKY(TDK)</td><td>2327(國巨) / 2492(華新科) / 6207(雷科)</td><td>被動元件報價連動</td></tr>
+  <tr><td>17</td><td>IC載板ABF</td><td>IBIDEN(揖斐電)</td><td>3037(欣興) / 3189(景碩) / 8046(南電)</td><td>ABF載板連動</td></tr>
+  <tr><td>18</td><td>USB-PD與PC周邊</td><td>INTC(英特爾) / MSFT(微軟)</td><td>2436(偉詮電) / 5269(祥碩) / 4966(譜瑞-KY)</td><td>PC周邊晶片連動</td></tr>
+  <tr><td>19</td><td>石英震盪器</td><td>KYOCERA(京瓷)</td><td>3042(晶技) / 2484(希華)</td><td>頻率元件連動</td></tr>
+  <tr><td>20</td><td>軟性印刷電路板FPC</td><td>AAPL(蘋果)</td><td>4958(臻鼎-KY) / 6269(台郡)</td><td>FPC蘋果供應鏈連動</td></tr>
+  <tr><td>21</td><td>LED與第三代半導體</td><td>WOLF(科銳)</td><td>3714(富采) / 8261(富鼎) / 3707(漢磊)</td><td>第三代半導體連動</td></tr>
+  <tr><td>22</td><td>觸控面板</td><td>AAPL(蘋果)</td><td>3673(TPK-KY) / 6456(GIS-KY)</td><td>觸控面板連動</td></tr>
+  <tr><td>23</td><td>連接器與高階傳輸線</td><td>APH(安費諾)</td><td>3665(貿聯-KY) / 2392(正崴) / 6197(佳必琪)</td><td>連接器連動</td></tr>
+  <tr><td>24</td><td>光學鏡頭</td><td>AAPL(蘋果)</td><td>3008(大立光) / 3406(玉晶光) / 3362(先進光)</td><td>光學鏡頭連動</td></tr>
+  <tr><td>25</td><td>網通設備Wi-Fi 7</td><td>CSCO(思科) / COMM(康普)</td><td>6285(啟碁) / 2345(智邦) / 5388(中磊) / 4906(正文)</td><td>網通設備連動</td></tr>
+  <tr><td>26</td><td>重電四雄</td><td>GE(奇異) / ETN(伊頓)</td><td>1519(華城) / 1503(士電) / 1513(中興電) / 1514(亞力)</td><td>電力基礎建設連動</td></tr>
+  <tr><td>27</td><td>綠能風力發電</td><td>NEE(NextEra) / FSLR(第一太陽能)</td><td>9958(世紀鋼) / 6806(森崴能源) / 6869(雲豹能源)</td><td>綠能政策連動</td></tr>
+  <tr><td>28</td><td>航太零組件與軍工</td><td>LMT(洛克希德) / RTX(雷神) / BA(波音)</td><td>2634(漢翔) / 8033(雷虎) / 8222(寶一) / 6753(龍德造船)</td><td>國防軍工連動</td></tr>
+  <tr><td>29</td><td>自動化設備與機器人</td><td>FANUY(發那科) / ROK(洛克威爾)</td><td>2395(研華) / 6414(樺漢) / 2359(所羅門) / 3030(德律)</td><td>工業自動化連動</td></tr>
+  <tr><td>30</td><td>電動車供應鏈</td><td>TSLA(特斯拉)</td><td>2258(鴻華先進) / 4528(江興鍛) / 1536(和大) / 3715(定穎投控)</td><td>電動車概念連動</td></tr>
+  <tr><td>31</td><td>低軌道衛星</td><td>RKLB(Rocket Lab)</td><td>3491(昇達科) / 2313(華通) / 3138(耀登)</td><td>低軌衛星連動</td></tr>
+  <tr><td>32</td><td>網際網路與電商</td><td>AMZN(亞馬遜) / BABA(阿里巴巴)</td><td>8454(富邦媒) / 8044(網家) / 6763(綠界科技)</td><td>電商連動</td></tr>
+  <tr><td>33</td><td>鋼鐵工業</td><td>X(美國鋼鐵) / NUE(紐可鋼鐵)</td><td>2002(中鋼) / 2006(東和鋼鐵) / 2014(中鴻)</td><td>鋼鐵報價連動</td></tr>
+  <tr><td>34</td><td>水泥營建</td><td>CAT(卡特彼勒)</td><td>1101(台泥) / 1102(亞泥)</td><td>基建題材連動</td></tr>
+  <tr><td>35</td><td>航運貨櫃</td><td>AMKBY(馬士基)</td><td>2603(長榮) / 2609(陽明) / 2615(萬海) / 2606(裕民) / 2605(新興)</td><td>運價指數連動</td></tr>
+  <tr><td>36</td><td>航空觀光</td><td>DAL(達美航空) / UAL(聯合航空)</td><td>2610(華航) / 2618(長榮航)</td><td>油價/旅遊需求連動</td></tr>
+  <tr><td>37</td><td>塑膠石化</td><td>XOM(埃克森美孚) / CVX(雪佛龍)</td><td>1301(台塑) / 1303(南亞) / 1326(台化) / 6505(台塑化)</td><td>油價報價連動</td></tr>
+  <tr><td>38</td><td>紡織成衣</td><td>NKE(耐吉) / LULU(露露樂蒙)</td><td>1476(儒鴻) / 1477(聚陽)</td><td>運動品牌代工連動</td></tr>
+  <tr><td>39</td><td>生技新藥與CDMO</td><td>PFE(輝瑞) / LLY(禮來) / MRNA(莫德納)</td><td>6446(藥華藥) / 1795(美時) / 6472(保瑞) / 6589(台康生技)</td><td>生技股連動</td></tr>
+  <tr><td>40</td><td>隱形眼鏡與醫材</td><td>ALC(愛爾康) / COO(酷柏光學)</td><td>1565(精華) / 6491(晶碩)</td><td>醫材連動</td></tr>
+</table>
+<h2>⚠️ 可能還需要補的</h2>
+<table>
+  <tr><th>項目</th><th>說明</th><th>難度</th></tr>
+  <tr><td>台指期夜盤即時數據</td><td>目前TX00.TW yfinance找不到，需永豐API</td><td>中</td></tr>
+  <tr><td>川普推文即時爬蟲</td><td>需要Twitter API或其他串接</td><td>高</td></tr>
+  <tr><td>FOMC利率機率預測</td><td>CME FedWatch工具串接</td><td>中</td></tr>
+  <tr><td>美國CPI/PPI/NFP公佈</td><td>每月固定時間公佈</td><td>低</td></tr>
+</table>
+
+<p style="color:#888;font-size:17px;margin-top:30px">
+  🦞 小龍蝦產出 | 2026-07-07 18:06 | 共約200+事件已列出
+</p>
+</body>
+</html>

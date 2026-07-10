@@ -1,0 +1,3082 @@
+{
+  "2330": {
+    "name": "台積電",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 2445.0,
+    "best": {
+      "pnl": 54.64,
+      "k": 3,
+      "buy": 35,
+      "sell": 75,
+      "trades": 7,
+      "wins": 6
+    },
+    "top5": [
+      {
+        "k": 3,
+        "buy": 35,
+        "sell": 75,
+        "pnl": 54.64,
+        "trades": 7,
+        "sr": 85.7
+      },
+      {
+        "k": 3,
+        "buy": null,
+        "sell": 80,
+        "pnl": 52.46,
+        "trades": 10,
+        "sr": 80.0
+      },
+      {
+        "k": 3,
+        "buy": null,
+        "sell": 75,
+        "pnl": 52.0,
+        "trades": 12,
+        "sr": 75.0
+      },
+      {
+        "k": 3,
+        "buy": 35,
+        "sell": 80,
+        "pnl": 51.52,
+        "trades": 7,
+        "sr": 71.4
+      },
+      {
+        "k": 3,
+        "buy": 35,
+        "sell": 70,
+        "pnl": 51.32,
+        "trades": 9,
+        "sr": 88.9
+      }
+    ]
+  },
+  "2454": {
+    "name": "聯發科",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 4195.0,
+    "best": {
+      "pnl": 148.87,
+      "k": 5,
+      "buy": 20,
+      "sell": 80,
+      "trades": 3,
+      "wins": 3
+    },
+    "top5": [
+      {
+        "k": 5,
+        "buy": 20,
+        "sell": 80,
+        "pnl": 148.87,
+        "trades": 3,
+        "sr": 100.0
+      },
+      {
+        "k": 5,
+        "buy": 30,
+        "sell": 80,
+        "pnl": 148.44,
+        "trades": 4,
+        "sr": 75.0
+      },
+      {
+        "k": 5,
+        "buy": 25,
+        "sell": 80,
+        "pnl": 147.26,
+        "trades": 4,
+        "sr": 75.0
+      },
+      {
+        "k": 3,
+        "buy": null,
+        "sell": 80,
+        "pnl": 145.97,
+        "trades": 3,
+        "sr": 66.7
+      },
+      {
+        "k": 5,
+        "buy": 35,
+        "sell": 80,
+        "pnl": 145.92,
+        "trades": 4,
+        "sr": 75.0
+      }
+    ]
+  },
+  "2317": {
+    "name": "鴻海",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 240.5,
+    "best": {
+      "pnl": 41.21,
+      "k": 3,
+      "buy": 20,
+      "sell": 80,
+      "trades": 3,
+      "wins": 1
+    },
+    "top5": [
+      {
+        "k": 3,
+        "buy": 20,
+        "sell": 80,
+        "pnl": 41.21,
+        "trades": 3,
+        "sr": 33.3
+      },
+      {
+        "k": 14,
+        "buy": null,
+        "sell": 70,
+        "pnl": 22.15,
+        "trades": 29,
+        "sr": 55.2
+      },
+      {
+        "k": 12,
+        "buy": null,
+        "sell": 70,
+        "pnl": 22.07,
+        "trades": 25,
+        "sr": 56.0
+      },
+      {
+        "k": 9,
+        "buy": null,
+        "sell": 50,
+        "pnl": 20.85,
+        "trades": 54,
+        "sr": 44.4
+      },
+      {
+        "k": 12,
+        "buy": null,
+        "sell": 65,
+        "pnl": 19.99,
+        "trades": 33,
+        "sr": 48.5
+      }
+    ]
+  },
+  "2308": {
+    "name": "台達電",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 2075.0,
+    "best": {
+      "pnl": 91.64,
+      "k": 9,
+      "buy": 45,
+      "sell": 80,
+      "trades": 9,
+      "wins": 6
+    },
+    "top5": [
+      {
+        "k": 9,
+        "buy": 45,
+        "sell": 80,
+        "pnl": 91.64,
+        "trades": 9,
+        "sr": 66.7
+      },
+      {
+        "k": 9,
+        "buy": 50,
+        "sell": 80,
+        "pnl": 91.64,
+        "trades": 9,
+        "sr": 66.7
+      },
+      {
+        "k": 3,
+        "buy": 35,
+        "sell": 75,
+        "pnl": 90.75,
+        "trades": 7,
+        "sr": 71.4
+      },
+      {
+        "k": 5,
+        "buy": 30,
+        "sell": 75,
+        "pnl": 88.98,
+        "trades": 9,
+        "sr": 77.8
+      },
+      {
+        "k": 3,
+        "buy": 40,
+        "sell": 65,
+        "pnl": 88.41,
+        "trades": 12,
+        "sr": 91.7
+      }
+    ]
+  },
+  "2881": {
+    "name": "富邦金",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 121.0,
+    "best": {
+      "pnl": 33.67,
+      "k": 3,
+      "buy": 25,
+      "sell": 80,
+      "trades": 3,
+      "wins": 1
+    },
+    "top5": [
+      {
+        "k": 3,
+        "buy": 25,
+        "sell": 80,
+        "pnl": 33.67,
+        "trades": 3,
+        "sr": 33.3
+      },
+      {
+        "k": 3,
+        "buy": 30,
+        "sell": 80,
+        "pnl": 33.67,
+        "trades": 3,
+        "sr": 33.3
+      },
+      {
+        "k": 3,
+        "buy": null,
+        "sell": 50,
+        "pnl": 32.85,
+        "trades": 65,
+        "sr": 50.8
+      },
+      {
+        "k": 3,
+        "buy": 35,
+        "sell": 80,
+        "pnl": 31.42,
+        "trades": 3,
+        "sr": 33.3
+      },
+      {
+        "k": 3,
+        "buy": 40,
+        "sell": 80,
+        "pnl": 30.05,
+        "trades": 3,
+        "sr": 33.3
+      }
+    ]
+  },
+  "2882": {
+    "name": "國泰金",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 93.6,
+    "best": {
+      "pnl": 42.72,
+      "k": 3,
+      "buy": 25,
+      "sell": 75,
+      "trades": 3,
+      "wins": 1
+    },
+    "top5": [
+      {
+        "k": 3,
+        "buy": 25,
+        "sell": 75,
+        "pnl": 42.72,
+        "trades": 3,
+        "sr": 33.3
+      },
+      {
+        "k": 3,
+        "buy": 25,
+        "sell": 80,
+        "pnl": 42.72,
+        "trades": 3,
+        "sr": 33.3
+      },
+      {
+        "k": 3,
+        "buy": 30,
+        "sell": 75,
+        "pnl": 32.86,
+        "trades": 3,
+        "sr": 33.3
+      },
+      {
+        "k": 3,
+        "buy": 30,
+        "sell": 80,
+        "pnl": 32.86,
+        "trades": 3,
+        "sr": 33.3
+      },
+      {
+        "k": 5,
+        "buy": null,
+        "sell": 80,
+        "pnl": 32.73,
+        "trades": 5,
+        "sr": 60.0
+      }
+    ]
+  },
+  "2412": {
+    "name": "中華電",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 141.0,
+    "best": {
+      "pnl": 8.14,
+      "k": 7,
+      "buy": 45,
+      "sell": 75,
+      "trades": 13,
+      "wins": 8
+    },
+    "top5": [
+      {
+        "k": 7,
+        "buy": 45,
+        "sell": 75,
+        "pnl": 8.14,
+        "trades": 13,
+        "sr": 61.5
+      },
+      {
+        "k": 7,
+        "buy": 45,
+        "sell": 65,
+        "pnl": 6.98,
+        "trades": 18,
+        "sr": 44.4
+      },
+      {
+        "k": 5,
+        "buy": 45,
+        "sell": 70,
+        "pnl": 6.95,
+        "trades": 11,
+        "sr": 54.5
+      },
+      {
+        "k": 7,
+        "buy": 50,
+        "sell": 75,
+        "pnl": 6.33,
+        "trades": 13,
+        "sr": 61.5
+      },
+      {
+        "k": 3,
+        "buy": null,
+        "sell": 80,
+        "pnl": 6.32,
+        "trades": 4,
+        "sr": 75.0
+      }
+    ]
+  },
+  "1301": {
+    "name": "台塑",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 62.1,
+    "best": {
+      "pnl": 100.23,
+      "k": 5,
+      "buy": 20,
+      "sell": 80,
+      "trades": 5,
+      "wins": 5
+    },
+    "top5": [
+      {
+        "k": 5,
+        "buy": 20,
+        "sell": 80,
+        "pnl": 100.23,
+        "trades": 5,
+        "sr": 100.0
+      },
+      {
+        "k": 14,
+        "buy": null,
+        "sell": 65,
+        "pnl": 92.4,
+        "trades": 30,
+        "sr": 76.7
+      },
+      {
+        "k": 14,
+        "buy": 40,
+        "sell": 80,
+        "pnl": 90.77,
+        "trades": 10,
+        "sr": 90.0
+      },
+      {
+        "k": 14,
+        "buy": 45,
+        "sell": 80,
+        "pnl": 90.77,
+        "trades": 10,
+        "sr": 90.0
+      },
+      {
+        "k": 14,
+        "buy": 50,
+        "sell": 80,
+        "pnl": 90.77,
+        "trades": 10,
+        "sr": 90.0
+      }
+    ]
+  },
+  "1303": {
+    "name": "南亞",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 197.0,
+    "best": {
+      "pnl": 174.27,
+      "k": 12,
+      "buy": 40,
+      "sell": 60,
+      "trades": 27,
+      "wins": 24
+    },
+    "top5": [
+      {
+        "k": 12,
+        "buy": 40,
+        "sell": 60,
+        "pnl": 174.27,
+        "trades": 27,
+        "sr": 88.9
+      },
+      {
+        "k": 14,
+        "buy": 40,
+        "sell": null,
+        "pnl": 172.21,
+        "trades": 43,
+        "sr": 53.5
+      },
+      {
+        "k": 14,
+        "buy": 40,
+        "sell": 60,
+        "pnl": 171.91,
+        "trades": 26,
+        "sr": 80.8
+      },
+      {
+        "k": 12,
+        "buy": 40,
+        "sell": 50,
+        "pnl": 170.49,
+        "trades": 30,
+        "sr": 80.0
+      },
+      {
+        "k": 14,
+        "buy": null,
+        "sell": 60,
+        "pnl": 170.31,
+        "trades": 39,
+        "sr": 64.1
+      }
+    ]
+  },
+  "1326": {
+    "name": "台化",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 68.0,
+    "best": {
+      "pnl": 122.53,
+      "k": 7,
+      "buy": 20,
+      "sell": 80,
+      "trades": 6,
+      "wins": 6
+    },
+    "top5": [
+      {
+        "k": 7,
+        "buy": 20,
+        "sell": 80,
+        "pnl": 122.53,
+        "trades": 6,
+        "sr": 100.0
+      },
+      {
+        "k": 3,
+        "buy": 30,
+        "sell": 80,
+        "pnl": 121.33,
+        "trades": 5,
+        "sr": 80.0
+      },
+      {
+        "k": 14,
+        "buy": 35,
+        "sell": 75,
+        "pnl": 119.87,
+        "trades": 14,
+        "sr": 78.6
+      },
+      {
+        "k": 14,
+        "buy": 40,
+        "sell": 75,
+        "pnl": 119.87,
+        "trades": 14,
+        "sr": 78.6
+      },
+      {
+        "k": 14,
+        "buy": 45,
+        "sell": 75,
+        "pnl": 119.87,
+        "trades": 14,
+        "sr": 78.6
+      }
+    ]
+  },
+  "2002": {
+    "name": "中鋼",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 18.95,
+    "best": {
+      "pnl": 28.28,
+      "k": 7,
+      "buy": 20,
+      "sell": 55,
+      "trades": 12,
+      "wins": 8
+    },
+    "top5": [
+      {
+        "k": 7,
+        "buy": 20,
+        "sell": 55,
+        "pnl": 28.28,
+        "trades": 12,
+        "sr": 66.7
+      },
+      {
+        "k": 7,
+        "buy": 20,
+        "sell": 65,
+        "pnl": 27.61,
+        "trades": 10,
+        "sr": 70.0
+      },
+      {
+        "k": 7,
+        "buy": 20,
+        "sell": 60,
+        "pnl": 26.67,
+        "trades": 11,
+        "sr": 72.7
+      },
+      {
+        "k": 14,
+        "buy": 25,
+        "sell": 60,
+        "pnl": 26.64,
+        "trades": 19,
+        "sr": 78.9
+      },
+      {
+        "k": 5,
+        "buy": 25,
+        "sell": 55,
+        "pnl": 26.48,
+        "trades": 13,
+        "sr": 69.2
+      }
+    ]
+  },
+  "2303": {
+    "name": "聯電",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 170.5,
+    "best": {
+      "pnl": 232.76,
+      "k": 3,
+      "buy": 45,
+      "sell": 80,
+      "trades": 3,
+      "wins": 2
+    },
+    "top5": [
+      {
+        "k": 3,
+        "buy": 45,
+        "sell": 80,
+        "pnl": 232.76,
+        "trades": 3,
+        "sr": 66.7
+      },
+      {
+        "k": 3,
+        "buy": 50,
+        "sell": 80,
+        "pnl": 228.54,
+        "trades": 3,
+        "sr": 66.7
+      },
+      {
+        "k": 3,
+        "buy": null,
+        "sell": 80,
+        "pnl": 228.54,
+        "trades": 3,
+        "sr": 66.7
+      },
+      {
+        "k": 3,
+        "buy": 35,
+        "sell": 80,
+        "pnl": 218.17,
+        "trades": 3,
+        "sr": 66.7
+      },
+      {
+        "k": 3,
+        "buy": 40,
+        "sell": 80,
+        "pnl": 218.17,
+        "trades": 3,
+        "sr": 66.7
+      }
+    ]
+  },
+  "2886": {
+    "name": "兆豐金",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 45.5,
+    "best": {
+      "pnl": 18.39,
+      "k": 3,
+      "buy": 50,
+      "sell": 60,
+      "trades": 21,
+      "wins": 16
+    },
+    "top5": [
+      {
+        "k": 3,
+        "buy": 50,
+        "sell": 60,
+        "pnl": 18.39,
+        "trades": 21,
+        "sr": 76.2
+      },
+      {
+        "k": 3,
+        "buy": 40,
+        "sell": 80,
+        "pnl": 16.38,
+        "trades": 4,
+        "sr": 75.0
+      },
+      {
+        "k": 3,
+        "buy": 45,
+        "sell": 80,
+        "pnl": 16.25,
+        "trades": 4,
+        "sr": 75.0
+      },
+      {
+        "k": 5,
+        "buy": 50,
+        "sell": 70,
+        "pnl": 15.5,
+        "trades": 12,
+        "sr": 75.0
+      },
+      {
+        "k": 3,
+        "buy": 50,
+        "sell": 55,
+        "pnl": 15.4,
+        "trades": 28,
+        "sr": 64.3
+      }
+    ]
+  },
+  "2891": {
+    "name": "中信金",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 70.6,
+    "best": {
+      "pnl": 46.96,
+      "k": 5,
+      "buy": 35,
+      "sell": 75,
+      "trades": 6,
+      "wins": 5
+    },
+    "top5": [
+      {
+        "k": 5,
+        "buy": 35,
+        "sell": 75,
+        "pnl": 46.96,
+        "trades": 6,
+        "sr": 83.3
+      },
+      {
+        "k": 5,
+        "buy": 40,
+        "sell": 75,
+        "pnl": 46.96,
+        "trades": 6,
+        "sr": 83.3
+      },
+      {
+        "k": 5,
+        "buy": 35,
+        "sell": 80,
+        "pnl": 46.93,
+        "trades": 4,
+        "sr": 75.0
+      },
+      {
+        "k": 5,
+        "buy": 40,
+        "sell": 80,
+        "pnl": 46.93,
+        "trades": 4,
+        "sr": 75.0
+      },
+      {
+        "k": 5,
+        "buy": 45,
+        "sell": 75,
+        "pnl": 43.24,
+        "trades": 6,
+        "sr": 83.3
+      }
+    ]
+  },
+  "2884": {
+    "name": "玉山金",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 33.7,
+    "best": {
+      "pnl": 8.7,
+      "k": 9,
+      "buy": 40,
+      "sell": 50,
+      "trades": 23,
+      "wins": 16
+    },
+    "top5": [
+      {
+        "k": 9,
+        "buy": 40,
+        "sell": 50,
+        "pnl": 8.7,
+        "trades": 23,
+        "sr": 69.6
+      },
+      {
+        "k": 9,
+        "buy": 40,
+        "sell": 55,
+        "pnl": 7.93,
+        "trades": 22,
+        "sr": 68.2
+      },
+      {
+        "k": 12,
+        "buy": 35,
+        "sell": 60,
+        "pnl": 7.7,
+        "trades": 21,
+        "sr": 57.1
+      },
+      {
+        "k": 12,
+        "buy": 35,
+        "sell": 55,
+        "pnl": 7.57,
+        "trades": 22,
+        "sr": 59.1
+      },
+      {
+        "k": 3,
+        "buy": 20,
+        "sell": 60,
+        "pnl": 7.53,
+        "trades": 4,
+        "sr": 100.0
+      }
+    ]
+  },
+  "2887": {
+    "name": "台新金",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 34.15,
+    "best": {
+      "pnl": 52.56,
+      "k": 3,
+      "buy": null,
+      "sell": 80,
+      "trades": 4,
+      "wins": 3
+    },
+    "top5": [
+      {
+        "k": 3,
+        "buy": null,
+        "sell": 80,
+        "pnl": 52.56,
+        "trades": 4,
+        "sr": 75.0
+      },
+      {
+        "k": 3,
+        "buy": null,
+        "sell": 75,
+        "pnl": 49.31,
+        "trades": 8,
+        "sr": 62.5
+      },
+      {
+        "k": 5,
+        "buy": null,
+        "sell": 80,
+        "pnl": 45.91,
+        "trades": 8,
+        "sr": 75.0
+      },
+      {
+        "k": 12,
+        "buy": null,
+        "sell": 80,
+        "pnl": 43.86,
+        "trades": 20,
+        "sr": 65.0
+      },
+      {
+        "k": 7,
+        "buy": null,
+        "sell": 80,
+        "pnl": 42.96,
+        "trades": 13,
+        "sr": 69.2
+      }
+    ]
+  },
+  "2885": {
+    "name": "元大金",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 67.2,
+    "best": {
+      "pnl": 71.43,
+      "k": 3,
+      "buy": 45,
+      "sell": 80,
+      "trades": 2,
+      "wins": 1
+    },
+    "top5": [
+      {
+        "k": 3,
+        "buy": 45,
+        "sell": 80,
+        "pnl": 71.43,
+        "trades": 2,
+        "sr": 50.0
+      },
+      {
+        "k": 3,
+        "buy": 50,
+        "sell": 80,
+        "pnl": 71.43,
+        "trades": 2,
+        "sr": 50.0
+      },
+      {
+        "k": 3,
+        "buy": null,
+        "sell": 80,
+        "pnl": 71.43,
+        "trades": 2,
+        "sr": 50.0
+      },
+      {
+        "k": 3,
+        "buy": 45,
+        "sell": 75,
+        "pnl": 62.89,
+        "trades": 3,
+        "sr": 66.7
+      },
+      {
+        "k": 3,
+        "buy": 50,
+        "sell": 75,
+        "pnl": 62.89,
+        "trades": 3,
+        "sr": 66.7
+      }
+    ]
+  },
+  "2301": {
+    "name": "光寶科",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 219.0,
+    "best": {
+      "pnl": 85.83,
+      "k": 14,
+      "buy": 35,
+      "sell": 75,
+      "trades": 16,
+      "wins": 12
+    },
+    "top5": [
+      {
+        "k": 14,
+        "buy": 35,
+        "sell": 75,
+        "pnl": 85.83,
+        "trades": 16,
+        "sr": 75.0
+      },
+      {
+        "k": 12,
+        "buy": null,
+        "sell": 70,
+        "pnl": 83.03,
+        "trades": 30,
+        "sr": 63.3
+      },
+      {
+        "k": 14,
+        "buy": 40,
+        "sell": 75,
+        "pnl": 82.21,
+        "trades": 16,
+        "sr": 75.0
+      },
+      {
+        "k": 14,
+        "buy": 45,
+        "sell": 75,
+        "pnl": 82.21,
+        "trades": 16,
+        "sr": 75.0
+      },
+      {
+        "k": 12,
+        "buy": 30,
+        "sell": 70,
+        "pnl": 79.86,
+        "trades": 19,
+        "sr": 78.9
+      }
+    ]
+  },
+  "2357": {
+    "name": "華碩",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 675.0,
+    "best": {
+      "pnl": 44.59,
+      "k": 12,
+      "buy": null,
+      "sell": 60,
+      "trades": 42,
+      "wins": 22
+    },
+    "top5": [
+      {
+        "k": 12,
+        "buy": null,
+        "sell": 60,
+        "pnl": 44.59,
+        "trades": 42,
+        "sr": 52.4
+      },
+      {
+        "k": 14,
+        "buy": null,
+        "sell": 60,
+        "pnl": 41.98,
+        "trades": 43,
+        "sr": 51.2
+      },
+      {
+        "k": 12,
+        "buy": null,
+        "sell": 50,
+        "pnl": 40.14,
+        "trades": 49,
+        "sr": 53.1
+      },
+      {
+        "k": 12,
+        "buy": null,
+        "sell": 55,
+        "pnl": 40.04,
+        "trades": 46,
+        "sr": 54.3
+      },
+      {
+        "k": 14,
+        "buy": null,
+        "sell": 65,
+        "pnl": 38.96,
+        "trades": 38,
+        "sr": 50.0
+      }
+    ]
+  },
+  "2382": {
+    "name": "廣達",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 377.0,
+    "best": {
+      "pnl": 43.5,
+      "k": 9,
+      "buy": null,
+      "sell": 55,
+      "trades": 49,
+      "wins": 32
+    },
+    "top5": [
+      {
+        "k": 9,
+        "buy": null,
+        "sell": 55,
+        "pnl": 43.5,
+        "trades": 49,
+        "sr": 65.3
+      },
+      {
+        "k": 9,
+        "buy": null,
+        "sell": 50,
+        "pnl": 42.71,
+        "trades": 53,
+        "sr": 60.4
+      },
+      {
+        "k": 14,
+        "buy": null,
+        "sell": 50,
+        "pnl": 42.13,
+        "trades": 51,
+        "sr": 54.9
+      },
+      {
+        "k": 9,
+        "buy": 30,
+        "sell": 70,
+        "pnl": 40.53,
+        "trades": 13,
+        "sr": 84.6
+      },
+      {
+        "k": 9,
+        "buy": 50,
+        "sell": 50,
+        "pnl": 40.44,
+        "trades": 32,
+        "sr": 68.8
+      }
+    ]
+  },
+  "3231": {
+    "name": "緯創",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 159.0,
+    "best": {
+      "pnl": 40.16,
+      "k": 14,
+      "buy": 30,
+      "sell": 50,
+      "trades": 22,
+      "wins": 14
+    },
+    "top5": [
+      {
+        "k": 14,
+        "buy": 30,
+        "sell": 50,
+        "pnl": 40.16,
+        "trades": 22,
+        "sr": 63.6
+      },
+      {
+        "k": 14,
+        "buy": 25,
+        "sell": 50,
+        "pnl": 39.77,
+        "trades": 16,
+        "sr": 62.5
+      },
+      {
+        "k": 14,
+        "buy": 30,
+        "sell": 55,
+        "pnl": 39.59,
+        "trades": 20,
+        "sr": 70.0
+      },
+      {
+        "k": 14,
+        "buy": 30,
+        "sell": 65,
+        "pnl": 39.41,
+        "trades": 17,
+        "sr": 70.6
+      },
+      {
+        "k": 14,
+        "buy": 25,
+        "sell": 65,
+        "pnl": 36.56,
+        "trades": 13,
+        "sr": 69.2
+      }
+    ]
+  },
+  "2356": {
+    "name": "英業達",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 67.6,
+    "best": {
+      "pnl": 64.49,
+      "k": 7,
+      "buy": null,
+      "sell": 65,
+      "trades": 40,
+      "wins": 24
+    },
+    "top5": [
+      {
+        "k": 7,
+        "buy": null,
+        "sell": 65,
+        "pnl": 64.49,
+        "trades": 40,
+        "sr": 60.0
+      },
+      {
+        "k": 7,
+        "buy": 45,
+        "sell": 80,
+        "pnl": 61.88,
+        "trades": 7,
+        "sr": 71.4
+      },
+      {
+        "k": 7,
+        "buy": 50,
+        "sell": 80,
+        "pnl": 61.88,
+        "trades": 7,
+        "sr": 71.4
+      },
+      {
+        "k": 7,
+        "buy": null,
+        "sell": 60,
+        "pnl": 61.23,
+        "trades": 48,
+        "sr": 56.2
+      },
+      {
+        "k": 7,
+        "buy": 35,
+        "sell": 80,
+        "pnl": 60.27,
+        "trades": 7,
+        "sr": 71.4
+      }
+    ]
+  },
+  "2353": {
+    "name": "宏碁",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 32.9,
+    "best": {
+      "pnl": 53.69,
+      "k": 3,
+      "buy": 20,
+      "sell": 75,
+      "trades": 3,
+      "wins": 1
+    },
+    "top5": [
+      {
+        "k": 3,
+        "buy": 20,
+        "sell": 75,
+        "pnl": 53.69,
+        "trades": 3,
+        "sr": 33.3
+      },
+      {
+        "k": 3,
+        "buy": 30,
+        "sell": 75,
+        "pnl": 49.23,
+        "trades": 4,
+        "sr": 50.0
+      },
+      {
+        "k": 3,
+        "buy": 35,
+        "sell": 75,
+        "pnl": 49.23,
+        "trades": 4,
+        "sr": 50.0
+      },
+      {
+        "k": 5,
+        "buy": 20,
+        "sell": 80,
+        "pnl": 49.16,
+        "trades": 4,
+        "sr": 50.0
+      },
+      {
+        "k": 5,
+        "buy": 35,
+        "sell": 80,
+        "pnl": 48.9,
+        "trades": 4,
+        "sr": 50.0
+      }
+    ]
+  },
+  "3008": {
+    "name": "大立光",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 4230.0,
+    "best": {
+      "pnl": 75.94,
+      "k": 3,
+      "buy": 35,
+      "sell": 80,
+      "trades": 5,
+      "wins": 2
+    },
+    "top5": [
+      {
+        "k": 3,
+        "buy": 35,
+        "sell": 80,
+        "pnl": 75.94,
+        "trades": 5,
+        "sr": 40.0
+      },
+      {
+        "k": 3,
+        "buy": 30,
+        "sell": 80,
+        "pnl": 66.03,
+        "trades": 5,
+        "sr": 40.0
+      },
+      {
+        "k": 3,
+        "buy": 40,
+        "sell": 80,
+        "pnl": 65.96,
+        "trades": 5,
+        "sr": 40.0
+      },
+      {
+        "k": 12,
+        "buy": null,
+        "sell": 60,
+        "pnl": 55.69,
+        "trades": 35,
+        "sr": 57.1
+      },
+      {
+        "k": 3,
+        "buy": 45,
+        "sell": 80,
+        "pnl": 55.45,
+        "trades": 5,
+        "sr": 40.0
+      }
+    ]
+  },
+  "3034": {
+    "name": "聯詠",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 538.0,
+    "best": {
+      "pnl": 56.14,
+      "k": 5,
+      "buy": 25,
+      "sell": 80,
+      "trades": 8,
+      "wins": 7
+    },
+    "top5": [
+      {
+        "k": 5,
+        "buy": 25,
+        "sell": 80,
+        "pnl": 56.14,
+        "trades": 8,
+        "sr": 87.5
+      },
+      {
+        "k": 7,
+        "buy": 30,
+        "sell": 80,
+        "pnl": 55.76,
+        "trades": 9,
+        "sr": 88.9
+      },
+      {
+        "k": 5,
+        "buy": 30,
+        "sell": 80,
+        "pnl": 53.39,
+        "trades": 8,
+        "sr": 87.5
+      },
+      {
+        "k": 3,
+        "buy": 30,
+        "sell": 80,
+        "pnl": 53.08,
+        "trades": 3,
+        "sr": 66.7
+      },
+      {
+        "k": 3,
+        "buy": 35,
+        "sell": 80,
+        "pnl": 52.71,
+        "trades": 3,
+        "sr": 66.7
+      }
+    ]
+  },
+  "3711": {
+    "name": "日月光",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 682.0,
+    "best": {
+      "pnl": 133.98,
+      "k": 3,
+      "buy": null,
+      "sell": 80,
+      "trades": 4,
+      "wins": 2
+    },
+    "top5": [
+      {
+        "k": 3,
+        "buy": null,
+        "sell": 80,
+        "pnl": 133.98,
+        "trades": 4,
+        "sr": 50.0
+      },
+      {
+        "k": 3,
+        "buy": 35,
+        "sell": 75,
+        "pnl": 122.35,
+        "trades": 7,
+        "sr": 85.7
+      },
+      {
+        "k": 3,
+        "buy": 40,
+        "sell": 75,
+        "pnl": 118.87,
+        "trades": 7,
+        "sr": 85.7
+      },
+      {
+        "k": 3,
+        "buy": 35,
+        "sell": 80,
+        "pnl": 118.85,
+        "trades": 3,
+        "sr": 66.7
+      },
+      {
+        "k": 3,
+        "buy": 40,
+        "sell": 80,
+        "pnl": 118.85,
+        "trades": 3,
+        "sr": 66.7
+      }
+    ]
+  },
+  "4904": {
+    "name": "遠傳",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 105.0,
+    "best": {
+      "pnl": 18.24,
+      "k": 5,
+      "buy": null,
+      "sell": 80,
+      "trades": 8,
+      "wins": 4
+    },
+    "top5": [
+      {
+        "k": 5,
+        "buy": null,
+        "sell": 80,
+        "pnl": 18.24,
+        "trades": 8,
+        "sr": 50.0
+      },
+      {
+        "k": 5,
+        "buy": 35,
+        "sell": 80,
+        "pnl": 17.85,
+        "trades": 6,
+        "sr": 66.7
+      },
+      {
+        "k": 3,
+        "buy": 35,
+        "sell": 70,
+        "pnl": 17.45,
+        "trades": 7,
+        "sr": 85.7
+      },
+      {
+        "k": 3,
+        "buy": 35,
+        "sell": 75,
+        "pnl": 17.45,
+        "trades": 7,
+        "sr": 85.7
+      },
+      {
+        "k": 3,
+        "buy": 30,
+        "sell": 80,
+        "pnl": 17.38,
+        "trades": 3,
+        "sr": 100.0
+      }
+    ]
+  },
+  "4958": {
+    "name": "臻鼎-KY",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 613.0,
+    "best": {
+      "pnl": 277.53,
+      "k": 3,
+      "buy": 45,
+      "sell": 80,
+      "trades": 3,
+      "wins": 2
+    },
+    "top5": [
+      {
+        "k": 3,
+        "buy": 45,
+        "sell": 80,
+        "pnl": 277.53,
+        "trades": 3,
+        "sr": 66.7
+      },
+      {
+        "k": 3,
+        "buy": 40,
+        "sell": 80,
+        "pnl": 272.25,
+        "trades": 3,
+        "sr": 66.7
+      },
+      {
+        "k": 3,
+        "buy": 50,
+        "sell": 80,
+        "pnl": 271.17,
+        "trades": 3,
+        "sr": 66.7
+      },
+      {
+        "k": 3,
+        "buy": null,
+        "sell": 80,
+        "pnl": 268.7,
+        "trades": 3,
+        "sr": 66.7
+      },
+      {
+        "k": 3,
+        "buy": 30,
+        "sell": 80,
+        "pnl": 255.42,
+        "trades": 3,
+        "sr": 66.7
+      }
+    ]
+  },
+  "5871": {
+    "name": "中租-KY",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 116.5,
+    "best": {
+      "pnl": 20.73,
+      "k": 9,
+      "buy": 40,
+      "sell": 70,
+      "trades": 14,
+      "wins": 8
+    },
+    "top5": [
+      {
+        "k": 9,
+        "buy": 40,
+        "sell": 70,
+        "pnl": 20.73,
+        "trades": 14,
+        "sr": 57.1
+      },
+      {
+        "k": 9,
+        "buy": 45,
+        "sell": 70,
+        "pnl": 20.73,
+        "trades": 14,
+        "sr": 57.1
+      },
+      {
+        "k": 9,
+        "buy": 50,
+        "sell": 70,
+        "pnl": 20.73,
+        "trades": 14,
+        "sr": 57.1
+      },
+      {
+        "k": 3,
+        "buy": 30,
+        "sell": 65,
+        "pnl": 16.97,
+        "trades": 10,
+        "sr": 80.0
+      },
+      {
+        "k": 12,
+        "buy": 40,
+        "sell": 75,
+        "pnl": 16.85,
+        "trades": 12,
+        "sr": 58.3
+      }
+    ]
+  },
+  "5880": {
+    "name": "合庫金",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 24.7,
+    "best": {
+      "pnl": 5.63,
+      "k": 14,
+      "buy": 45,
+      "sell": 80,
+      "trades": 10,
+      "wins": 5
+    },
+    "top5": [
+      {
+        "k": 14,
+        "buy": 45,
+        "sell": 80,
+        "pnl": 5.63,
+        "trades": 10,
+        "sr": 50.0
+      },
+      {
+        "k": 14,
+        "buy": 50,
+        "sell": 80,
+        "pnl": 5.63,
+        "trades": 10,
+        "sr": 50.0
+      },
+      {
+        "k": 14,
+        "buy": 25,
+        "sell": 80,
+        "pnl": 4.52,
+        "trades": 6,
+        "sr": 66.7
+      },
+      {
+        "k": 3,
+        "buy": 45,
+        "sell": 70,
+        "pnl": 4.35,
+        "trades": 6,
+        "sr": 50.0
+      },
+      {
+        "k": 3,
+        "buy": 50,
+        "sell": 70,
+        "pnl": 4.35,
+        "trades": 6,
+        "sr": 50.0
+      }
+    ]
+  },
+  "8046": {
+    "name": "南電",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 1185.0,
+    "best": {
+      "pnl": 198.51,
+      "k": 3,
+      "buy": null,
+      "sell": 80,
+      "trades": 6,
+      "wins": 5
+    },
+    "top5": [
+      {
+        "k": 3,
+        "buy": null,
+        "sell": 80,
+        "pnl": 198.51,
+        "trades": 6,
+        "sr": 83.3
+      },
+      {
+        "k": 3,
+        "buy": 30,
+        "sell": 80,
+        "pnl": 182.96,
+        "trades": 5,
+        "sr": 80.0
+      },
+      {
+        "k": 3,
+        "buy": 35,
+        "sell": 80,
+        "pnl": 182.96,
+        "trades": 5,
+        "sr": 80.0
+      },
+      {
+        "k": 3,
+        "buy": 20,
+        "sell": 80,
+        "pnl": 181.73,
+        "trades": 5,
+        "sr": 80.0
+      },
+      {
+        "k": 3,
+        "buy": 25,
+        "sell": 80,
+        "pnl": 181.73,
+        "trades": 5,
+        "sr": 80.0
+      }
+    ]
+  },
+  "8454": {
+    "name": "富邦媒",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 293.0,
+    "best": {
+      "pnl": 57.52,
+      "k": 14,
+      "buy": null,
+      "sell": 80,
+      "trades": 19,
+      "wins": 11
+    },
+    "top5": [
+      {
+        "k": 14,
+        "buy": null,
+        "sell": 80,
+        "pnl": 57.52,
+        "trades": 19,
+        "sr": 57.9
+      },
+      {
+        "k": 12,
+        "buy": null,
+        "sell": 80,
+        "pnl": 57.15,
+        "trades": 20,
+        "sr": 50.0
+      },
+      {
+        "k": 14,
+        "buy": null,
+        "sell": 75,
+        "pnl": 55.85,
+        "trades": 22,
+        "sr": 63.6
+      },
+      {
+        "k": 12,
+        "buy": null,
+        "sell": 75,
+        "pnl": 55.22,
+        "trades": 24,
+        "sr": 58.3
+      },
+      {
+        "k": 12,
+        "buy": null,
+        "sell": 65,
+        "pnl": 44.21,
+        "trades": 38,
+        "sr": 52.6
+      }
+    ]
+  },
+  "9921": {
+    "name": "巨大",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 76.2,
+    "best": {
+      "pnl": 14.77,
+      "k": 5,
+      "buy": 25,
+      "sell": 65,
+      "trades": 11,
+      "wins": 7
+    },
+    "top5": [
+      {
+        "k": 5,
+        "buy": 25,
+        "sell": 65,
+        "pnl": 14.77,
+        "trades": 11,
+        "sr": 63.6
+      },
+      {
+        "k": 5,
+        "buy": 30,
+        "sell": 50,
+        "pnl": 14.15,
+        "trades": 21,
+        "sr": 47.6
+      },
+      {
+        "k": 5,
+        "buy": 25,
+        "sell": 60,
+        "pnl": 13.83,
+        "trades": 13,
+        "sr": 53.8
+      },
+      {
+        "k": 5,
+        "buy": 30,
+        "sell": 65,
+        "pnl": 13.81,
+        "trades": 14,
+        "sr": 64.3
+      },
+      {
+        "k": 5,
+        "buy": 25,
+        "sell": 70,
+        "pnl": 11.86,
+        "trades": 9,
+        "sr": 66.7
+      }
+    ]
+  },
+  "9933": {
+    "name": "中鼎",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 40.95,
+    "best": {
+      "pnl": 49.46,
+      "k": 3,
+      "buy": 35,
+      "sell": 75,
+      "trades": 5,
+      "wins": 4
+    },
+    "top5": [
+      {
+        "k": 3,
+        "buy": 35,
+        "sell": 75,
+        "pnl": 49.46,
+        "trades": 5,
+        "sr": 80.0
+      },
+      {
+        "k": 5,
+        "buy": 40,
+        "sell": 75,
+        "pnl": 47.27,
+        "trades": 8,
+        "sr": 75.0
+      },
+      {
+        "k": 5,
+        "buy": 40,
+        "sell": 65,
+        "pnl": 45.41,
+        "trades": 19,
+        "sr": 68.4
+      },
+      {
+        "k": 5,
+        "buy": 40,
+        "sell": 70,
+        "pnl": 44.86,
+        "trades": 13,
+        "sr": 69.2
+      },
+      {
+        "k": 5,
+        "buy": 40,
+        "sell": 80,
+        "pnl": 44.51,
+        "trades": 7,
+        "sr": 71.4
+      }
+    ]
+  },
+  "1101": {
+    "name": "台泥",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 23.65,
+    "best": {
+      "pnl": 17.71,
+      "k": 3,
+      "buy": 45,
+      "sell": 60,
+      "trades": 21,
+      "wins": 12
+    },
+    "top5": [
+      {
+        "k": 3,
+        "buy": 45,
+        "sell": 60,
+        "pnl": 17.71,
+        "trades": 21,
+        "sr": 57.1
+      },
+      {
+        "k": 5,
+        "buy": 25,
+        "sell": 75,
+        "pnl": 16.92,
+        "trades": 6,
+        "sr": 66.7
+      },
+      {
+        "k": 3,
+        "buy": 40,
+        "sell": 60,
+        "pnl": 16.58,
+        "trades": 18,
+        "sr": 61.1
+      },
+      {
+        "k": 7,
+        "buy": 35,
+        "sell": 55,
+        "pnl": 16.2,
+        "trades": 22,
+        "sr": 68.2
+      },
+      {
+        "k": 3,
+        "buy": 50,
+        "sell": 60,
+        "pnl": 16.1,
+        "trades": 21,
+        "sr": 52.4
+      }
+    ]
+  },
+  "1216": {
+    "name": "統一",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 76.3,
+    "best": {
+      "pnl": 5.19,
+      "k": 9,
+      "buy": 20,
+      "sell": 70,
+      "trades": 7,
+      "wins": 6
+    },
+    "top5": [
+      {
+        "k": 9,
+        "buy": 20,
+        "sell": 70,
+        "pnl": 5.19,
+        "trades": 7,
+        "sr": 85.7
+      },
+      {
+        "k": 9,
+        "buy": 25,
+        "sell": 70,
+        "pnl": 3.16,
+        "trades": 8,
+        "sr": 62.5
+      },
+      {
+        "k": 3,
+        "buy": 20,
+        "sell": 65,
+        "pnl": 2.95,
+        "trades": 3,
+        "sr": 66.7
+      },
+      {
+        "k": 3,
+        "buy": 20,
+        "sell": 60,
+        "pnl": 1.9,
+        "trades": 4,
+        "sr": 50.0
+      },
+      {
+        "k": 5,
+        "buy": 50,
+        "sell": null,
+        "pnl": 1.78,
+        "trades": 81,
+        "sr": 32.1
+      }
+    ]
+  },
+  "1402": {
+    "name": "遠東新",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 29.1,
+    "best": {
+      "pnl": 21.53,
+      "k": 14,
+      "buy": 45,
+      "sell": 80,
+      "trades": 11,
+      "wins": 8
+    },
+    "top5": [
+      {
+        "k": 14,
+        "buy": 45,
+        "sell": 80,
+        "pnl": 21.53,
+        "trades": 11,
+        "sr": 72.7
+      },
+      {
+        "k": 14,
+        "buy": 40,
+        "sell": 80,
+        "pnl": 19.95,
+        "trades": 10,
+        "sr": 70.0
+      },
+      {
+        "k": 9,
+        "buy": 20,
+        "sell": 80,
+        "pnl": 18.66,
+        "trades": 5,
+        "sr": 80.0
+      },
+      {
+        "k": 12,
+        "buy": 30,
+        "sell": 80,
+        "pnl": 18.32,
+        "trades": 6,
+        "sr": 83.3
+      },
+      {
+        "k": 14,
+        "buy": 35,
+        "sell": 80,
+        "pnl": 17.7,
+        "trades": 8,
+        "sr": 62.5
+      }
+    ]
+  },
+  "1476": {
+    "name": "儒鴻",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 323.5,
+    "best": {
+      "pnl": 21.96,
+      "k": 3,
+      "buy": 25,
+      "sell": 60,
+      "trades": 6,
+      "wins": 6
+    },
+    "top5": [
+      {
+        "k": 3,
+        "buy": 25,
+        "sell": 60,
+        "pnl": 21.96,
+        "trades": 6,
+        "sr": 100.0
+      },
+      {
+        "k": 3,
+        "buy": 25,
+        "sell": 65,
+        "pnl": 21.5,
+        "trades": 6,
+        "sr": 100.0
+      },
+      {
+        "k": 3,
+        "buy": 25,
+        "sell": 55,
+        "pnl": 18.95,
+        "trades": 6,
+        "sr": 83.3
+      },
+      {
+        "k": 5,
+        "buy": 25,
+        "sell": 50,
+        "pnl": 16.55,
+        "trades": 11,
+        "sr": 72.7
+      },
+      {
+        "k": 5,
+        "buy": 20,
+        "sell": 65,
+        "pnl": 16.36,
+        "trades": 5,
+        "sr": 100.0
+      }
+    ]
+  },
+  "1590": {
+    "name": "亞德客-KY",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 1440.0,
+    "best": {
+      "pnl": 53.52,
+      "k": 14,
+      "buy": null,
+      "sell": 80,
+      "trades": 8,
+      "wins": 5
+    },
+    "top5": [
+      {
+        "k": 14,
+        "buy": null,
+        "sell": 80,
+        "pnl": 53.52,
+        "trades": 8,
+        "sr": 62.5
+      },
+      {
+        "k": 14,
+        "buy": 50,
+        "sell": 80,
+        "pnl": 53.34,
+        "trades": 7,
+        "sr": 71.4
+      },
+      {
+        "k": 3,
+        "buy": null,
+        "sell": 80,
+        "pnl": 50.99,
+        "trades": 3,
+        "sr": 66.7
+      },
+      {
+        "k": 9,
+        "buy": 35,
+        "sell": 80,
+        "pnl": 50.91,
+        "trades": 6,
+        "sr": 66.7
+      },
+      {
+        "k": 14,
+        "buy": 40,
+        "sell": 80,
+        "pnl": 48.36,
+        "trades": 7,
+        "sr": 57.1
+      }
+    ]
+  },
+  "2049": {
+    "name": "上銀",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 350.0,
+    "best": {
+      "pnl": 77.59,
+      "k": 5,
+      "buy": null,
+      "sell": 75,
+      "trades": 11,
+      "wins": 7
+    },
+    "top5": [
+      {
+        "k": 5,
+        "buy": null,
+        "sell": 75,
+        "pnl": 77.59,
+        "trades": 11,
+        "sr": 63.6
+      },
+      {
+        "k": 7,
+        "buy": 25,
+        "sell": 80,
+        "pnl": 76.7,
+        "trades": 7,
+        "sr": 71.4
+      },
+      {
+        "k": 5,
+        "buy": 35,
+        "sell": 70,
+        "pnl": 74.16,
+        "trades": 12,
+        "sr": 75.0
+      },
+      {
+        "k": 7,
+        "buy": 30,
+        "sell": 80,
+        "pnl": 73.0,
+        "trades": 7,
+        "sr": 57.1
+      },
+      {
+        "k": 7,
+        "buy": null,
+        "sell": 75,
+        "pnl": 70.8,
+        "trades": 14,
+        "sr": 71.4
+      }
+    ]
+  },
+  "2105": {
+    "name": "正新",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 32.15,
+    "best": {
+      "pnl": 32.19,
+      "k": 9,
+      "buy": 25,
+      "sell": 80,
+      "trades": 9,
+      "wins": 8
+    },
+    "top5": [
+      {
+        "k": 9,
+        "buy": 25,
+        "sell": 80,
+        "pnl": 32.19,
+        "trades": 9,
+        "sr": 88.9
+      },
+      {
+        "k": 9,
+        "buy": 20,
+        "sell": 80,
+        "pnl": 31.95,
+        "trades": 8,
+        "sr": 87.5
+      },
+      {
+        "k": 7,
+        "buy": 25,
+        "sell": 75,
+        "pnl": 28.58,
+        "trades": 9,
+        "sr": 77.8
+      },
+      {
+        "k": 7,
+        "buy": 25,
+        "sell": 70,
+        "pnl": 25.17,
+        "trades": 10,
+        "sr": 70.0
+      },
+      {
+        "k": 7,
+        "buy": 25,
+        "sell": 80,
+        "pnl": 23.88,
+        "trades": 6,
+        "sr": 83.3
+      }
+    ]
+  },
+  "2207": {
+    "name": "和泰車",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 473.0,
+    "best": {
+      "pnl": 12.46,
+      "k": 5,
+      "buy": 20,
+      "sell": 70,
+      "trades": 7,
+      "wins": 4
+    },
+    "top5": [
+      {
+        "k": 5,
+        "buy": 20,
+        "sell": 70,
+        "pnl": 12.46,
+        "trades": 7,
+        "sr": 57.1
+      },
+      {
+        "k": 7,
+        "buy": 25,
+        "sell": 65,
+        "pnl": 9.33,
+        "trades": 12,
+        "sr": 58.3
+      },
+      {
+        "k": 7,
+        "buy": 30,
+        "sell": 70,
+        "pnl": 8.31,
+        "trades": 13,
+        "sr": 61.5
+      },
+      {
+        "k": 12,
+        "buy": 20,
+        "sell": 80,
+        "pnl": 8.29,
+        "trades": 9,
+        "sr": 44.4
+      },
+      {
+        "k": 7,
+        "buy": 25,
+        "sell": 70,
+        "pnl": 7.99,
+        "trades": 11,
+        "sr": 54.5
+      }
+    ]
+  },
+  "2395": {
+    "name": "研華",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 521.0,
+    "best": {
+      "pnl": 79.21,
+      "k": 3,
+      "buy": 35,
+      "sell": 80,
+      "trades": 4,
+      "wins": 3
+    },
+    "top5": [
+      {
+        "k": 3,
+        "buy": 35,
+        "sell": 80,
+        "pnl": 79.21,
+        "trades": 4,
+        "sr": 75.0
+      },
+      {
+        "k": 3,
+        "buy": 40,
+        "sell": 80,
+        "pnl": 76.61,
+        "trades": 4,
+        "sr": 75.0
+      },
+      {
+        "k": 5,
+        "buy": 30,
+        "sell": 80,
+        "pnl": 76.61,
+        "trades": 4,
+        "sr": 75.0
+      },
+      {
+        "k": 5,
+        "buy": null,
+        "sell": 80,
+        "pnl": 76.31,
+        "trades": 6,
+        "sr": 66.7
+      },
+      {
+        "k": 3,
+        "buy": 50,
+        "sell": 80,
+        "pnl": 76.14,
+        "trades": 4,
+        "sr": 75.0
+      }
+    ]
+  },
+  "2408": {
+    "name": "南亞科",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 409.5,
+    "best": {
+      "pnl": 116.69,
+      "k": 12,
+      "buy": null,
+      "sell": null,
+      "trades": 68,
+      "wins": 32
+    },
+    "top5": [
+      {
+        "k": 12,
+        "buy": null,
+        "sell": null,
+        "pnl": 116.69,
+        "trades": 68,
+        "sr": 47.1
+      },
+      {
+        "k": 14,
+        "buy": null,
+        "sell": null,
+        "pnl": 115.88,
+        "trades": 66,
+        "sr": 45.5
+      },
+      {
+        "k": 9,
+        "buy": null,
+        "sell": 65,
+        "pnl": 114.05,
+        "trades": 41,
+        "sr": 61.0
+      },
+      {
+        "k": 9,
+        "buy": null,
+        "sell": 70,
+        "pnl": 110.0,
+        "trades": 29,
+        "sr": 62.1
+      },
+      {
+        "k": 5,
+        "buy": null,
+        "sell": 65,
+        "pnl": 103.54,
+        "trades": 34,
+        "sr": 61.8
+      }
+    ]
+  },
+  "2474": {
+    "name": "可成",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 207.0,
+    "best": {
+      "pnl": 20.92,
+      "k": 7,
+      "buy": 35,
+      "sell": 50,
+      "trades": 24,
+      "wins": 13
+    },
+    "top5": [
+      {
+        "k": 7,
+        "buy": 35,
+        "sell": 50,
+        "pnl": 20.92,
+        "trades": 24,
+        "sr": 54.2
+      },
+      {
+        "k": 3,
+        "buy": 20,
+        "sell": 70,
+        "pnl": 19.82,
+        "trades": 3,
+        "sr": 66.7
+      },
+      {
+        "k": 5,
+        "buy": 25,
+        "sell": 50,
+        "pnl": 19.13,
+        "trades": 12,
+        "sr": 41.7
+      },
+      {
+        "k": 9,
+        "buy": 35,
+        "sell": 65,
+        "pnl": 16.93,
+        "trades": 12,
+        "sr": 50.0
+      },
+      {
+        "k": 12,
+        "buy": 20,
+        "sell": 65,
+        "pnl": 16.77,
+        "trades": 8,
+        "sr": 50.0
+      }
+    ]
+  },
+  "2603": {
+    "name": "長榮",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 195.0,
+    "best": {
+      "pnl": 17.53,
+      "k": 5,
+      "buy": null,
+      "sell": 60,
+      "trades": 28,
+      "wins": 17
+    },
+    "top5": [
+      {
+        "k": 5,
+        "buy": null,
+        "sell": 60,
+        "pnl": 17.53,
+        "trades": 28,
+        "sr": 60.7
+      },
+      {
+        "k": 5,
+        "buy": null,
+        "sell": 65,
+        "pnl": 17.3,
+        "trades": 23,
+        "sr": 65.2
+      },
+      {
+        "k": 7,
+        "buy": 50,
+        "sell": 65,
+        "pnl": 16.39,
+        "trades": 19,
+        "sr": 73.7
+      },
+      {
+        "k": 3,
+        "buy": 35,
+        "sell": 70,
+        "pnl": 15.3,
+        "trades": 7,
+        "sr": 71.4
+      },
+      {
+        "k": 5,
+        "buy": null,
+        "sell": 55,
+        "pnl": 15.16,
+        "trades": 40,
+        "sr": 52.5
+      }
+    ]
+  },
+  "2610": {
+    "name": "華航",
+    "category": "0050",
+    "bars": 1200,
+    "latest_price": 22.55,
+    "best": {
+      "pnl": 27.77,
+      "k": 14,
+      "buy": 40,
+      "sell": 80,
+      "trades": 11,
+      "wins": 8
+    },
+    "top5": [
+      {
+        "k": 14,
+        "buy": 40,
+        "sell": 80,
+        "pnl": 27.77,
+        "trades": 11,
+        "sr": 72.7
+      },
+      {
+        "k": 9,
+        "buy": 50,
+        "sell": 70,
+        "pnl": 26.6,
+        "trades": 17,
+        "sr": 70.6
+      },
+      {
+        "k": 14,
+        "buy": 45,
+        "sell": 80,
+        "pnl": 25.28,
+        "trades": 11,
+        "sr": 72.7
+      },
+      {
+        "k": 9,
+        "buy": 50,
+        "sell": 75,
+        "pnl": 25.25,
+        "trades": 14,
+        "sr": 78.6
+      },
+      {
+        "k": 12,
+        "buy": 50,
+        "sell": 80,
+        "pnl": 25.16,
+        "trades": 11,
+        "sr": 72.7
+      }
+    ]
+  },
+  "2344": {
+    "name": "華邦電",
+    "category": "熱門",
+    "bars": 1200,
+    "latest_price": 184.5,
+    "best": {
+      "pnl": 110.2,
+      "k": 9,
+      "buy": 25,
+      "sell": 80,
+      "trades": 10,
+      "wins": 7
+    },
+    "top5": [
+      {
+        "k": 9,
+        "buy": 25,
+        "sell": 80,
+        "pnl": 110.2,
+        "trades": 10,
+        "sr": 70.0
+      },
+      {
+        "k": 9,
+        "buy": 30,
+        "sell": 80,
+        "pnl": 99.35,
+        "trades": 11,
+        "sr": 63.6
+      },
+      {
+        "k": 9,
+        "buy": 35,
+        "sell": 80,
+        "pnl": 93.71,
+        "trades": 11,
+        "sr": 63.6
+      },
+      {
+        "k": 9,
+        "buy": 20,
+        "sell": 80,
+        "pnl": 92.17,
+        "trades": 6,
+        "sr": 83.3
+      },
+      {
+        "k": 9,
+        "buy": 50,
+        "sell": 80,
+        "pnl": 83.01,
+        "trades": 13,
+        "sr": 69.2
+      }
+    ]
+  },
+  "6770": {
+    "name": "力積電",
+    "category": "熱門",
+    "bars": 1200,
+    "latest_price": 73.4,
+    "best": {
+      "pnl": 84.28,
+      "k": 7,
+      "buy": null,
+      "sell": 80,
+      "trades": 12,
+      "wins": 8
+    },
+    "top5": [
+      {
+        "k": 7,
+        "buy": null,
+        "sell": 80,
+        "pnl": 84.28,
+        "trades": 12,
+        "sr": 66.7
+      },
+      {
+        "k": 5,
+        "buy": 50,
+        "sell": 80,
+        "pnl": 80.36,
+        "trades": 8,
+        "sr": 62.5
+      },
+      {
+        "k": 5,
+        "buy": 45,
+        "sell": 80,
+        "pnl": 79.08,
+        "trades": 8,
+        "sr": 62.5
+      },
+      {
+        "k": 5,
+        "buy": null,
+        "sell": 65,
+        "pnl": 76.94,
+        "trades": 23,
+        "sr": 69.6
+      },
+      {
+        "k": 5,
+        "buy": null,
+        "sell": 70,
+        "pnl": 73.68,
+        "trades": 21,
+        "sr": 66.7
+      }
+    ]
+  },
+  "2609": {
+    "name": "陽明",
+    "category": "熱門",
+    "bars": 1200,
+    "latest_price": 52.4,
+    "best": {
+      "pnl": 16.74,
+      "k": 7,
+      "buy": 25,
+      "sell": 80,
+      "trades": 5,
+      "wins": 3
+    },
+    "top5": [
+      {
+        "k": 7,
+        "buy": 25,
+        "sell": 80,
+        "pnl": 16.74,
+        "trades": 5,
+        "sr": 60.0
+      },
+      {
+        "k": 7,
+        "buy": 20,
+        "sell": 80,
+        "pnl": 16.73,
+        "trades": 3,
+        "sr": 66.7
+      },
+      {
+        "k": 5,
+        "buy": 45,
+        "sell": 55,
+        "pnl": 16.4,
+        "trades": 21,
+        "sr": 66.7
+      },
+      {
+        "k": 5,
+        "buy": 50,
+        "sell": 55,
+        "pnl": 15.75,
+        "trades": 22,
+        "sr": 63.6
+      },
+      {
+        "k": 3,
+        "buy": 45,
+        "sell": 65,
+        "pnl": 11.86,
+        "trades": 9,
+        "sr": 66.7
+      }
+    ]
+  },
+  "2618": {
+    "name": "長榮航",
+    "category": "熱門",
+    "bars": 1200,
+    "latest_price": 43.85,
+    "best": {
+      "pnl": 35.52,
+      "k": 5,
+      "buy": 30,
+      "sell": 75,
+      "trades": 7,
+      "wins": 6
+    },
+    "top5": [
+      {
+        "k": 5,
+        "buy": 30,
+        "sell": 75,
+        "pnl": 35.52,
+        "trades": 7,
+        "sr": 85.7
+      },
+      {
+        "k": 5,
+        "buy": 25,
+        "sell": 80,
+        "pnl": 31.1,
+        "trades": 3,
+        "sr": 66.7
+      },
+      {
+        "k": 7,
+        "buy": 40,
+        "sell": 70,
+        "pnl": 29.37,
+        "trades": 19,
+        "sr": 73.7
+      },
+      {
+        "k": 7,
+        "buy": 40,
+        "sell": 80,
+        "pnl": 26.71,
+        "trades": 7,
+        "sr": 57.1
+      },
+      {
+        "k": 7,
+        "buy": 45,
+        "sell": 70,
+        "pnl": 26.43,
+        "trades": 19,
+        "sr": 73.7
+      }
+    ]
+  },
+  "2892": {
+    "name": "第一金",
+    "category": "熱門",
+    "bars": 1200,
+    "latest_price": 32.4,
+    "best": {
+      "pnl": 9.9,
+      "k": 5,
+      "buy": null,
+      "sell": 80,
+      "trades": 6,
+      "wins": 3
+    },
+    "top5": [
+      {
+        "k": 5,
+        "buy": null,
+        "sell": 80,
+        "pnl": 9.9,
+        "trades": 6,
+        "sr": 50.0
+      },
+      {
+        "k": 3,
+        "buy": null,
+        "sell": 80,
+        "pnl": 9.28,
+        "trades": 4,
+        "sr": 25.0
+      },
+      {
+        "k": 3,
+        "buy": null,
+        "sell": 70,
+        "pnl": 9.16,
+        "trades": 8,
+        "sr": 37.5
+      },
+      {
+        "k": 9,
+        "buy": 50,
+        "sell": 60,
+        "pnl": 9.06,
+        "trades": 21,
+        "sr": 52.4
+      },
+      {
+        "k": 3,
+        "buy": null,
+        "sell": 75,
+        "pnl": 8.83,
+        "trades": 6,
+        "sr": 33.3
+      }
+    ]
+  },
+  "3037": {
+    "name": "欣興",
+    "category": "熱門",
+    "bars": 1200,
+    "latest_price": 969.0,
+    "best": {
+      "pnl": 199.74,
+      "k": 3,
+      "buy": null,
+      "sell": 80,
+      "trades": 6,
+      "wins": 4
+    },
+    "top5": [
+      {
+        "k": 3,
+        "buy": null,
+        "sell": 80,
+        "pnl": 199.74,
+        "trades": 6,
+        "sr": 66.7
+      },
+      {
+        "k": 3,
+        "buy": 45,
+        "sell": 80,
+        "pnl": 195.94,
+        "trades": 6,
+        "sr": 66.7
+      },
+      {
+        "k": 3,
+        "buy": 50,
+        "sell": 80,
+        "pnl": 189.39,
+        "trades": 6,
+        "sr": 66.7
+      },
+      {
+        "k": 12,
+        "buy": null,
+        "sell": 55,
+        "pnl": 184.08,
+        "trades": 54,
+        "sr": 63.0
+      },
+      {
+        "k": 12,
+        "buy": null,
+        "sell": 50,
+        "pnl": 181.43,
+        "trades": 58,
+        "sr": 63.8
+      }
+    ]
+  },
+  "3189": {
+    "name": "景碩",
+    "category": "熱門",
+    "bars": 1200,
+    "latest_price": 833.0,
+    "best": {
+      "pnl": 241.42,
+      "k": 12,
+      "buy": 50,
+      "sell": 75,
+      "trades": 25,
+      "wins": 20
+    },
+    "top5": [
+      {
+        "k": 12,
+        "buy": 50,
+        "sell": 75,
+        "pnl": 241.42,
+        "trades": 25,
+        "sr": 80.0
+      },
+      {
+        "k": 12,
+        "buy": null,
+        "sell": 75,
+        "pnl": 228.44,
+        "trades": 28,
+        "sr": 78.6
+      },
+      {
+        "k": 14,
+        "buy": 50,
+        "sell": 80,
+        "pnl": 227.79,
+        "trades": 20,
+        "sr": 75.0
+      },
+      {
+        "k": 12,
+        "buy": 50,
+        "sell": 80,
+        "pnl": 225.58,
+        "trades": 21,
+        "sr": 81.0
+      },
+      {
+        "k": 14,
+        "buy": 35,
+        "sell": 80,
+        "pnl": 224.44,
+        "trades": 16,
+        "sr": 75.0
+      }
+    ]
+  },
+  "6139": {
+    "name": "亞翔",
+    "category": "亞翔",
+    "bars": 1200,
+    "latest_price": 948.0,
+    "best": {
+      "pnl": 100.22,
+      "k": 12,
+      "buy": 50,
+      "sell": 70,
+      "trades": 21,
+      "wins": 19
+    },
+    "top5": [
+      {
+        "k": 12,
+        "buy": 50,
+        "sell": 70,
+        "pnl": 100.22,
+        "trades": 21,
+        "sr": 90.5
+      },
+      {
+        "k": 14,
+        "buy": 40,
+        "sell": 70,
+        "pnl": 95.06,
+        "trades": 19,
+        "sr": 89.5
+      },
+      {
+        "k": 12,
+        "buy": 40,
+        "sell": 70,
+        "pnl": 94.68,
+        "trades": 19,
+        "sr": 89.5
+      },
+      {
+        "k": 14,
+        "buy": 45,
+        "sell": 70,
+        "pnl": 89.53,
+        "trades": 19,
+        "sr": 89.5
+      },
+      {
+        "k": 14,
+        "buy": 50,
+        "sell": 70,
+        "pnl": 89.53,
+        "trades": 19,
+        "sr": 89.5
+      }
+    ]
+  }
+}
