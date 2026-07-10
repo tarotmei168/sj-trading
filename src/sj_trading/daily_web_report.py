@@ -609,17 +609,26 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html=''):
 # ═══════════════════════════════════════════════
 
 def push_to_github():
-    """自動 git add + commit + push（用專案根目錄 git）"""
-    import subprocess
+    """自動 git add + commit + push（用 token 在 remote URL）"""
+    import subprocess, re
     git_path = r'D:\StableDiffusion\Git\bin\git.exe'
     if not os.path.exists(git_path):
-        git_path = 'git'  # fallback
+        git_path = 'git'
     
     try:
-        git_dir = BASE_DIR  # 專案根目錄
+        git_dir = BASE_DIR
         now = datetime.now().strftime('%Y-%m-%d %H:%M')
         
-        # 複製 index.html + architecture.html 到根目錄
+        # 從 .env 讀 token
+        env_path = os.path.join(BASE_DIR, '.env')
+        token = ''
+        if os.path.exists(env_path):
+            with open(env_path, 'r', encoding='utf-8') as f:
+                m = re.search(r'GITHUB_TOKEN=(.+)', f.read())
+                if m:
+                    token = m.group(1).strip()
+        
+        # 複製檔案到根目錄
         import shutil
         for f in ['index.html', 'architecture.html']:
             src = os.path.join(WEB_DIR, f)
@@ -627,20 +636,27 @@ def push_to_github():
             if os.path.exists(src):
                 shutil.copy2(src, dst)
         
+        # 設含 token 的 remote URL
+        if token:
+            remote_url = f'https://tarotmei168:{token}@github.com/tarotmei168/sj-trading.git'
+            subprocess.run([git_path, 'remote', 'set-url', 'origin', remote_url],
+                           cwd=git_dir, capture_output=True, timeout=10)
+        
         subprocess.run([git_path, 'add', '-A'],
                        cwd=git_dir, capture_output=True, timeout=30)
         subprocess.run([git_path, 'commit', '-m', f'🦞 晨報更新 {now}'],
                        cwd=git_dir, capture_output=True, timeout=30)
-        result = subprocess.run([git_path, 'push', 'origin', 'main'],
+        result = subprocess.run([git_path, 'push', 'origin', 'main', '--force'],
                                 cwd=git_dir, capture_output=True, timeout=60)
         if result.returncode == 0:
             print('✅ Git Push 完成')
             return True
         else:
-            print(f'⚠️ Git Push 輸出: {result.stderr.decode("utf-8", errors="replace")[:200]}')
-            return True  # 可能沒新東西還是不影響
+            out = result.stderr.decode('utf-8', errors='replace') if result.stderr else ''
+            print(f'⚠️ Git Push 輸出: {out[:200]}')
+            return False
     except subprocess.TimeoutExpired:
-        print('⚠️ Git Push 超時，僅存檔')
+        print('⚠️ Git Push 超時')
         return False
     except Exception as e:
         print(f'⚠️ Git Push 失敗: {str(e)[:60]}')
