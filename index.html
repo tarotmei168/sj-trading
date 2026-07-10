@@ -85,19 +85,19 @@ td{padding:10px 6px;border-bottom:1px solid var(--border-color);vertical-align:m
 </table>
 </div>
 
-<!-- ③ 投信建倉 -->
+<!-- ③ 投信建倉（只顯示連日買超/潛力建倉股） -->
 <div class="card alert">
-<div class="card-title">🏦 投信法人秘密建倉 · 滲透率 P_day / P_cum</div>
+<div class="card-title">🏦 投信法人秘密建倉 · 連日買超潛力股</div>
 <table>
-<thead><tr><th>代號</th><th>名稱</th><th>淨買超(萬)</th><th>P_day</th><th>P_cum</th></tr></thead>
+<thead><tr><th>代號</th><th>名稱</th><th>淨買超(萬)</th><th>連買天數</th><th>P_cum累計滲透率</th></tr></thead>
 <tbody>
-<tr><td>3042</td><td>晶技</td><td class="up">69</td><td>0.0001%</td><td>0.0001%</td></tr>
-<tr><td>2382</td><td>廣達</td><td class="up">111</td><td>0.0001%</td><td>0.0002%</td></tr>
-<tr><td>8150</td><td>南茂</td><td class="up">20</td><td>0.0001%</td><td>0.0005%</td></tr>
-<tr><td>2344</td><td>華邦電</td><td class="down">-358</td><td>-0.0005%</td><td>-0.0012%</td></tr>
+<tr><td>3042</td><td>晶技</td><td class="up">+69</td><td>🔥 2天</td><td>0.0002%</td></tr>
+<tr><td>8150</td><td>南茂</td><td class="up">+50</td><td>🔥 2天</td><td>0.0005%</td></tr>
+<tr><td>6770</td><td>力積電</td><td class="up">+9</td><td>1天</td><td>0.0001%</td></tr>
+<tr><td>3035</td><td>智原</td><td class="up">+0.1</td><td>1天</td><td>0.0001%</td></tr>
 </tbody>
 </table>
-<p style="font-size:16px;color:var(--text-muted);margin-top:8px;">📌 盤後16:30更新 · P_day = 日買超張數 / (總股本×1000) × 100%</p>
+<p style="font-size:16px;color:var(--text-muted);margin-top:8px;">📌 盤後16:30更新 · 只顯示投信淨買超標的，負值(賣超)不列入</p>
 </div>
 
 <!-- ④ 台美聯動牆（即時警報） -->
