@@ -1,24 +1,21 @@
 # -*- coding: utf-8 -*-
 """
-🦞 KD 30分K 黃金交叉回測引擎
-================================
-每檔股票獨立回測，找出最適 KD 參數。
-使用 Shioaji 下載 45 天 30分K 資料進行回測。
+🦞 KD 黃金交叉回測引擎（本機 726 天日K資料）
+==============================================
+用 database/*_3y.csv 的 3年日K線回測
+每檔股票獨立找最適 KD 參數
 
-輸出: database/kd_params.json (每檔股票的最適參數)
+輸出: database/kd_params.json
 """
-import os, json, sys, time
-from datetime import datetime, timedelta
+import os, json, sys, csv
+from datetime import datetime
 import numpy as np
 
 BASE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.insert(0, os.path.join(BASE, 'src', 'sj_trading'))
+DB_DIR = os.path.join(BASE, 'database')
+PARAMS_FILE = os.path.join(DB_DIR, 'kd_params.json')
 
-OUTPUT_DIR = os.path.join(BASE, 'database')
-PARAMS_FILE = os.path.join(OUTPUT_DIR, 'kd_params.json')
-os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-# 19 檔持股
+# 20 檔持股
 STOCKS = [
     ('2436','偉詮電'),('2337','旺宏'),('5351','鈺創'),
     ('3673','TPK-KY'),('3711','日月光'),('4958','臻鼎-KY'),('3042','晶技'),
@@ -29,322 +26,279 @@ STOCKS = [
     ('2330','台積電'),
 ]
 
-# ═══════════════════════════════════════════════
-#  KD 計算（使用本地資料）
-# ═══════════════════════════════════════════════
+# ══════════════════════════════════════════════
+#  KD 計算
+# ══════════════════════════════════════════════
 
-def calc_KD(closes, highs, lows, n=9):
-    """計算 KD 值，回傳 K, D, 是否金叉, 差距"""
-    if len(closes) < n + 1:
-        return 50, 50, False, 0
+def read_csv_data(stock_id):
+    """讀取 3年日K CSV"""
+    fp = os.path.join(DB_DIR, f'{stock_id}_3y.csv')
+    if not os.path.exists(fp):
+        return None
+    dates, opens, highs, lows, closes, volumes = [], [], [], [], [], []
+    with open(fp, 'r', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            try:
+                dates.append(row['date'])
+                opens.append(float(row['open']))
+                highs.append(float(row.get('high', row.get('High', 0))))
+                lows.append(float(row.get('low', row.get('Low', 0))))
+                closes.append(float(row.get('close', row.get('Close', 0))))
+                volumes.append(int(float(row.get('volume', row.get('Volume', 0)))))
+            except (ValueError, KeyError):
+                continue
+    return {
+        'dates': dates, 'opens': opens, 'highs': highs, 'lows': lows,
+        'closes': closes, 'volumes': volumes
+    }
+
+def compute_kd(closes, highs, lows, rsv_days=9, k_smooth=3, d_smooth=3):
+    """
+    計算完整 KD 線（傳回所有 K, D 值）
+    rsv_days: RSV 計算天數（預設 9）
+    k_smooth: K 平滑因子（預設 3）
+    d_smooth: D 平滑因子（預設 3）
+    """
+    n = len(closes)
+    if n < rsv_days + 2:
+        return [], []
     
-    # RSV 計算
-    last_n_high = max(highs[-(n+1):-1])
-    last_n_low = min(lows[-(n+1):-1])
-    if last_n_high == last_n_low:
-        rsv = 50
-    else:
-        rsv = (closes[-2] - last_n_low) / (last_n_high - last_n_low) * 100
+    k_values = [50.0]
+    d_values = [50.0]
     
-    # 平滑計算
-    k = rsv * 2/3 + 50 * 1/3  # 初始值用50
-    d = k * 2/3 + 50 * 1/3
-    
-    # 用完整公式算一遍
-    k_values = [50]
-    d_values = [50]
-    
-    for i in range(1, len(closes)):
-        h9 = max(highs[max(0,i-8):i+1])
-        l9 = min(lows[max(0,i-8):i+1])
+    for i in range(n):
+        # RSV
+        start = max(0, i - rsv_days + 1)
+        h9 = max(highs[start:i+1])
+        l9 = min(lows[start:i+1])
         if h9 == l9:
-            rsv_i = 50
+            rsv = 50.0
         else:
-            rsv_i = (closes[i] - l9) / (h9 - l9) * 100
+            rsv = (closes[i] - l9) / (h9 - l9) * 100
         
-        k_i = k_values[-1] * 2/3 + rsv_i * 1/3
-        d_i = d_values[-1] * 2/3 + k_i * 1/3
+        # K = (K_prev * (k_smooth-1) + RSV) / k_smooth
+        k_i = (k_values[-1] * (k_smooth - 1) + rsv) / k_smooth
+        # D = (D_prev * (d_smooth-1) + K) / d_smooth
+        d_i = (d_values[-1] * (d_smooth - 1) + k_i) / d_smooth
         
         k_values.append(k_i)
         d_values.append(d_i)
     
-    k = k_values[-1]
-    d = d_values[-1]
-    
-    # 金叉判斷（前一根 K < D，這根 K > D）
-    prev_k = k_values[-2] if len(k_values) >= 2 else k_values[-1]
-    prev_d = d_values[-2] if len(d_values) >= 2 else d_values[-1]
-    golden = prev_k < prev_d and k > d
-    gap = k - d
-    
-    return k, d, golden, gap
+    return k_values[1:], d_values[1:]
 
 
-# ═══════════════════════════════════════════════
-#  下載 30分K 資料（用永豐 Shioaji）
-# ═══════════════════════════════════════════════
+# ══════════════════════════════════════════════
+#  回測核心
+# ══════════════════════════════════════════════
 
-def download_30min_kbars(stock_id, days=45):
-    """用 Shioaji 下載 30分K 資料"""
-    try:
-        from shioaji_helper import ShioajiClient
-        sjc = ShioajiClient()
-        if not sjc.login():
-            print(f'    Shioaji 登入失敗')
-            return []
-        
-        api = sjc.api
-        contract = api.Contracts.Stocks[stock_id]
-        
-        end = datetime.now()
-        start = end - timedelta(days=days)
-        
-        # 用 30 分 K 線抓（每根 K 棒 30 分鐘）
-        kbars = api.kbars(
-            contract=contract,
-            start=start.strftime('%Y-%m-%d'),
-            end=end.strftime('%Y-%m-%d'),
-        )
-        
-        if len(kbars.ts) == 0:
-            sjc.logout()
-            return []
-        
-        result = []
-        for i in range(len(kbars.ts)):
-            result.append({
-                'datetime': pd.to_datetime(kbars.ts[i]).strftime('%Y-%m-%d %H:%M'),
-                'open': float(kbars.Open[i]),
-                'high': float(kbars.High[i]),
-                'low': float(kbars.Low[i]),
-                'close': float(kbars.Close[i]),
-                'volume': int(kbars.Volume[i]),
-            })
-        
-        sjc.logout()
-        return result
-    except Exception as e:
-        return []
-
-
-# ═══════════════════════════════════════════════
-#  回測 KD 參數（找到最佳組合）
-# ═══════════════════════════════════════════════
-
-def backtest_kd_params(kbars_data):
+def backtest_stock(data, k_smooth=3, d_smooth=3, rsv_days=9,
+                    buy_threshold=40, sell_mode='dead_cross',
+                    stop_loss=3, take_profit=5):
     """
-    對一檔股票的 30分K 資料進行 KD 參數回測
+    對一檔股票用指定參數回測
     
-    測試不同的:
-    - K 平滑週期 (2~5)
-    - D 平滑週期 (2~5)
-    - 超賣區金叉 (RSV 低於 20~40)
-    - 超賣後回升確認
-    
-    回傳: 最適參數 dict
+    回傳: { trades, wins, losses, total_profit, win_rate, score }
     """
-    if len(kbars_data) < 30:
+    closes = data['closes']
+    highs = data['highs']
+    lows = data['lows']
+    
+    k_vals, d_vals = compute_kd(closes, highs, lows, rsv_days, k_smooth, d_smooth)
+    if not k_vals:
         return None
     
-    closes = np.array([k['close'] for k in kbars_data])
-    highs = np.array([k['high'] for k in kbars_data])
-    lows = np.array([k['low'] for k in kbars_data])
+    trades = []
+    position = 0  # 0=空手, 1=持有
+    entry_price = 0
+    entry_idx = 0
     
-    best_params = None
+    for i in range(rsv_days + 5, len(closes)):
+        k = k_vals[i]
+        d = d_vals[i]
+        k_prev = k_vals[i-1]
+        d_prev = d_vals[i-1]
+        
+        price = closes[i]
+        
+        # 金叉：K 從下往上穿 D
+        golden = k_prev < d_prev and k > d
+        
+        # 買入：金叉 + K 值在超賣區
+        if not position and golden and k < buy_threshold:
+            position = 1
+            entry_price = price
+            entry_idx = i
+            continue
+        
+        # 持有中檢查出場
+        if position:
+            profit_pct = (price / entry_price - 1) * 100
+            
+            # 停損
+            if profit_pct <= -stop_loss:
+                trades.append({
+                    'entry_idx': entry_idx, 'exit_idx': i,
+                    'entry_price': entry_price, 'exit_price': price,
+                    'profit_pct': round(profit_pct, 2),
+                    'exit_reason': 'stop_loss'
+                })
+                position = 0
+                continue
+            
+            # 停利
+            if profit_pct >= take_profit:
+                trades.append({
+                    'entry_idx': entry_idx, 'exit_idx': i,
+                    'entry_price': entry_price, 'exit_price': price,
+                    'profit_pct': round(profit_pct, 2),
+                    'exit_reason': 'take_profit'
+                })
+                position = 0
+                continue
+            
+            # 死叉出場
+            dead = k_prev > d_prev and k < d
+            if dead:
+                trades.append({
+                    'entry_idx': entry_idx, 'exit_idx': i,
+                    'entry_price': entry_price, 'exit_price': price,
+                    'profit_pct': round(profit_pct, 2),
+                    'exit_reason': 'dead_cross'
+                })
+                position = 0
+                continue
+    
+    # 最後一筆強制平倉
+    if position:
+        price = closes[-1]
+        profit_pct = (price / entry_price - 1) * 100
+        trades.append({
+            'entry_idx': entry_idx, 'exit_idx': len(closes)-1,
+            'entry_price': entry_price, 'exit_price': price,
+            'profit_pct': round(profit_pct, 2),
+            'exit_reason': 'forced'
+        })
+    
+    if not trades:
+        return None
+    
+    wins = sum(1 for t in trades if t['profit_pct'] > 0)
+    losses = sum(1 for t in trades if t['profit_pct'] <= 0)
+    total = wins + losses
+    win_rate = wins / total * 100 if total > 0 else 0
+    total_profit = sum(t['profit_pct'] for t in trades)
+    avg_profit = total_profit / total if total > 0 else 0
+    max_loss = min(t['profit_pct'] for t in trades) if trades else 0
+    max_gain = max(t['profit_pct'] for t in trades) if trades else 0
+    
+    # 評分公式：勝率權重 + 總報酬權重
+    score = win_rate * 0.6 + avg_profit * 5 * 0.4
+    
+    return {
+        'total_trades': total,
+        'wins': wins,
+        'losses': losses,
+        'win_rate': round(win_rate, 1),
+        'total_profit': round(total_profit, 2),
+        'avg_profit': round(avg_profit, 2),
+        'max_loss': round(max_loss, 2),
+        'max_gain': round(max_gain, 2),
+        'score': round(score, 1),
+        'trades_sample': trades[:5],
+    }
+
+
+# ══════════════════════════════════════════════
+#  參數搜尋
+# ══════════════════════════════════════════════
+
+def find_best_params(data):
+    """搜尋最佳 KD 參數組合"""
+    best = None
     best_score = -999
     
-    # 測試各種 K/D 平滑週期組合
-    for k_period in range(2, 6):
-        for d_period in range(2, 6):
-            if k_period == d_period == 2:
-                continue  # 太敏感
-            
-            # 用不同 RSV 天數 (5~14)
-            for rsv_days in [5, 7, 9, 12, 14]:
-                score = 0
-                wins = 0
-                losses = 0
-                
-                # 模擬交易
-                position = 0  # 0=空手, 1=持有
-                entry_price = 0
-                
-                for i in range(rsv_days + max(k_period, d_period), len(closes)):
-                    # 取一段資料計算 KD
-                    seg_closes = closes[max(0,i-rsv_days):i+1]
-                    seg_highs = highs[max(0,i-rsv_days):i+1]
-                    seg_lows = lows[max(0,i-rsv_days):i+1]
-                    
-                    # 算 KD
-                    h9 = max(seg_highs[:-1])
-                    l9 = min(seg_lows[:-1])
-                    if h9 == l9:
-                        continue
-                    rsv = (seg_closes[-2] - l9) / (h9 - l9) * 100
-                    
-                    # K 值 (簡化版)
-                    k = (2/3) * 50 + (1/3) * rsv
-                    d = (2/3) * 50 + (1/3) * k
-                    
-                    # 前一根K
-                    rsv_prev = (seg_closes[-3] - l9) / (h9 - l9) * 100 if len(seg_closes) > 2 else rsv
-                    k_prev = (2/3) * 50 + (1/3) * rsv_prev
-                    d_prev = (2/3) * 50 + (1/3) * k_prev
-                    
-                    current_price = closes[i]
-                    
-                    # 金叉判斷 (K 從下往上穿 D)
-                    is_golden = k_prev < d_prev and k > d
-                    
-                    # 買入條件：金叉 + 在超賣區附近 (K<40)
-                    if not position and is_golden and k < 40:
-                        position = 1
-                        entry_price = current_price
-                    
-                    # 賣出條件：死叉 (K 向下穿 D) 或漲幅超過 5%
-                    elif position:
-                        if k_prev > d_prev and k < d:
-                            # 死叉賣出
-                            profit_pct = (current_price / entry_price - 1) * 100
-                            if profit_pct > 0:
-                                wins += 1
-                            else:
-                                losses += 1
-                            score += profit_pct
-                            position = 0
-                        elif current_price / entry_price > 1.05:
-                            # 停利 5%
-                            profit_pct = 5
-                            wins += 1
-                            score += profit_pct
-                            position = 0
-                        elif current_price / entry_price < 0.97:
-                            # 停損 3%
-                            profit_pct = -3
-                            losses += 1
-                            score += profit_pct
-                            position = 0
-                
-                total_trades = wins + losses
-                if total_trades >= 5:  # 至少要有5次交易
-                    win_rate = wins / total_trades * 100
-                    # 評分：勝率 + 總報酬 / 交易次數
-                    total_score = win_rate + (score / max(total_trades, 1)) * 10
-                    
-                    if total_score > best_score:
-                        best_score = total_score
-                        best_params = {
-                            'k_period': k_period,
-                            'd_period': d_period,
-                            'rsv_days': rsv_days,
-                            'total_trades': total_trades,
-                            'wins': wins,
-                            'losses': losses,
-                            'win_rate': round(win_rate, 1),
-                            'total_profit': round(score, 2),
-                            'score': round(total_score, 1),
-                        }
+    param_grid = []
+    for k_s in [2, 3, 4, 5]:
+        for d_s in [2, 3, 4, 5]:
+            for rsv in [5, 7, 9, 12, 14]:
+                for buy_k in [30, 35, 40, 45, 50]:
+                    for sl in [2, 3, 4]:
+                        for tp in [3, 4, 5, 6]:
+                            if k_s == d_s == 2:
+                                continue
+                            param_grid.append((k_s, d_s, rsv, buy_k, sl, tp))
     
-    return best_params
+    # 如果組合太多，抽樣測試
+    total_combos = len(param_grid)
+    step = max(1, total_combos // 200)  # 最多測 200 組
+    test_grid = param_grid[::step]
+    
+    for params in test_grid:
+        k_s, d_s, rsv, buy_k, sl, tp = params
+        result = backtest_stock(data, k_s, d_s, rsv, buy_k, 'dead_cross', sl, tp)
+        if result and result['total_trades'] >= 5:
+            s = result['score']
+            if s > best_score:
+                best_score = s
+                best = {
+                    'k_period': k_s, 'd_period': d_s, 'rsv_days': rsv,
+                    'buy_threshold': buy_k,
+                    'stop_loss': sl, 'take_profit': tp,
+                    **result
+                }
+    
+    return best
 
 
-# ═══════════════════════════════════════════════
+# ══════════════════════════════════════════════
 #  主流程
-# ═══════════════════════════════════════════════
+# ══════════════════════════════════════════════
 
-def run_backtest(force_download=False):
+def run_all_backtest():
     """對所有持股跑 KD 回測"""
-    print('=' * 60)
-    print('  🦞 KD 30分K 黃金交叉回測')
+    print('=' * 70)
+    print('  🦞 KD 黃金交叉回測（本機 3 年日K資料）')
     print(f'  {datetime.now().strftime("%Y-%m-%d %H:%M")}')
-    print('=' * 60)
-    
-    # 讀取現有參數
-    existing_params = {}
-    if os.path.exists(PARAMS_FILE):
-        with open(PARAMS_FILE, 'r', encoding='utf-8') as f:
-            existing_params = json.load(f)
-        print(f'  已有 {len(existing_params)} 檔股票的參數')
+    print('=' * 70)
     
     results = {}
     
     for sid, sname in STOCKS:
-        print(f'\n  {sid} {sname}...', end=' ', flush=True)
+        print(f'\n  📊 {sid} {sname}...', end=' ', flush=True)
         
-        # 讀取本地 30 分 K 資料（如果有）
-        local_file = os.path.join(OUTPUT_DIR, f'{sid}_30min.json')
-        kbars_data = []
+        data = read_csv_data(sid)
+        if not data or len(data['closes']) < 100:
+            print('❌ 資料不足')
+            continue
         
-        if os.path.exists(local_file) and not force_download:
-            try:
-                with open(local_file, 'r', encoding='utf-8') as f:
-                    kbars_data = json.load(f)
-                print(f'讀取本地 {len(kbars_data)} 根 K 棒', end=' ')
-            except:
-                pass
-        
-        if not kbars_data:
-            print('下載 30分K...', end=' ', flush=True)
-            kbars_data = download_30min_kbars(sid, days=45)
-            if kbars_data:
-                # 存檔
-                with open(local_file, 'w', encoding='utf-8') as f:
-                    json.dump(kbars_data, f, ensure_ascii=False)
-                print(f'{len(kbars_data)} 根', end=' ')
-            else:
-                print('下載失敗，用上次參數', end=' ')
-                if sid in existing_params:
-                    results[sid] = existing_params[sid]
-                    print(f'(沿用) K={existing_params[sid].get("k_period",9)}')
-                else:
-                    # 預設參數
-                    results[sid] = {
-                        'k_period': 3, 'd_period': 3, 'rsv_days': 9,
-                        'source': 'default'
-                    }
-                    print('(預設 K3/D3/RSV9)')
-                continue
-        
-        if kbars_data and len(kbars_data) >= 30:
-            params = backtest_kd_params(kbars_data)
-            if params:
-                params['source'] = 'backtest'
-                results[sid] = params
-                print(f'✅ K{params["k_period"]}/D{params["d_period"]}/RSV{params["rsv_days"]}  '
-                      f'勝率{params["win_rate"]}% 交易{params["total_trades"]}次')
-            else:
-                if sid in existing_params:
-                    results[sid] = existing_params[sid]
-                    print(f'⚠️ 回測不足，沿用 K={existing_params[sid].get("k_period",9)}')
-                else:
-                    results[sid] = {
-                        'k_period': 3, 'd_period': 3, 'rsv_days': 9,
-                        'source': 'default'
-                    }
-                    print('⚠️ 回測不足，設預設 K3/D3/RSV9')
+        best = find_best_params(data)
+        if best:
+            results[sid] = best
+            print(f'✅ K{best["k_period"]}/D{best["d_period"]}/RSV{best["rsv_days"]}  '
+                  f'買K<{best["buy_threshold"]} 停損{best["stop_loss"]}%停利{best["take_profit"]}%  '
+                  f'勝率{best["win_rate"]}% 交易{best["total_trades"]}次')
         else:
-            if sid in existing_params:
-                results[sid] = existing_params[sid]
-                print(f'沿用 K={existing_params[sid].get("k_period",9)}')
-            else:
-                results[sid] = {
-                    'k_period': 3, 'd_period': 3, 'rsv_days': 9,
-                    'source': 'default'
-                }
-                print('預設 K3/D3/RSV9')
+            print('❌ 回測失敗')
     
-    # 儲存參數
+    if not results:
+        print('\n  ❌ 沒有任何股票回測成功')
+        return
+    
+    # 儲存
     output = {
         'update_time': datetime.now().strftime('%Y-%m-%d %H:%M'),
+        'data_source': 'database/*_3y.csv (3年日K)',
         'stocks': results,
     }
     with open(PARAMS_FILE, 'w', encoding='utf-8') as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
     
     print()
-    print('=' * 60)
-    print(f'  ✅ 完成！參數已儲存: {PARAMS_FILE}')
-    print('=' * 60)
+    print('=' * 70)
+    print(f'  ✅ 完成！{len(results)} 檔股票參數已儲存')
+    print(f'  📁 {PARAMS_FILE}')
+    print('=' * 70)
     
     return results
 
@@ -356,12 +310,14 @@ def get_kd_params(stock_id):
             with open(PARAMS_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             return data.get('stocks', {}).get(stock_id, {
-                'k_period': 3, 'd_period': 3, 'rsv_days': 9
+                'k_period': 3, 'd_period': 3, 'rsv_days': 9,
+                'buy_threshold': 40, 'stop_loss': 3, 'take_profit': 5
             })
         except:
             pass
-    return {'k_period': 3, 'd_period': 3, 'rsv_days': 9}
+    return {'k_period': 3, 'd_period': 3, 'rsv_days': 9,
+            'buy_threshold': 40, 'stop_loss': 3, 'take_profit': 5}
 
 
 if __name__ == '__main__':
-    run_backtest(force_download=True)
+    run_all_backtest()
