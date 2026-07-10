@@ -251,7 +251,7 @@ def get_futures_tone():
     # 從昨天S&P期貨判斷（非精確，僅供基調）
     return '⬆️ 費半大幅領漲，今日台股半導體開高偏強'
 
-def gen_html(snaps, tech_data, trust_rates, alerts, events, tone):
+def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html=''):
     now = datetime.now()
     today = now.strftime('%Y-%m-%d')
     now_hm = now.strftime('%H:%M')
@@ -540,7 +540,10 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone):
         </table>
     </div>
 
-    <!-- 川普投顧 -->
+    <!-- 新聞區塊：由 morning_news.py 動態產生 -->
+    {news_html if news_html else ''}
+    
+    <!-- 川普投顧靜態備援 -->
     <div class="card" style="border-left-color: #a29bfe;">
         <div class="card-title">🗣️ 川普投顧大砲特區</div>
         <p>持續監控川普對台灣晶片關稅與科技禁令言論</p>
@@ -632,7 +635,18 @@ def run():
     print('\n🏗️ 組裝 HTML...')
     alerts = get_linkage_alerts()
     events = get_events()
-    html = gen_html(snaps, tech_data, trust_rates, alerts, events, tone)
+    # 4a. 抓新聞
+    print('\n📰 抓取今日新聞...')
+    try:
+        from morning_news import get_all_headlines, generate_html
+        news_data = get_all_headlines()
+        news_html = generate_html(news_data)
+        print(f'   ✅ 新聞就緒')
+    except Exception as e:
+        print(f'   ⚠️ 新聞抓取失敗: {str(e)[:40]}')
+        news_html = ''
+    
+    html = gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html)
     size_kb = len(html) / 1024
     print(f'   ✅ HTML 完成 ({size_kb:.0f} KB)')
     
