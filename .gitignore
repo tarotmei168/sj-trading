@@ -1,0 +1,11 @@
+﻿*.pyc
+__pycache__/
+*.egg-info/
+.DS_Store
+.env
+_tmp_*
+_upload*
+cache/
+output/scheduler.log
+output/monitor_*.txt
+output/morning_*.txt
