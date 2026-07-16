@@ -365,10 +365,10 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html=''):
                 total = h['total_trust']
                 is_watch = h.get('is_watch', False)
                 
-                # 滲透率
+                # 滲透率（只有持股才有，全市場無資料）
                 r = trust_rates.get(sid, {})
-                p_day = r.get('p_day', 0) if isinstance(r.get('p_day'), (int, float)) else 0
-                p_cum = r.get('p_cum', 0) if isinstance(r.get('p_cum'), (int, float)) else 0
+                p_day = r.get('p_day', 0) if isinstance(r.get('p_day'), (int, float)) and r.get('p_day', 0) > 0 else '—'
+                p_cum = r.get('p_cum', 0) if isinstance(r.get('p_cum'), (int, float)) and r.get('p_cum', 0) > 0 else '—'
                 
                 tag = '【持股】' if is_watch else ''
                 if total >= 5000000:
@@ -379,8 +379,8 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html=''):
                     f'<tr><td>{sid}</td><td>{name}</td>'
                     f'<td>{days}天</td>'
                     f'<td style="color:var(--red-alert);font-weight:bold;">{total:>10,}</td>'
-                    f'<td>{p_day:.4f}%</td>'
-                    f'<td>{p_cum:.4f}%</td>'
+                    f'<td>{p_day if isinstance(p_day, str) else f"{p_day:.4f}%"}</td>'
+                    f'<td>{p_cum if isinstance(p_cum, str) else f"{p_cum:.4f}%"}</td>'
                     f'<td>{tag}</td></tr>\n'
                 )
                 if trust_rows.count('<tr>') >= 42:
@@ -543,9 +543,9 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html=''):
     </div>
 
     <!-- 費半 SOX（唯一指數）-->
-    <!-- SOX + 台指期夜盤 -->
+    <!-- SOX + 台指期 -->
     <div class="card info">
-        <div class="card-title">🇺🇸 費城半導體指數 (SOX) + 🇹🇼 台指期夜盤</div>
+        <div class="card-title">🇺🇸 費城半導體指數 (SOX) + 🇹🇼 台指期</div>
         <div class="sox-box">
             <div class="sox-name">費城半導體指數 · 台股風向球</div>
             <div class="sox-val">{sox_close}</div>
@@ -553,7 +553,7 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html=''):
         </div>
         <div style="background: #2a2a2a; padding: 12px; border-radius: 6px; text-align: center; margin-top: 10px; border: 1.5px solid #1e90ff;">
             <div style="font-size: 18px; color: #ccc;">台指期指數</div>
-            <div style="font-size: 24px; font-weight: bold; margin: 6px 0; color: #fff;">{fut_str if fut is not None and fut else '台指期夜盤 — 離線'}</div>
+            <div style="font-size: 24px; font-weight: bold; margin: 6px 0; color: #fff;">{fut_str if fut is not None and fut else '台指期 — 離線'}</div>
         </div>
         <div class="tone-bar">
             💡 開盤基調：{tone}
