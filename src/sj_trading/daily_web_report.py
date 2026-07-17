@@ -32,6 +32,14 @@ sys.path.insert(0, os.path.dirname(SCRIPT_DIR))
 WORKSPACE = os.path.dirname(BASE_DIR)
 sys.path.insert(0, WORKSPACE)
 
+# 載入 .env（永豐金 API Key）
+try:
+    from dotenv import load_dotenv
+    env_path = os.path.join(BASE_DIR, '.env')
+    load_dotenv(env_path)
+except:
+    pass
+
 # ─── 19檔持股（架構文件規定）──────────────────
 CORE_19 = [
     ('2436','偉詮電'), ('2337','旺宏'), ('5351','鈺創'),
