@@ -411,15 +411,19 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html=''):
             f'</div>\n'
         )
     
-    # ── 未來14天事件 ──
+    # ── 未來14天事件（只顯示 >= 今天的日期）──
+    today_dt = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    cutoff_dt = today_dt + timedelta(days=14)
     event_rows = ''
     for date_str, ev in KNOWN_EVENTS:
-        event_rows += (
-            f'<div class="event-row">'
-            f'<span>{fmt_date(date_str)}</span>'
-            f'<span>{ev}</span>'
-            f'</div>\n'
-        )
+        ev_dt = datetime.strptime(date_str, '%Y-%m-%d')
+        if ev_dt >= today_dt and ev_dt <= cutoff_dt:
+            event_rows += (
+                f'<div class="event-row">'
+                f'<span>{fmt_date(date_str)}</span>'
+                f'<span>{ev}</span>'
+                f'</div>\n'
+            )
     if not event_rows:
         event_rows = '<div class="event-row"><span>暫無事件</span></div>'
     
