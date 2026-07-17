@@ -89,6 +89,14 @@ python upload.py
 
 ## 📊 KD 黃金交叉（已完成每檔獨立回測）
 
+### ⚠️ 每日必須先更新 database 再跑晨報
+FinMind API 每天盤後更新。CSV 過期會讓 KD 用舊資料算，金叉判斷不準。
+**晨報流程第一步先跑：**
+```
+python src/sj_trading/download_all_3y.py
+```
+現在已加 6770 力積電 + 2330 台積電進 download list。
+
 ### 本機資料（不要刪掉！）
 ```
 C:\Users\User\.openclaw\workspace\sj-trading\database\
@@ -139,6 +147,7 @@ python -X utf8 src\sj_trading\kd_backtest.py
 
 ### 08:30 晨報產出
 ```
+0. python src/sj_trading/download_all_3y.py  ← 先更新 database，否則KD用舊資料
 1. python src/sj_trading/daily_web_report.py
    - Shioaji 永豐API → 19檔即時報價
    - database/*_3y.csv → KD/RSI/支撐（每檔參數不同，讀 kd_params.json）
