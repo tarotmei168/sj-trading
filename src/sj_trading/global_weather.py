@@ -43,17 +43,22 @@ def get_taiwan_futures():
         import sys, os
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         from shioaji_helper import ShioajiClient
+        import shioaji as sj
         sjc = ShioajiClient()
         if sjc.login():
-            contract = sjc.api.Contracts.Futures.TX  # 台指期近月
+            # 手動建立台指期近月合約（TXFC1F = 台指期近月）
+            contract = sj.BaseContract(
+                code='TXFC1F',
+                exchange=sj.Exchange.TAIFEX,
+                security_type=sj.SecurityType.Future
+            )
             snap = sjc.api.snapshots([contract])
             if snap and len(snap) > 0:
                 close = snap[0].close
-                ref = snap[0].reference_price
-                if ref and ref > 0:
-                    change = (close / ref - 1) * 100
+                change_rate = snap[0].change_rate
+                if close and close > 0 and change_rate is not None:
                     sjc.logout()
-                    return {"close": round(close, 2), "change": round(change, 2), "source": "永豐即時"}
+                    return {"close": round(close, 2), "change": round(change_rate, 2), "source": "永豐即時"}
             sjc.logout()
     except:
         pass
@@ -65,13 +70,11 @@ def get_taiwan_futures():
             import io, contextlib
             with contextlib.redirect_stderr(io.StringIO()):
                 t = yf.Ticker(sym)
-                # 用 1d 或 1h 抓最新
                 df = t.history(period="2d", interval="1h")
                 if df is not None and len(df) >= 2:
                     closes = df["Close"].values
                     change = (closes[-1] / closes[-2] - 1) * 100
                     return {"close": round(closes[-1], 2), "change": round(change, 2), "source": "yfinance即時"}
-                # fallback to daily
                 df = t.history(period="5d")
                 if df is not None and len(df) >= 2:
                     closes = df["Close"].values
@@ -235,7 +238,7 @@ def generate_weather_section():
         lines.append("  %s 費半波動%.1f%% → 直接影響台股半導體族群開盤" % (sox_icon, sox["change"]))
     
     # ── 台指期夜盤 ──
-    fut = get_taiwan_futures_night()
+    fut = get_taiwan_futures()
     if fut:
         arrow = "🔺" if fut["change"] > 0 else "🔻" if fut["change"] < 0 else "➖"
         lines.append("")
