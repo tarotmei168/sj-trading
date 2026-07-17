@@ -46,17 +46,18 @@ def get_taiwan_futures():
         import shioaji as sj
         sjc = ShioajiClient()
         if sjc.login():
-            # 手動建立台指期近月合約（TXFC1F = 台指期近月）
+            # 台指期近月合約
             contract = sj.BaseContract(
                 code='TXFC1F',
                 exchange=sj.Exchange.TAIFEX,
-                security_type=sj.SecurityType.Future
+                security_type=sj.SecurityType.Stock  # Future 會 crash，用 Stock 可建立
             )
             snap = sjc.api.snapshots([contract])
             if snap and len(snap) > 0:
                 close = snap[0].close
-                change_rate = snap[0].change_rate
-                if close and close > 0 and change_rate is not None:
+                change_price = snap[0].change_price
+                if close and close > 0:
+                    change_rate = (change_price / (close - change_price)) * 100 if (close - change_price) != 0 else 0
                     sjc.logout()
                     return {"close": round(close, 2), "change": round(change_rate, 2), "source": "永豐即時"}
             sjc.logout()
