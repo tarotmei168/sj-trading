@@ -113,8 +113,8 @@ class ShioajiClient:
             raise
         self._contracts = self._api.Contracts.Stocks
 
-        # 若有 CA 憑證則啟用
-        if cfg["ca_path"] and not sim:
+        # 若有 CA 憑證則啟用（需有密碼）
+        if cfg["ca_path"] and cfg["ca_passwd"] and not sim:
             try:
                 self._api.activate_ca(
                     ca_path=cfg["ca_path"],
