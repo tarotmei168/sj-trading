@@ -884,6 +884,9 @@ def run():
         except:
             pass
     all_ids = list(dict.fromkeys(CORE_IDS + potential_ids))
+    # 🔍 debug: 先測試 read_local_csv
+    debug_test = read_local_csv('2330')
+    print(f'  [DEBUG] read_local_csv(2330): {type(debug_test).__name__}, len={len(debug_test) if debug_test else "None"}')
     tech_data = get_tech_batch(all_ids)
     ok_count = sum(1 for v in tech_data.values() if v)
     print(f'   ✅ {ok_count}/{len(all_ids)} 檔技術指標就緒（含 {len(potential_ids)} 檔潛力股）')
