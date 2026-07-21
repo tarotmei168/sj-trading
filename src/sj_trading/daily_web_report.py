@@ -1176,10 +1176,7 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
     <!-- 潛力股候選（全市場投信+法人掃描，標記對作/共愛）-->
     <div class="card alert">
         <div class="card-title">
-            🎯 潛力股候選：投信/法人動向
-            · 全市場連買>=3天, 累計>50萬
-            · 若投信+外資同買標記 🟢共愛；對作標記 🔴對作
-            · 更新: {trust_update_time}
+            🎯 潛力股候選
         </div>
         <div class="pc-grid">
             {potential_rows}
