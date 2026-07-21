@@ -1,4 +1,4 @@
-# 🦞 小龍蝦晨報系統 — 開機記憶卡（完整版）
+# 🦞 小龍蝦早報系統 — 開機記憶卡（完整版）
 # ⚠️ 每次重啟後，先讀這個檔案！全部設定都在這裡。
 
 ## 📍 專案位置
@@ -31,7 +31,7 @@ python upload.py
 
 ### 每改完東西後一定要做的事
 1. 本地修改完成
-2. 測試：產一次晨報（`python src/sj_trading/daily_web_report.py`）
+2. 測試：產一次早報（`python src/sj_trading/daily_web_report.py`）
 3. 上傳：`git push origin main --force`
 4. 更新 MORNING_CHECKLIST.md 記錄
 5. git push 上傳 MORNING_CHECKLIST.md
@@ -41,8 +41,8 @@ python upload.py
 ## ⏰ 自動排程（cron，已設定好）
 | 時間 | 任務 | 腳本 |
 |:---:|:---|:---|
-| 08:30 | 🦞 產晨報 + git push + 啟動盤中監控 | daily_web_report.py |
-| 16:30 | 🏦 全市場投信掃描 + 更新晨報 + git push | daily_market_update.py → daily_web_report.py |
+| 08:30 | 🦞 產早報 + git push + 啟動盤中監控 | daily_web_report.py |
+| 16:30 | 🏦 全市場投信掃描 + 更新早報 + git push | daily_market_update.py → daily_web_report.py |
 | 08:30~13:30 | 📊 盤中每5分KD監控（含逼近金叉預警） | day_engine_v2.py |
 
 ---
@@ -84,9 +84,9 @@ python upload.py
 
 ## 📊 KD 黃金交叉（已完成每檔獨立回測）
 
-### ⚠️ 每日必須先更新 database 再跑晨報
+### ⚠️ 每日必須先更新 database 再跑早報
 FinMind API 每天盤後更新。CSV 過期會讓 KD 用舊資料算，金叉判斷不準。
-**晨報流程第一步先跑：**
+**早報流程第一步先跑：**
 ```
 python src/sj_trading/download_all_3y.py
 ```
@@ -145,9 +145,9 @@ python -X utf8 src\sj_trading\kd_backtest.py
 
 ---
 
-## 📝 晨報流程（完整正確版）
+## 📝 早報流程（完整正確版）
 
-### 08:30 晨報產出
+### 08:30 早報產出
 ```
 0. python src/sj_trading/download_all_3y.py  ← 先更新 database，否則KD用舊資料
 1. python src/sj_trading/daily_web_report.py
@@ -177,7 +177,7 @@ python -X utf8 src\sj_trading\kd_backtest.py
 ---
 
 ## 🧠 永遠記住的事
-1. **每天08:30前產出晨報** → git push 上傳
+1. **每天08:30前產出早報** → git push 上傳
 2. **投信資料要掃全市場**，不只 watchlist
 3. **新聞只留台股+美股**，過濾中國
 4. **KD 用本機 database/*_3y.csv 資料回測**，每檔參數不同，存 database/kd_params.json

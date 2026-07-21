@@ -25,12 +25,12 @@ td{padding:8px;border:1px solid #444;font-size:18px}
 </head><body>
 
 <h1>??? 小龍蝦行動總經操盤雷達</h1>
-<p style="text-align:center;color:#a0a0a0;font-size:18px">全系統架構（最高執行準則） | 更新: 2026-07-21 14:35</p>
+<p style="text-align:center;color:#a0a0a0;font-size:18px">全系統架構（最高執行準則） | 更新: 2026-07-21 16:24</p>
 
 <div class="section red">
 <h2>方式一、時程排程</h2>
 <table><tr><th>時間</th><th>任務</th><th>指令</th></tr>
-<tr><td><b>08:30</b> ???</td><td>晨報產出 + Git Push</td><td>daily_web_report.py</td></tr>
+<tr><td><b>08:30</b> ???</td><td>早報產出 + Git Push</td><td>daily_web_report.py</td></tr>
 <tr><td><b>08:30~13:35</b> ???</td><td>盤中KD金叉監控</td><td>day_engine_notify.json</td></tr>
 <tr><td><b>16:30</b> ???</td><td>全市場資料庫更新</td><td>daily_market_update.py</td></tr>
 <tr><td>非交易日</td><td colspan="2">全部跳過</td></tr>
@@ -55,8 +55,8 @@ td{padding:8px;border:1px solid #444;font-size:18px}
 <tr><td>15分K金叉預警</td><td>K&gt;D gap&lt;1.5</td><td>每檔日2次</td><td>09:00~13:00</td></tr>
 <tr><td>個股即時暴跌</td><td>跌幅 &gt;7%</td><td>每檔日1次</td><td>即時</td></tr>
 <tr><td>個股即時暴漲</td><td>漲幅 &gt;9%</td><td>每檔日1次</td><td>即時</td></tr>
-<tr><td>今日重大事件</td><td>除息/法說/結算</td><td>08:35 1次</td><td>隨晨報</td></tr>
-<tr><td>費半暴動</td><td>隔夜 &gt;±3%</td><td>晨報1次</td><td>08:30</td></tr>
+<tr><td>今日重大事件</td><td>除息/法說/結算</td><td>08:35 1次</td><td>隨早報</td></tr>
+<tr><td>費半暴動</td><td>隔夜 &gt;±3%</td><td>早報1次</td><td>08:30</td></tr>
 <tr><td>投信異常建倉</td><td>P_day&gt;0.01%</td><td>盤後1次</td><td>16:35</td></tr>
 <tr><td>新聞重大影響</td><td>情緒極負面</td><td>盤後1次</td><td>16:35</td></tr>
 </table>
@@ -124,7 +124,7 @@ td{padding:8px;border:1px solid #444;font-size:18px}
 </div>
 
 <div class="section red">
-<h2>?? 晨報版型規範</h2>
+<h2>早報版型規範</h2>
 <table><tr><th>項目</th><th>要求</th></tr>
 <tr><td>字體</td><td><b>18px</b> 全頁統一</td></tr>
 <tr><td>色系</td><td>深色 #121212 / 卡片 #1e1e1e / 金字 #ffbe76</td></tr>
@@ -165,11 +165,11 @@ td{padding:8px;border:1px solid #444;font-size:18px}
 <h2>?? 檔案組織</h2>
 <table><tr><th>路徑</th><th>說明</th></tr>
 <tr><td>architecture_master.md</td><td>最高準則</td></tr>
-<tr><td>web/index.html</td><td>晨報 (GitHub Pages)</td></tr>
+<tr><td>web/index.html</td><td>早報 (GitHub Pages)</td></tr>
 <tr><td>web/architecture.html</td><td>架構說明</td></tr>
 <tr><td>database/代號_3y.csv</td><td>19檔+額外日K</td></tr>
 <tr><td>output/SITC_Accumulation.csv</td><td>投信買賣超累積</td></tr>
-<tr><td>src/sj_trading/daily_web_report.py</td><td>晨報產生器</td></tr>
+<tr><td>src/sj_trading/daily_web_report.py</td><td>早報產生器</td></tr>
 <tr><td>src/sj_trading/daily_market_update.py</td><td>16:30資料更新</td></tr>
 <tr><td>src/sj_trading/global_weather.py</td><td>總經氣象台</td></tr>
 <tr><td>src/sj_trading/calc_tech.py</td><td>技術指標離線計算</td></tr>
@@ -243,6 +243,6 @@ td{padding:8px;border:1px solid #444;font-size:18px}
 </ol>
 </div>
 
-<div class="footer">??? 小龍蝦系統全架構 | 更新: 2026-07-21 14:35 | 最高執行準則</div>
+<div class="footer">??? 小龍蝦系統全架構 | 更新: 2026-07-21 16:24 | 最高執行準則</div>
 
 </body></html>

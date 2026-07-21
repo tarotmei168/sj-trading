@@ -148,34 +148,100 @@ def get_shioaji_snapshots():
 #  📊 技術指標（本地離線計算）
 # ═══════════════════════════════════════════════
 
+# ── 3年30分K KD最佳參數（2026-07-21回測）──
+KD3Y_PARAMS = {
+    "2436": {"K":5, "VolF":0, "Pos":"none"},
+    "2337": {"K":21, "VolF":0, "Pos":"none"},
+    "5351": {"K":14, "VolF":0, "Pos":"none"},
+    "3673": {"K":14, "VolF":1, "Pos":"none"},
+    "3711": {"K":21, "VolF":0, "Pos":"none"},
+    "4958": {"K":21, "VolF":0, "Pos":"mid"},
+    "3042": {"K":14, "VolF":1, "Pos":"none"},
+    "2454": {"K":21, "VolF":0, "Pos":"none"},
+    "2317": {"K":14, "VolF":1, "Pos":"none"},
+    "8150": {"K":21, "VolF":0, "Pos":"none"},
+    "2330": {"K":9, "VolF":1, "Pos":"none"},
+}
+
+import numpy as np
+
+def compute_3ykd(close, low, high, kp):
+    """計算30分K KD（3年回測的最佳K值）"""
+    n = len(close)
+    k_vals = np.full(n, 50.0, dtype=float)
+    d_vals = np.full(n, 50.0, dtype=float)
+    for i in range(kp - 1, n):
+        llv = np.min(low[i - kp + 1 : i + 1])
+        hhv = np.max(high[i - kp + 1 : i + 1])
+        denom = hhv - llv
+        rsv = 50.0 if denom == 0 else ((close[i] - llv) / denom) * 100
+        if i == kp - 1:
+            k_vals[i] = 50.0 * 2/3 + rsv * 1/3
+        else:
+            k_vals[i] = k_vals[i-1] * 2/3 + rsv * 1/3
+        d_vals[i] = d_vals[i-1] * 2/3 + k_vals[i] * 1/3
+    return k_vals, d_vals
+
 def get_tech_batch(stock_ids):
-    """批次產出19檔的KD/RSI/支撐"""
+    """批次產出技術指標（3年30分K KD + MACD + RSI + 量能）"""
     result = {}
     for sid in stock_ids:
         data = read_local_csv(sid)
         if not data or len(data) < 25:
             result[sid] = None
             continue
-        closes = [d['close'] for d in data]
-        highs = [d['high'] for d in data]
-        lows = [d['low'] for d in data]
+        closes = np.array([d['close'] for d in data], dtype=float)
+        highs = np.array([d['high'] for d in data], dtype=float)
+        lows = np.array([d['low'] for d in data], dtype=float)
+        volumes = np.array([d['volume'] for d in data], dtype=float)
         
-        k, d, golden, gap = calc_KD(closes, highs, lows)
-        rsi = calc_RSI(closes)
-        support25 = min(closes[-25:]) if len(closes) >= 25 else min(closes)
+        # KD（3年回測最佳K值）
+        kp = KD3Y_PARAMS.get(sid, {}).get("K", 9)
+        k_vals, d_vals = compute_3ykd(closes, lows, highs, kp)
+        k = k_vals[-1]
+        d = d_vals[-1]
+        golden = k >= d
+        gap = k - d
         
-        # 位階判斷
-        if rsi < 30: level = '超賣'
-        elif rsi < 40: level = '偏低'
-        elif rsi < 55: level = '中性'
-        elif rsi < 70: level = '偏多'
+        # RSI
+        rsi_val = calc_RSI(closes.tolist())
+        
+        
+        # 量能：最近5天均量 / 前20天均量
+        if len(volumes) >= 25:
+            vol5 = float(np.mean(volumes[-5:]))
+            vol20 = float(np.mean(volumes[-20:-5])) if len(volumes) >= 25 else vol5
+            vol_ratio = vol5 / vol20 if vol20 > 0 else 1.0
+        else:
+            vol5 = float(np.mean(volumes[-5:])) if len(volumes) >= 5 else 0
+            vol20 = float(np.mean(volumes[-20:])) if len(volumes) >= 20 else vol5
+            vol_ratio = vol5 / vol20 if vol20 > 0 else 1.0
+        
+        if vol_ratio > 1.5: vol_note = '放量🟢'
+        elif vol_ratio < 0.8: vol_note = '量縮🔴'
+        else: vol_note = '平量⚪'
+        
+        # KD位置
+        if gap > 3: kd_pos = '多頭'
+        elif gap > 0: kd_pos = '偏多'
+        elif gap > -3: kd_pos = '偏空'
+        else: kd_pos = '空頭'
+        
+        # MACD信號
+        
+        # 位階
+        if rsi_val < 30: level = '超賣'
+        elif rsi_val < 40: level = '偏低'
+        elif rsi_val < 55: level = '中性'
+        elif rsi_val < 70: level = '偏多'
         else: level = '過熱'
         
         result[sid] = {
-            'k': round(k, 1), 'd': round(d, 1),
-            'golden': golden, 'gap': round(gap, 1),
-            'rsi': rsi, 'support25': round(support25, 1),
-            'price': closes[-1], 'level': level,
+            'k': round(k, 1), 'd': round(d, 1), 'gap': round(gap, 1),
+            'golden': golden, 'rsi': rsi_val,
+            'dif': round(dif, 2), 'dea': round(dea, 2), 'macd_hist': round(macd_hist, 2),
+            'vol_ratio': round(vol_ratio, 2), 'vol_note': vol_note,
+            'price': closes[-1],
         }
     return result
 
@@ -199,7 +265,6 @@ def get_trust_penetration():
         return {}
     
     return calc_rates(sitc_path, CORE_IDS)
-
 
 # ═══════════════════════════════════════════════
 #  🔗 台美聯動 + 未來事件
@@ -255,7 +320,6 @@ KNOWN_EVENTS = [
 def fmt_date(date_str):
     d = datetime.strptime(date_str, '%Y-%m-%d')
     return f'{d.month}/{d.day}({WEEKDAY_NAMES[d.weekday()]})'
-
 
 # ═══════════════════════════════════════════════
 #  🏗️ HTML 組裝
@@ -323,46 +387,59 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         tone = f'費半 {sox_chg} | {fut_str} → {fut_tone}'
     
     # ── 核心持股表格 ──
-    def fmt_stock_row(sid, sname, snaps, tech):
-        s = snaps.get(sid, {})
+    def fmt_stock_row(sid, sname, tech):
         t = tech.get(sid)
-        if not s or not t:
+        if not t:
             return ''
         
-        px = s.get('price', 0)
-        chg_pct = s.get('change_pct', 0)
-        high = s.get('high', '—')
-        low = s.get('low', '—')
-        
-        if chg_pct < -2: marker, color = '🔴', 'var(--red-alert)'
-        elif chg_pct < 0: marker, color = '🟡', '#ffa502'
-        elif chg_pct < 2: marker, color = '🟢', 'var(--green-go)'
-        else: marker, color = '🟢', 'var(--green-go)'
-        
+        px = t.get('price', 0)
         k, d = t['k'], t['d']
         gap = t['gap']
-        if gap > 0 and gap < 3: kd_s = f'🔥金叉 K{k}/{d}'
-        elif gap < -3: kd_s = f'💀死叉 K{k}/{d}'
-        else: kd_s = f'K{k}/{d} ➖'
+        rsi_val = t['rsi']
+        vol_note = t.get('vol_note', '—')
         
-        rsi = t['rsi']
-        support = t['support25']
-        lv = t['level']
+        kp = KD3Y_PARAMS.get(sid, {}).get('K', 9)
+        if gap > 3: kd_s = f'🟢金叉(K{kp}) K{k:.1f}/{d:.1f}'
+        elif gap > 0: kd_s = f'🟡逼近金叉(K{kp}) K{k:.1f}/{d:.1f}'
+        elif gap > -3: kd_s = f'🟡逼近死叉(K{kp}) K{k:.1f}/{d:.1f}'
+        else: kd_s = f'🔴死叉(K{kp}) K{k:.1f}/{d:.1f}'
+        
+        
+        hints = []
+        if t.get('golden') and gap < 3: hints.append('🔥金叉中')
+        elif not t.get('golden') and gap > -3: hints.append('💀死叉中')
+        if rsi_val > 70: hints.append('過熱')
+        elif rsi_val < 30: hints.append('超賣')
+        hint_s = ' | '.join(hints) if hints else '—'
+        
+        if gap > 3 and rsi_val < 60:
+            strategy = '🟢 K金叉 可持股'
+        elif gap > 0 and rsi_val < 50:
+            strategy = '🟡 近金叉 觀望期待'
+        elif gap < -3 and rsi_val > 40:
+            strategy = '🔴 死叉中 避開'
+        elif rsi_val > 70:
+            strategy = '🔴 RSI過熱 注意回檔'
+        elif rsi_val < 30 and gap > 0:
+            strategy = '🟢 RSI超賣+金叉 留意買點'
+        else:
+            strategy = '➖ 觀望'
         
         return (
-            f'<tr><td><b>{sid}</b><br>{sname}</td>'
-            f'<td>{px}</td>'
-            f'<td style="color:{color}">{marker} {chg_pct:+.2f}%</td>'
-            f'<td>H:{high} L:{low}</td>'
-            f'<td>{support}</td>'
+            f'<tr>'
+            f'<td><b>{sid}</b></td>'
+            f'<td>{sname}</td>'
+            f'<td style="font-weight:bold;font-size:1.05em">{px}</td>'
             f'<td>{kd_s}</td>'
-            f'<td>{rsi}</td>'
-            f'<td>{lv}</td></tr>\n'
+            f'<td>{rsi_val}</td>'
+            f'<td>{vol_note}</td>'
+            f'<td>{hint_s}</td>'
+            f'<td>{strategy}</td></tr>\n'
         )
-    
+
     price_rows = ''
     for sid, sname in CORE_19:
-        price_rows += fmt_stock_row(sid, sname, snaps, tech_data)
+        price_rows += fmt_stock_row(sid, sname, tech_data)
     if not price_rows:
         price_rows = '<tr><td colspan="8" style="text-align:center;color:#666;">⏳ 資料讀取中</td></tr>'
     
@@ -404,7 +481,7 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
                     f'<td>{p_cum if isinstance(p_cum, str) else f"{p_cum:.4f}%"}</td>'
                     f'<td>{tag}</td></tr>\n'
                 )
-                if trust_rows.count('<tr>') >= 42:
+                if trust_rows.count('<tr>') >= 10:
                     break
         except:
             pass
@@ -471,9 +548,10 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         if t:
             k, d = t['k'], t['d']
             gap = t['gap']
-            if gap > 0 and gap < 3: kd_s = f'🔥金叉 K{k}/{d}'
-            elif gap < -3: kd_s = f'💀死叉 K{k}/{d}'
-            else: kd_s = f'K{k}/{d} ➖'
+            kp2 = KD3Y_PARAMS.get(sid, {}).get("K", 9)
+            if gap > 0 and gap < 3: kd_s = f'🔥金叉(K{kp2}) K{k:.1f}/{d:.1f}'
+            elif gap < -3: kd_s = f'💀死叉(K{kp2}) K{k:.1f}/{d:.1f}'
+            else: kd_s = f'K{kp2} K{k:.1f}/{d:.1f} ➖'
             tech_str = f'{kd_s} RSI{t["rsi"]} {t["level"]}'
         else:
             tech_str = '—'
@@ -495,7 +573,7 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🦞 小龍蝦行動總經操盤雷達</title>
+    <title>🦞 小龍蝦早報 — 行動總經操盤雷達</title>
     <style>
         :root {{
             --bg-dark: #121212;
@@ -602,8 +680,8 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
 <body>
 
     <div class="header">
-        <h1>🌤️ 全球股市天氣預報</h1>
-        <p>🦞 小龍蝦自動產出 | {today} {now_hm} | FinMind + Shioaji 雙核心</p>
+        <h1>🐛 早報 — 全球股市天氣預報</h1>
+        <p>🦞 小龍蝦早報 | {today} {now_hm} | SOX+台指期 | 30分K KD 3年回測最佳參數</p>
     </div>
 
     <!-- 費半 SOX（唯一指數）-->
@@ -630,8 +708,7 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         <table>
             <thead>
                 <tr>
-                    <th>代號/名稱</th><th>現價</th><th>漲跌</th>
-                    <th>高低</th><th>25天支撐</th><th>K/D</th><th>RSI</th><th>位階</th>
+                    <th>代號</th><th>名稱</th><th>股價</th><th>KD</th><th>RSI</th><th>量能</th><th>提示</th><th>策略</th>
                 </tr>
             </thead>
             <tbody>{price_rows}</tbody>
@@ -684,7 +761,7 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
                     <th>連買</th>
                     <th>投信買超</th>
                     <th>法人（外資）</th>
-                    <th>備註</th>
+                    <th>KD/RSI</th>
                 </tr>
             </thead>
             <tbody>{potential_rows}</tbody>
@@ -704,7 +781,7 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
     </div>
 
     <div class="footer">
-        小龍蝦自動產出 | 08:30 晨報 · 09:00~13:35 監控 · 16:30 更新
+        小龍蝦自動產出 | 08:30 早報 · 09:00~13:35 監控 · 16:30 更新
         | 雙核心 FinMind+Shioaji | 全頁 18px 統一
     </div>
 
@@ -712,7 +789,6 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
 </html>'''
     
     return html
-
 
 # ═══════════════════════════════════════════════
 #  📤 Git Push
@@ -754,7 +830,7 @@ def push_to_github():
         
         subprocess.run([git_path, 'add', '-A'],
                        cwd=git_dir, capture_output=True, timeout=30)
-        subprocess.run([git_path, 'commit', '-m', f'🦞 晨報更新 {now}'],
+        subprocess.run([git_path, 'commit', '-m', f'🦞 早報更新 {now}'],
                        cwd=git_dir, capture_output=True, timeout=30)
         result = subprocess.run([git_path, 'push', 'origin', 'main', '--force'],
                                 cwd=git_dir, capture_output=True, timeout=60)
@@ -772,7 +848,6 @@ def push_to_github():
         print(f'⚠️ Git Push 失敗: {str(e)[:60]}')
         return False
 
-
 # ═══════════════════════════════════════════════
 #  🚀 主流程
 # ═══════════════════════════════════════════════
@@ -780,7 +855,7 @@ def push_to_github():
 def run():
     now = datetime.now()
     print('=' * 60)
-    print(f'  🦞 網頁晨報產出 | {now.strftime("%Y-%m-%d %H:%M")}')
+    print(f'  🦞 網頁早報產出 | {now.strftime("%Y-%m-%d %H:%M")}')
     print(f'  執行模式: {"模擬" if not HAVE_SJ else "標準"} | 18px 全頁')
     print('=' * 60)
     
@@ -866,7 +941,6 @@ def run():
     print('=' * 60)
     return html
 
-
 # ═══════════════════════════════════════════════
 #  🏗️ 架構頁產生器（分層表格）
 # ═══════════════════════════════════════════════
@@ -905,7 +979,7 @@ td{{padding:8px;border:1px solid #444;font-size:18px}}
 <div class="section red">
 <h2>方式一、時程排程</h2>
 <table><tr><th>時間</th><th>任務</th><th>指令</th></tr>
-<tr><td><b>08:30</b> ???</td><td>晨報產出 + Git Push</td><td>daily_web_report.py</td></tr>
+<tr><td><b>08:30</b> ???</td><td>早報產出 + Git Push</td><td>daily_web_report.py</td></tr>
 <tr><td><b>08:30~13:35</b> ???</td><td>盤中KD金叉監控</td><td>day_engine_notify.json</td></tr>
 <tr><td><b>16:30</b> ???</td><td>全市場資料庫更新</td><td>daily_market_update.py</td></tr>
 <tr><td>非交易日</td><td colspan="2">全部跳過</td></tr>
@@ -930,8 +1004,8 @@ td{{padding:8px;border:1px solid #444;font-size:18px}}
 <tr><td>15分K金叉預警</td><td>K&gt;D gap&lt;1.5</td><td>每檔日2次</td><td>09:00~13:00</td></tr>
 <tr><td>個股即時暴跌</td><td>跌幅 &gt;7%</td><td>每檔日1次</td><td>即時</td></tr>
 <tr><td>個股即時暴漲</td><td>漲幅 &gt;9%</td><td>每檔日1次</td><td>即時</td></tr>
-<tr><td>今日重大事件</td><td>除息/法說/結算</td><td>08:35 1次</td><td>隨晨報</td></tr>
-<tr><td>費半暴動</td><td>隔夜 &gt;±3%</td><td>晨報1次</td><td>08:30</td></tr>
+<tr><td>今日重大事件</td><td>除息/法說/結算</td><td>08:35 1次</td><td>隨早報</td></tr>
+<tr><td>費半暴動</td><td>隔夜 &gt;±3%</td><td>早報1次</td><td>08:30</td></tr>
 <tr><td>投信異常建倉</td><td>P_day&gt;0.01%</td><td>盤後1次</td><td>16:35</td></tr>
 <tr><td>新聞重大影響</td><td>情緒極負面</td><td>盤後1次</td><td>16:35</td></tr>
 </table>
@@ -999,7 +1073,7 @@ td{{padding:8px;border:1px solid #444;font-size:18px}}
 </div>
 
 <div class="section red">
-<h2>?? 晨報版型規範</h2>
+<h2>早報版型規範</h2>
 <table><tr><th>項目</th><th>要求</th></tr>
 <tr><td>字體</td><td><b>18px</b> 全頁統一</td></tr>
 <tr><td>色系</td><td>深色 #121212 / 卡片 #1e1e1e / 金字 #ffbe76</td></tr>
@@ -1040,11 +1114,11 @@ td{{padding:8px;border:1px solid #444;font-size:18px}}
 <h2>?? 檔案組織</h2>
 <table><tr><th>路徑</th><th>說明</th></tr>
 <tr><td>architecture_master.md</td><td>最高準則</td></tr>
-<tr><td>web/index.html</td><td>晨報 (GitHub Pages)</td></tr>
+<tr><td>web/index.html</td><td>早報 (GitHub Pages)</td></tr>
 <tr><td>web/architecture.html</td><td>架構說明</td></tr>
 <tr><td>database/代號_3y.csv</td><td>19檔+額外日K</td></tr>
 <tr><td>output/SITC_Accumulation.csv</td><td>投信買賣超累積</td></tr>
-<tr><td>src/sj_trading/daily_web_report.py</td><td>晨報產生器</td></tr>
+<tr><td>src/sj_trading/daily_web_report.py</td><td>早報產生器</td></tr>
 <tr><td>src/sj_trading/daily_market_update.py</td><td>16:30資料更新</td></tr>
 <tr><td>src/sj_trading/global_weather.py</td><td>總經氣象台</td></tr>
 <tr><td>src/sj_trading/calc_tech.py</td><td>技術指標離線計算</td></tr>
@@ -1121,7 +1195,6 @@ td{{padding:8px;border:1px solid #444;font-size:18px}}
 <div class="footer">??? 小龍蝦系統全架構 | 更新: {t} | 最高執行準則</div>
 
 </body></html>'''
-
 
 if __name__ == '__main__':
     run()

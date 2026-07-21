@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-🦞 核心11檔 30分K KD 盤中即時監控（黃金交叉預警）
+🦞 核心11檔 30分K KD 盤中即時監控 ⚠️ WeChat 通知版
 =========================================================
 使用本地 database/30min_kd/*_kd.csv 歷史KD資料，
-盤中每根30分K更新時（約每30分鐘），抓取即時1分K合成最新一根，
-比對KD值，提前通知：
-  - ⚠️ 逼近金叉（K<D 差距≤3 且 K往上追）
-  - 🟢 正式金叉（K穿D）
-  - 🔴 死亡交叉（K跌破D）
+盤中每5分鐘掃一次，偵測30分K KD黃金/死亡交叉。
 
-輸出：即時文字 + 寫入 output/core_kd_alerts.json
+通知規則：
+  - 只發送黃金交叉（K穿D）和死亡交叉（K跌破D）
+  - 每個交叉事件連續發 3 次 WeChat 訊息（間隔1秒）
+  - 逼近金叉/逼近死叉不發 WeChat，僅顯示在控制台
+  - 平常完全不發 → 避免封號
 
 用法：
-  python src/sj_trading/core_intraday_kd_monitor.py        # 一次性掃描
-  python src/sj_trading/core_intraday_kd_monitor.py --loop # 每5分鐘循環
+  python src/sj_trading/core_intraday_kd_monitor.py          # 一次性掃描
+  python src/sj_trading/core_intraday_kd_monitor.py --loop   # 每5分鐘循環
 """
 
 import os, sys, json, time, argparse
@@ -44,6 +44,10 @@ OUTPUT_DIR = BASE_DIR / "output"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 ALERTS_FILE = OUTPUT_DIR / "core_kd_alerts.json"
+
+# ── WeChat 通知設定 ──
+WECHAT_TARGET = None  # 由 send_wechat_alert() 自動從 message 工具發送
+WECHAT_CHANNEL = "openclaw-weixin"
 
 
 # ═══════════════════════════════════════════════════════
@@ -368,13 +372,18 @@ def scan_once():
     save_alerts(alerts)
     api.logout()
 
-    # 重點彙總
+    # 重點彙總 + WeChat 發送（只發黃金交叉和死亡交叉，連續3次）
     if new_alerts:
         print(f"\n{'='*65}")
         print(f"  ⚠️ 新觸發 {len(new_alerts)} 個警報!")
         print(f"{'='*65}")
         for a in new_alerts:
-            print(f"  {a['message']}")
+            msg = a['message']
+            print(f"  {msg}")
+            
+            # 只對正式交叉發 WeChat（逼近不發），連續3次
+            if a["status"] in ("GOLDEN_CROSS", "DEATH_CROSS"):
+                send_wechat_alert(msg, repeat=3, delay=1)
 
     print(f"\n{'='*65}")
     print(f"  掃描完成\n")
@@ -418,6 +427,37 @@ def loop_mode(interval_minutes: int = 5):
         wait_seconds = (next_scan - datetime.now()).total_seconds()
         if wait_seconds > 0:
             time.sleep(wait_seconds)
+
+
+# ═══════════════════════════════════════════════════════
+#  WeChat 發送
+# ═══════════════════════════════════════════════════════
+
+def send_wechat_alert(message: str, repeat: int = 3, delay: int = 1):
+    """
+    透過 OpenClaw message tool 發送 WeChat 通知。
+    連續發 repeat 次，每次間隔 delay 秒。
+    channel = openclaw-weixin
+    """
+    import subprocess, json, sys as _sys
+
+    for i in range(repeat):
+        try:
+            # 用 openclaw msg 命令發送
+            cmd = [
+                "openclaw", "msg", "--channel", WECHAT_CHANNEL,
+                "--target", "me", message
+            ]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+            if result.returncode == 0:
+                print(f"  📱 WeChat 第{i+1}次發送成功")
+            else:
+                print(f"  ⚠️ WeChat 第{i+1}次發送失敗: {result.stderr[:100]}")
+        except Exception as e:
+            print(f"  ⚠️ WeChat 第{i+1}次發送異常: {e}")
+        
+        if i < repeat - 1:
+            time.sleep(delay)
 
 
 # ═══════════════════════════════════════════════════════
