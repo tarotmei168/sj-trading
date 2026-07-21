@@ -1,0 +1,11 @@
+{
+  "version": "1.7.0",
+  "has_constant": true,
+  "constant_names": [],
+  "shioaji_attrs": [
+    "Contracts",
+    "KBars",
+    "constant"
+  ],
+  "kbars_signature": "(self, /, contract, start=None, end=None, timeout=30000, cb=None)"
+}

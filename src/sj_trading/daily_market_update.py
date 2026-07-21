@@ -7,7 +7,7 @@
   Tasks:
     1. Download institutional trust buying/selling -> SITC_Accumulation.csv
     2. Download fundamentals (revenue/EPS/PE) -> Fundamentals_Database.csv
-    3. Keyword + trust buying + revenue growth -> Potential_Candidates.txt
+    3. Generate potential candidates based on post-market TWSE T86 trust buy scan -> Potential_Candidates.txt
     4. AI產業聯想（DeepSeek自我思考）
  ============================================================
 """
@@ -261,7 +261,11 @@ def update_fundamentals():
 # =========================================================
 # =========================================================
 def generate_candidates(accumulation, fundamentals):
-    """全市場投信掃描 + 黑馬輸出（給晨報用 JSON）"""
+    """全市場投信掃描 + 黑馬輸出（給晨報用 JSON）。
+
+    此流程以盤後16:30 TWSE T86 投信買超資料為核心，篩選出候補潛力股。
+    產出 `Potential_Candidates.txt` 與 `trust_scan_latest.json`，供晨報與盤中監控使用。
+    """
     print("")
     print("=" * 60)
     print("  [Step 3] 全市場投信連續買超掃描")
