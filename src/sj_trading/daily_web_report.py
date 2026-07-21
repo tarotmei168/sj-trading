@@ -259,7 +259,7 @@ def get_futures_tone():
     # 從昨天S&P期貨判斷（非精確，僅供基調）
     return '⬆️ 費半大幅領漲，今日台股半導體開高偏強'
 
-def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html=''):
+def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', potential_stocks=None):
     now = datetime.now()
     today = now.strftime('%Y-%m-%d')
     now_hm = now.strftime('%H:%M')
@@ -370,7 +370,8 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html=''):
                 sid = h['sid']
                 name = h['name']
                 days = h['days']
-                total = h['total_trust']
+                total_trust = h['total_trust']
+                total_foreign = h['total_foreign']
                 is_watch = h.get('is_watch', False)
                 
                 # 滲透率（只有持股才有，全市場無資料）
@@ -379,14 +380,17 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html=''):
                 p_cum = r.get('p_cum', 0) if isinstance(r.get('p_cum'), (int, float)) and r.get('p_cum', 0) > 0 else '—'
                 
                 tag = '【持股】' if is_watch else ''
-                if total >= 5000000:
+                if total_trust >= 5000000:
                     tag = '🔥🔥' + tag
-                elif total >= 2000000:
+                elif total_trust >= 2000000:
                     tag = '🔥' + tag
+                
+                fn_color = 'var(--green-go);font-weight:bold;' if total_foreign < 0 else 'var(--red-alert);font-weight:bold;'
                 trust_rows += (
                     f'<tr><td>{sid}</td><td>{name}</td>'
                     f'<td>{days}天</td>'
-                    f'<td style="color:var(--red-alert);font-weight:bold;">{total:>10,}</td>'
+                    f'<td style="color:var(--red-alert);font-weight:bold;">{total_trust:>10,}</td>'
+                    f'<td style="color:{fn_color}">{total_foreign:>+10,}</td>'
                     f'<td>{p_day if isinstance(p_day, str) else f"{p_day:.4f}%"}</td>'
                     f'<td>{p_cum if isinstance(p_cum, str) else f"{p_cum:.4f}%"}</td>'
                     f'<td>{tag}</td></tr>\n'
@@ -396,7 +400,20 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html=''):
         except:
             pass
     if not trust_rows:
-        trust_rows = '<tr><td colspan="7" style="text-align:center;color:#666;">盤後16:30更新</td></tr>'
+        trust_rows = '<tr><td colspan="8" style="text-align:center;color:#666;">盤後16:30更新</td></tr>'
+    
+    # ── 潛力股候選（全市場非持股中被投信大買的）──
+    if potential_stocks is None and os.path.exists(trust_scan_path):
+        try:
+            with open(trust_scan_path, 'r', encoding='utf-8') as f:
+                trust_scan = json.load(f)
+            candidates = [h for h in trust_scan.get('trust_top40', []) 
+                         if not h.get('is_watch', False) and h['days'] >= 3 and h['total_trust'] >= 500000]
+            potential_stocks = candidates[:10]
+        except:
+            potential_stocks = []
+    elif potential_stocks is None:
+        potential_stocks = []
     
     # ── 台美聯動牆 ──
     linkage_rows = ''
@@ -435,6 +452,21 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html=''):
     if not event_rows:
         event_rows = '<div class="event-row"><span>暫無事件</span></div>'
     
+
+    # ── 潛力股候選 HTML 行 ──
+    potential_rows = ''
+    for p in potential_stocks:
+        fn_color = 'var(--green-go);font-weight:bold;' if p['total_foreign'] < 0 else 'var(--red-alert);font-weight:bold;'
+        potential_rows += (
+            f'<tr><td>{p["sid"]}</td><td>{p["name"]}</td>'
+            f'<td>{p["days"]}天</td>'
+            f'<td style="color:var(--red-alert);font-weight:bold;">{p["total_trust"]:,}</td>'
+            f'<td style="color:{fn_color}">{p["total_foreign"]:+,}</td>'
+            f'<td>✨ 投信連買</td></tr>\n'
+        )
+    if not potential_rows:
+        potential_rows = '<tr><td colspan="6" style="text-align:center;color:#666;">盤後16:30更新全市場掃描</td></tr>'
+
     # ═══════════════════════════════════════════
     #  🏗️ 最終 HTML
     # ═══════════════════════════════════════════
@@ -611,13 +643,34 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html=''):
                 <tr>
                     <th>代號</th><th>名稱</th>
                     <th>連買</th>
-                    <th>累計買超</th>
+                    <th>投信買超</th>
+                    <th>法人（外資）</th>
                     <th>P_day (%)</th>
                     <th>P_cum (%)</th>
                     <th>標記</th>
                 </tr>
             </thead>
             <tbody>{trust_rows}</tbody>
+        </table>
+    </div>
+
+    <!-- 潛力股候選（動態從全市場掃描）-->
+    <div class="card info">
+        <div class="card-title">🎯 潛力股候選（投信連買中，非持股）</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>代號</th><th>名稱</th>
+                    <th>連買</th>
+                    <th>投信買超</th>
+                    <th>法人（外資）</th>
+                    <th>備註</th>
+                </tr>
+            </thead>
+            <tbody>{potential_rows}</tbody>
+        </table>
+    </div>
+            </tbody>
         </table>
     </div>
 
