@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>潛力股候選邏輯說明</title>
+<style>
+  :root {
+    --bg: #121212;
+    --card: #1e1e1e;
+    --gold: #ffbe76;
+    --red: #ff6b6b;
+    --green: #2ed573;
+    --text: #e0e0e0;
+    --muted: #a0a0a0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Microsoft JhengHei", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0; padding: 16px;
+    font-size: 18px; line-height: 1.6;
+  }
+  h1 { color: var(--gold); font-size: 24px; border-bottom: 2px solid var(--gold); padding-bottom: 8px; }
+  h2 { color: var(--red); font-size: 20px; margin-top: 24px; }
+  h3 { color: var(--gold); font-size: 18px; margin-top: 18px; }
+  .card {
+    background: var(--card); border-radius: 8px;
+    padding: 16px; margin: 12px 0;
+    border-left: 4px solid var(--gold);
+  }
+  .card.red { border-left-color: var(--red); }
+  .card.green { border-left-color: var(--green); }
+  code { 
+    background: #2a2a2a; padding: 2px 6px; border-radius: 4px;
+    font-size: 16px; color: #7ec8e3;
+  }
+  table {
+    width: 100%; border-collapse: collapse; margin: 10px 0;
+    font-size: 17px;
+  }
+  th { background: #2d2d2d; color: var(--gold); padding: 8px 6px; text-align: left; border-bottom: 2px solid #333; }
+  td { padding: 8px 6px; border-bottom: 1px solid #333; }
+  .good { color: var(--green); }
+  .bad { color: var(--red); }
+  .warn { color: var(--gold); }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 14px; font-weight: bold; }
+  .tag-red { background: var(--red); color: #fff; }
+  .tag-green { background: var(--green); color: #000; }
+  .tag-gold { background: var(--gold); color: #000; }
+  .footer { text-align: center; color: #445566; margin-top: 30px; padding-top: 15px; border-top: 1px solid #333; }
+</style>
+</head>
+<body>
+
+<h1>?? 潛力股候選 — 當前篩選邏輯完整說明</h1>
+
+<div class="card">
+  <strong>一句話總結：</strong>目前是按「投信連續買超天數 ≥ 3 天」+「累計買超金額 ≥ 50 萬」從全市場篩出，<br>
+  再依<strong>累計買超金額由大到小排序</strong>，取前 40 名。沒考慮外資動向、也沒看股價位階。
+</div>
+
+<h2>一、資料來源</h2>
+<div class="card">
+  <code>TWSE T86 全市場三大法人買賣超日報</code>（網址：fund/T86?date=YYYYMMDD）
+  <ul>
+    <li>抓最近 5 個交易日（含今天盤後資料）</li>
+    <li>每檔股票的：投信買賣超、外資買賣超</li>
+    <li>計算是 <strong>逐日累加</strong>：連買幾天、累計買了多少錢</li>
+  </ul>
+</div>
+
+<h2>二、篩選條件（daily_market_update.py）</h2>
+<div class="card red">
+  <table>
+    <tr><th>條件</th><th>說明</th></tr>
+    <tr><td>連買 ≥ 3 天</td><td>投信連續買超天數（>=3）</td></tr>
+    <tr><td>累計買超 ≥ 50 萬</td><td>最近 N 天投信累計買超總金額</td></tr>
+    <tr><td>排序</td><td><strong>按 total_trust 由大到小</strong></td></tr>
+    <tr><td>取前 40 名</td><td>寫入 trust_scan_latest.json → <code>trust_top40[]</code></td></tr>
+  </table>
+</div>
+
+<h2>三、早報顯示邏輯（daily_web_report.py gen_html）</h2>
+<div class="card">
+  <ol>
+    <li>從 <code>trust_scan_latest.json.trust_top40</code> 讀取</li>
+    <li>再次篩選（退保險）連買 ≥ 3 天 + 累計 ≥ 50 萬</li>
+    <li>分兩組：<span class="tag tag-green">持股（CORE_19）</span>放前面，<span class="tag tag-gold">非持股</span>放後面</li>
+    <li>各取前 10 名，最多 20 檔</li>
+    <li><strong>沒有再重新排序</strong>——保留 T86 原始的累計買超金額降序</li>
+  </ol>
+</div>
+
+<h2>四、當前邏輯的盲點（為什麼會出現土洋對作）</h2>
+<div class="card red">
+  <table>
+    <tr><th>問題</th><th>原因</th></tr>
+    <tr><td class="bad">土洋對作股也被列入</td><td>只看投信買超金額，不看外資是否出貨</td></tr>
+    <tr><td class="bad">股價在高檔也被列入</td><td>沒用股價位階（30日高/低、RSI）過濾</td></tr>
+    <tr><td class="bad">連買天數少但金額大</td><td>3 天也算，可能是短線拉抬而非建倉</td></tr>
+    <tr><td class="bad">沒考慮股本大小</td><td>同樣買1億，小股本 vs 大股本意義不同（滲透率）</td></tr>
+  </table>
+  <p style="margin-top:12px"><strong>例：</strong>南亞（1303）投信連5天買1.4億，但外資同期賣超1.55億 → 被標記 🔴對作。這確實不是理想潛力股，因為外資在出貨。</p>
+</div>
+
+<h2>五、我的建議：應該怎麼改進</h2>
+<div class="card green">
+  <table>
+    <tr><th>改善方向</th><th>建議做法</th></tr>
+    <tr><td>1. 過濾土洋衝突</td><td>排除外資同期賣超 > 投信買超 50% 的（嚴重對作）</td></tr>
+    <tr><td>2. 加入位階評估</td><td>股價在近 30 日低點 15% 內才視為潛力（低檔建倉）</td></tr>
+    <tr><td>3. 加入滲透率權重</td><td>投信持股佔股本比例（P_cum），比純金額更有意義</td></tr>
+    <tr><td>4. 連買天數加權</td><td>連買 5 天以上權重高於 3 天的（真正連續建倉）</td></tr>
+    <tr><td>5. 外資共買加分</td><td>投信+外資同買的 🟢共愛 排在前面</td></tr>
+  </table>
+  <p style="margin-top:12px">最終建議的排序公式：<br>
+  <code>score = total_trust × (1 + days/10) × (1 + 位階加分) × (外資方向係數)</code><br>
+  其中外資方向係數：同買=1.5，小對作(外資賣超<投信買超的50%)=1.0，嚴重對作=排除
+  </p>
+</div>
+
+<h2>六、永豐金 API 是否有熱門排行？</h2>
+<div class="card">
+  <p>永豐金 Shioaji API 沒有直接提供「熱門量排行榜」功能。</p>
+  <p>Shioaji 能做的事：</p>
+  <ul>
+    <li>即時報價（tick/kbar）→ 只給價量</li>
+    <li>三大法人買賣超 → 沒有，這要從 TWSE T86 抓</li>
+    <li>個股新聞/財報 → 沒有</li>
+    <li>沒有類似「全市場排行」、「熱門股」、「法人買超排行榜」的直接 API</li>
+  </ul>
+  <p>目前全市場 T86 資料是從 TWSE 官方網站直接抓的（<code>twse.com.tw/fund/T86</code>），不需要 Shioaji。</p>
+</div>
+
+<h2>七、如果要修，要改哪些檔案？</h2>
+<div class="card red">
+  <table>
+    <tr><th>檔案</th><th>修改內容</th></tr>
+    <tr><td><code>src/sj_trading/daily_market_update.py</code></td><td>加入評分公式取代純 total_trust 排序；加入外資過濾</td></tr>
+    <tr><td><code>src/sj_trading/daily_web_report.py</code></td><td>潛力股候選的呈現邏輯（gen_html 中的 potential_stocks 段）</td></tr>
+    <tr><td><code>output/trust_scan_latest.json</code></td><td>格式會變（增加 score 等欄位）</td></tr>
+  </table>
+</div>
+
+<div class="footer">
+  小龍蝦系統 | 2026-07-21 | 潛力股篩選邏輯文件 v1
+</div>
+
+</body>
+</html>

@@ -47,7 +47,7 @@ CORE_19 = [
     ('2436','偉詮電'), ('2337','旺宏'), ('5351','鈺創'),
     ('3673','TPK-KY'), ('3711','日月光'), ('4958','臻鼎-KY'),
     ('3042','晶技'), ('2454','聯發科'), ('2317','鴻海'),
-    ('8150','南茂'), ('2330','台積電'),
+    ('8150','南茂'), ('2330','台積電'), ('0050','元大台灣50'),
 ]
 CORE_IDS = [s[0] for s in CORE_19]
 CORE_NAMES = {s[0]: s[1] for s in CORE_19}
@@ -161,6 +161,7 @@ KD3Y_PARAMS = {
     "2317": {"K":14, "VolF":1, "Pos":"none"},
     "8150": {"K":21, "VolF":0, "Pos":"none"},
     "2330": {"K":9, "VolF":1, "Pos":"none"},
+    "0050": {"K":9, "VolF":0, "Pos":"none"},  # ETF用日K KD，K=9保守
 }
 
 import numpy as np
@@ -226,12 +227,38 @@ def get_tech_batch(stock_ids):
     for sid in stock_ids:
         data = read_local_csv(sid)
         if not data or len(data) < 25:
-            result[sid] = None
-            continue
-        closes = np.array([d['close'] for d in data], dtype=float)
-        highs = np.array([d['high'] for d in data], dtype=float)
-        lows = np.array([d['low'] for d in data], dtype=float)
-        volumes = np.array([d['volume'] for d in data], dtype=float)
+            # 沒本機資料的（如0050），用 FinMind 日K 補
+            try:
+                import requests
+                url = 'https://api.finmindtrade.com/api/v4/data'
+                params = {'dataset': 'TaiwanStockPrice', 'data_id': sid, 'start_date': '2025-07-01', 'end_date': datetime.now().strftime('%Y-%m-%d')}
+                r = requests.get(url, params=params, timeout=10).json()
+                if r.get('status') == 200 and r.get('data') and len(r['data']) >= 25:
+                    items = r['data']
+                    # 轉成本機格式 (FinMind 用 max/min, 本機用 high/low)
+                    data = []
+                    for d in items:
+                        data.append({
+                            'close': d['close'],
+                            'high': d['max'],
+                            'low': d['min'],
+                            'volume': d.get('Trading_Volume', d.get('volume', 0)),
+                        })
+                    closes = np.array([d['close'] for d in data], dtype=float)
+                    highs = np.array([d['high'] for d in data], dtype=float)
+                    lows = np.array([d['low'] for d in data], dtype=float)
+                    volumes = np.array([d['volume'] for d in data], dtype=float)
+                else:
+                    result[sid] = None
+                    continue
+            except:
+                result[sid] = None
+                continue
+        else:
+            closes = np.array([d['close'] for d in data], dtype=float)
+            highs = np.array([d['high'] for d in data], dtype=float)
+            lows = np.array([d['low'] for d in data], dtype=float)
+            volumes = np.array([d['volume'] for d in data], dtype=float)
         
         # 資料預警: 如果資料中有 K,D 欄位（30分K KD），優先直接用
         # 否則用 compute_3ykd 重算
@@ -283,6 +310,7 @@ def get_tech_batch(stock_ids):
         result[sid] = {
             'k': round(k, 1), 'd': round(d, 1), 'gap': round(gap, 1),
             'golden': golden, 'rsi': rsi_val,
+            'low_30d': _get_30d_low(sid),
             'vol_ratio': round(vol_ratio, 2), 'vol_note': vol_note,
             'price': closes[-1],
             'level': level,
@@ -292,6 +320,28 @@ def get_tech_batch(stock_ids):
 # ═══════════════════════════════════════════════
 #  🏦 股本滲透率 (P_day + P_cum)
 # ═══════════════════════════════════════════════
+
+def _get_30d_low(stock_id):
+    """從本機CSV取最近30根K棒最低價最低值（判斷支撐位），無本機資料則用FinMind"""
+    data = read_local_csv(stock_id)
+    if not data or len(data) < 5:
+        # FinMind 備援
+        try:
+            import requests
+            url = 'https://api.finmindtrade.com/api/v4/data'
+            params = {'dataset': 'TaiwanStockPrice', 'data_id': stock_id, 'start_date': '2026-05-01', 'end_date': datetime.now().strftime('%Y-%m-%d')}
+            r = requests.get(url, params=params, timeout=10).json()
+            if r.get('status') == 200 and r.get('data') and len(r['data']) >= 5:
+                items = r['data']
+                lows = [d['min'] for d in items[-30:]]
+                return round(float(min(lows)), 1)
+        except:
+            pass
+        return None
+    tail = data[-30:] if len(data) >= 30 else data
+    lows = [d['low'] for d in tail]
+    return round(float(min(lows)), 1)
+
 
 def get_trust_penetration():
     """從 SITC_Accumulation.csv 算 19 檔投信滲透率"""
@@ -361,6 +411,240 @@ KNOWN_EVENTS = [
     ("2026-09-24","🔥🔥 投信Q3季底作帳白熱化"),
     ("2026-09-30","🔥🔥🔥 投信季底結帳日｜富時指數季度調整"),
 ]
+
+# ─── 🐂 美國四物日（Quadruple Witching）自動計算 ───────
+def get_quadruple_witching(year, month):
+    """回傳該月第3個星期五的日期 (datetime)，僅對 3/6/9/12 月有效"""
+    if month not in (3, 6, 9, 12):
+        return None
+    first_day = datetime(year, month, 1)
+    # weekday(): 0=Mon, 1=Tue, 2=Wed, 3=Thu, 4=Fri, 5=Sat, 6=Sun
+    days_ahead = 4 - first_day.weekday()
+    if days_ahead < 0:
+        days_ahead += 7
+    first_fri = first_day + timedelta(days=days_ahead)
+    third_fri = first_fri + timedelta(weeks=2)  # 第1 + 2週 = 第3個
+    return third_fri
+
+def get_upcoming_quadruple_witching(today, cutoff):
+    """未來14天內是否有四物日"""
+    results = []
+    for m in (3, 6, 9, 12):
+        qw = get_quadruple_witching(today.year, m)
+        if qw is None:
+            continue
+        if today <= qw <= cutoff:
+            days_to = (qw - today).days
+            results.append((qw.strftime('%Y-%m-%d'), f'⚠️ 美股四物日（結算日）波動加劇（{days_to}天後）'))
+        # 如果跨年也檢查
+        if m == 12 and qw < today and qw.month == 12:
+            qw_next = get_quadruple_witching(today.year + 1, 3)
+            if qw_next and today <= qw_next <= cutoff:
+                days_to = (qw_next - today).days
+                results.append((qw_next.strftime('%Y-%m-%d'), f'⚠️ 美股四物日（結算日）波動加劇（{days_to}天後）'))
+    return results
+
+# ─── 🇺🇸 美國總經自動抓取（BLS + Fed 官方行事曆）───────
+_US_EVENTS_CACHE = None
+_US_EVENTS_CACHE_TIME = None
+
+def _fetch_bls_calendar(year, month):
+    """從 BLS.gov List View 抓該月的行事曆，回傳 [(date_str, 事件名稱), ...]"""
+    import re
+    url = f'https://www.bls.gov/schedule/{year}/{month:02d}_sched_list.htm'
+    try:
+        import requests
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+        r = requests.get(url, headers=headers, timeout=10)
+        if r.status_code != 200:
+            return []
+        text = r.text
+        events = []
+        # List View 格式乾淨：每行 "Tuesday, August 04, 2026" 後面接時間 + 事件名
+        # 用正則抓 "(Monday|Tuesday|...), (Month) (DD), (YYYY)"
+        date_pattern = re.compile(r'(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday), (\w+) (\d{1,2}), (\d{4})')
+        month_map = {'January':1,'February':2,'March':3,'April':4,'May':5,'June':6,
+                    'July':7,'August':8,'September':9,'October':10,'November':11,'December':12}
+        lines = text.split('\n')
+        current_date_str = None
+        for i, line in enumerate(lines):
+            line_s = line.strip()
+            # 檢查日期行
+            m = date_pattern.search(line_s)
+            if m:
+                month_name = m.group(2)
+                day = int(m.group(3))
+                yr = int(m.group(4))
+                mm = month_map.get(month_name)
+                if mm:
+                    current_date_str = f'{yr}-{mm:02d}-{day:02d}'
+                continue
+            # 檢查事件名行（非空、不含HTML標籤）
+            if current_date_str and line_s and '<' not in line_s and '>' not in line_s:
+                keywords = ['Employment Situation', 'Consumer Price Index', 'Producer Price Index',
+                           'Job Openings', 'Labor Turnover', 'Real Earnings', 'Import and Export',
+                           'Employment Cost Index', 'Productivity and Costs',
+                           'State Employment', 'Metropolitan Area', 'Usual Weekly Earnings',
+                           'Access to and Use of Leave', 'Employment Projections',
+                           'Worker Displacement', 'County Employment',
+                           'Current Employment Statistics', 'Summer Youth']
+                if any(k.lower() in line_s.lower() for k in keywords):
+                    events.append((current_date_str, line_s))
+                    current_date_str = None  # 同一日期一個事件
+        return events
+    except:
+        return []
+
+def _fetch_fomc_calendar():
+    """從 Fed 官網抓 FOMC 會議日期"""
+    import re
+    url = 'https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm'
+    try:
+        import requests
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+        r = requests.get(url, headers=headers, timeout=15)
+        if r.status_code != 200:
+            return []
+        html = r.text
+        events = []
+        # 找 "2026 FOMC Meetings"</div> 後的 panel-body
+        month_pattern = re.compile(r'fomc-meeting__month[^>]*><strong>(\w+)</strong>')
+        date_pattern = re.compile(r'fomc-meeting__date[^>]*>(\d{1,2})[^\d]*(\d{1,2})?')
+        # 從 2026 年 section 開始找
+        idx = html.find('id="42828"')  # 2026 FOMC 的 id
+        if idx < 0:
+            idx = html.find('2026 FOMC')
+        if idx < 0:
+            return events
+        section = html[idx:idx+12000]  # 2026 全年約 12000 字元
+        lines = section.split('\n')
+        current_month = None
+        month_map = {'January':1,'February':2,'March':3,'April':4,'May':5,'June':6,
+                    'July':7,'August':8,'September':9,'October':10,'November':11,'December':12}
+        month_name = {'January':'1月','February':'2月','March':'3月','April':'4月','May':'5月','June':'6月',
+                     'July':'7月','August':'8月','September':'9月','October':'10月','November':'11月','December':'12月'}
+        for line in lines:
+            line_s = line.strip()
+            # 匹配月分行
+            mm = month_pattern.search(line_s)
+            if mm:
+                current_month = mm.group(1)
+                continue
+            # 匹配日期行
+            dd = date_pattern.search(line_s)
+            if dd and current_month:
+                m = month_map.get(current_month)
+                if m:
+                    end_day = int(dd.group(2)) if dd.group(2) else int(dd.group(1))
+                    start_day = int(dd.group(1))
+                    date_obj = datetime(2026, m, end_day)
+                    events.append((date_obj.strftime('%Y-%m-%d'), f'🔥🔥🔥 FOMC {month_name.get(current_month,current_month)}利率決議'))
+                    if start_day != end_day:
+                        date_obj_start = datetime(2026, m, start_day)
+                        events.append((date_obj_start.strftime('%Y-%m-%d'), f'🔥🔥🔥 FOMC {month_name.get(current_month,current_month)}會議首日'))
+                current_month = None
+        return events
+    except Exception as _fe:
+        print(f'  ⚠️ FOMC 行事曆抓取失敗: {_fe}')
+        return []
+
+def _generate_us_rules_events(today, cutoff):
+    """用已知排程規則推算美國總經事件日期"""
+    results = []
+    def nth_wd(y, m, wd, nth):
+        d = datetime(y, m, 1)
+        da = wd - d.weekday()
+        if da < 0:
+            da += 7
+        return d + timedelta(days=da) + timedelta(weeks=nth-1)
+    
+    month_names = {1:'1月',2:'2月',3:'3月',4:'4月',5:'5月',6:'6月',
+                   7:'7月',8:'8月',9:'9月',10:'10月',11:'11月',12:'12月'}
+    
+    for i in range(3):
+        m = today.month + i
+        y = today.year
+        if m > 12:
+            m -= 12
+            y += 1
+        
+        # 非農 NFP: 第1個星期五
+        nfp = nth_wd(y, m, 4, 1)
+        if today <= nfp <= cutoff:
+            results.append((nfp.strftime('%Y-%m-%d'), f'US {month_names[m]}非農就業(NFP)'))
+        
+        # CPI: 第2個星期三
+        cpi = nth_wd(y, m, 2, 2)
+        if today <= cpi <= cutoff:
+            results.append((cpi.strftime('%Y-%m-%d'), f'US {month_names[m]}CPI'))
+        
+        # PPI: 第2個星期四
+        ppi = nth_wd(y, m, 3, 2)
+        if today <= ppi <= cutoff:
+            results.append((ppi.strftime('%Y-%m-%d'), f'US {month_names[m]}PPI'))
+        
+        # ISM 製造業 PMI: 第1個工作日
+        fd = datetime(y, m, 1)
+        ism_m = fd
+        while ism_m.weekday() >= 5:
+            ism_m += timedelta(days=1)
+        if today <= ism_m <= cutoff:
+            results.append((ism_m.strftime('%Y-%m-%d'), f'US {month_names[m]}ISM製造業PMI'))
+        
+        # ISM 服務業 PMI: 通常第3個工作日（製造業後第2個工作日）
+        ism_s = ism_m + timedelta(days=1)
+        while ism_s.weekday() >= 5:
+            ism_s += timedelta(days=1)
+        if today <= ism_s <= cutoff:
+            results.append((ism_s.strftime('%Y-%m-%d'), f'US {month_names[m]}ISM服務業PMI'))
+        
+        # JOLTS: 通常在NFP之後的週二
+        jolts = nfp + timedelta(days=4) if nfp.weekday() <= 2 else nfp + timedelta(days=11)
+        if today <= jolts <= cutoff:
+            results.append((jolts.strftime('%Y-%m-%d'), f'US {month_names[m]}JOLTS職位空缺'))
+        
+        # GDP: 1月/4月/7月/10月的最後一週
+        if m in (1, 4, 7, 10):
+            gdp = datetime(y, m, 28)
+            while gdp.weekday() != 3:  # 星期四
+                gdp += timedelta(days=1)
+            gdp_label = {1:'Q4',4:'Q1',7:'Q2',10:'Q3'}
+            if today <= gdp <= cutoff:
+                results.append((gdp.strftime('%Y-%m-%d'), f'US {gdp_label[m]} GDP初值'))
+    
+    return results
+
+def get_us_events():
+    """合併四物日 + 規則推算 + FOMC 行事曆，輸出 [(date_str, event_name), ...]"""
+    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    cutoff = today + timedelta(days=14)
+    results = []
+    
+    # 1. 四物日
+    qw_list = get_upcoming_quadruple_witching(today, cutoff)
+    results.extend(qw_list)
+    
+    # 2. 用規則推算美國總經事件
+    rules_events = _generate_us_rules_events(today, cutoff)
+    results.extend(rules_events)
+    
+    # 3. FOMC（從 Fed 官網即時抓取）
+    fomc_events = _fetch_fomc_calendar()
+    for date_str, name in fomc_events:
+        ev_dt = datetime.strptime(date_str, '%Y-%m-%d')
+        if today <= ev_dt <= cutoff:
+            results.append((date_str, name))
+    
+    # 去重、排序
+    seen = set()
+    deduped = []
+    for date_str, name in sorted(results, key=lambda x: x[0]):
+        key = (date_str, name)
+        if key not in seen:
+            seen.add(key)
+            deduped.append(key)
+    return deduped
+
 def fmt_date(date_str):
     d = datetime.strptime(date_str, '%Y-%m-%d')
     return f'{d.month}/{d.day}({WEEKDAY_NAMES[d.weekday()]})'
@@ -376,18 +660,35 @@ def get_futures_tone():
     # 從昨天S&P期貨判斷（非精確，僅供基調）
     return '⬆️ 費半大幅領漲，今日台股半導體開高偏強'
 
-def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', potential_stocks=None):
+def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', potential_stocks=None, us_events=None):
     now = datetime.now()
     today = now.strftime('%Y-%m-%d')
     now_hm = now.strftime('%H:%M')
     
     # ── SOX 指數（從 global_weather 抓） ──
     try:
-        from global_weather import get_us_indexes, get_taiwan_futures
+        from global_weather import get_us_indexes
         us = get_us_indexes()
-        fut = get_taiwan_futures()
     except:
         us = {}
+    
+    # ── 台指期指數（直接用 yfinance 抓加權指數，TX00.TW 常離線）──
+    try:
+        import yfinance as yf
+        import io, contextlib
+        with contextlib.redirect_stderr(io.StringIO()):
+            twii = yf.Ticker('^TWII')
+            twii_df = twii.history(period='5d')
+        if twii_df is not None and len(twii_df) >= 2:
+            closes = twii_df['Close'].values
+            fut = {
+                'close': round(float(closes[-1]), 2),
+                'change': round((closes[-1] / closes[-2] - 1) * 100, 2),
+                'source': '加權指數',
+            }
+        else:
+            fut = None
+    except:
         fut = None
     
     sox_data = us.get('費城半導體', {})
@@ -469,11 +770,22 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         else:
             strategy = '➖ 觀望'
         
+        low_30d = t.get('low_30d')
+        if low_30d:
+            dist_to_low = round(((px / low_30d) - 1) * 100, 1)
+            if dist_to_low < 5:
+                low_s = f'<span style="color:var(--red-alert)">{low_30d} ⚠️</span>'
+            else:
+                low_s = f'{low_30d}'
+        else:
+            low_s = '—'
+        
         return (
             f'<tr>'
             f'<td><b>{sid}</b></td>'
             f'<td>{sname}</td>'
             f'<td style="font-weight:bold;font-size:1.05em">{px}</td>'
+            f'<td>{low_s}</td>'
             f'<td>{kd_s}</td>'
             f'<td>{rsi_val}</td>'
             f'<td>{vol_note}</td>'
@@ -485,7 +797,7 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
     for sid, sname in CORE_19:
         price_rows += fmt_stock_row(sid, sname, tech_data)
     if not price_rows:
-        price_rows = '<tr><td colspan="8" style="text-align:center;color:#666;">⏳ 資料讀取中</td></tr>'
+        price_rows = '<tr><td colspan="9" style="text-align:center;color:#666;">⏳ 資料讀取中</td></tr>'
     
     # ── 潛力股候選（全市場非持股中被投信大買的）──
     trust_update_time = '—'
@@ -571,9 +883,22 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
     else:
         linkage_rows = '<div class="link-row">⚠️ 聯動模組未啟用</div>'
     
-    # ── 未來14天事件（只顯示 >= 今天的日期）──
+    # ── 未來14天事件 ──
     today_dt = now.replace(hour=0, minute=0, second=0, microsecond=0)
     cutoff_dt = today_dt + timedelta(days=14)
+    
+    # A) 自動抓取的美國事件（四物日 + BLS總經 + FOMC）
+    us_events = get_us_events()
+    us_event_rows = ''
+    for date_str, ev in us_events:
+        us_event_rows += (
+            f'<div class="event-row">'
+            f'<span>{fmt_date(date_str)}</span>'
+            f'<span>{ev}</span>'
+            f'</div>\n'
+        )
+    
+    # B) 已知固定事件
     event_rows = ''
     for date_str, ev in KNOWN_EVENTS:
         ev_dt = datetime.strptime(date_str, '%Y-%m-%d')
@@ -585,7 +910,7 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
                 f'</div>\n'
             )
     if not event_rows:
-        event_rows = '<div class="event-row"><span>暫無事件</span></div>'
+        event_rows = '<div class="event-row"><span>—</span></div>'
     
 
     # ── 潛力股候選 HTML 行（含 KD/RSI + 對作/共愛標記）──
@@ -617,16 +942,26 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
             tech_str = f'{kd_s} RSI{t["rsi"]} {t["level"]}'
         else:
             tech_str = '—'
+        # 潛力股的30日低
+        _p_low = _get_30d_low(sid)
+        if _p_low:
+            _p_low_s = f'{_p_low}'
+        else:
+            _p_low_s = '—'
+        _p_price = t['price'] if t else p.get('close',0) or 0
+        _p_price_s = f'{_p_price:.1f}' if _p_price else '—'
         potential_rows += (
             f'<tr><td>{sid}</td><td>{p["name"]}</td>'
+            f'<td style="font-weight:bold">{_p_price_s}</td>'
             f'<td>{p["days"]}天</td>'
             f'<td style="color:var(--red-alert);font-weight:bold;">{p["total_trust"]:,}</td>'
             f'<td style="color:{fn_color}">{p["total_foreign"]:+,}</td>'
+            f'<td>{_p_low_s}</td>'
             f'<td>{tech_str}</td>'
             f'<td style="color:{flag_color};font-weight:bold;">{flag}</td></tr>\n'
         )
     if not potential_rows:
-        potential_rows = '<tr><td colspan="7" style="text-align:center;color:#666;">盤後16:30更新全市場掃描</td></tr>'
+        potential_rows = '<tr><td colspan="8" style="text-align:center;color:#666;">盤後16:30更新全市場掃描</td></tr>'
 
     # ═══════════════════════════════════════════
     #  🏗️ 最終 HTML
@@ -771,17 +1106,23 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         <table>
             <thead>
                 <tr>
-                    <th>代號</th><th>名稱</th><th>股價</th><th>KD</th><th>RSI</th><th>量能</th><th>提示</th><th>策略</th>
+                    <th>代號</th><th>名稱</th><th>股價</th><th>30日低</th><th>KD</th><th>RSI</th><th>量能</th><th>提示</th><th>策略</th>
                 </tr>
             </thead>
             <tbody>{price_rows}</tbody>
         </table>
     </div>
 
-    <!-- 未來14天關鍵事件 -->
+    <!-- 未來14天關鍵事件（台股固定 + 美國自動抓取）-->
     <div class="card alert">
-        <div class="card-title">📅 未來 14 天重要進程與作帳節奏</div>
+        <div class="card-title">📅 未來 14 天台股進程與作帳節奏</div>
         {event_rows}
+    </div>
+
+    <!-- 美國關鍵事件（自動抓取 BLS + Fed）-->
+    <div class="card info">
+        <div class="card-title">🇺🇸 未來 14 天美股/總經關鍵事件</div>
+        {us_event_rows if us_event_rows else '<div class="event-row"><span>暫無高重要性事件</span></div>'}
     </div>
 
     <!-- 台美產業聯動警報 -->
@@ -801,9 +1142,10 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         <table>
             <thead>
                 <tr>
-                    <th>代號</th><th>名稱</th><th>連買</th>
+                    <th>代號</th><th>名稱</th><th>股價</th><th>連買</th>
                     <th>投信買超</th>
                     <th>外資動向</th>
+                    <th>30日低</th>
                     <th>KD/RSI</th>
                     <th>備註</th>
                 </tr>
@@ -929,30 +1271,19 @@ def run():
     print('\n🏗️ 組裝 HTML...')
     alerts = get_linkage_alerts()
     events = get_events()
-    # 4a. 新聞從 output/news_crawled.json 讀取（爬蟲，0 token）
+    # 4a. 新聞從 output/news_headlines.json 讀取（鉅亨網 API，0 token）
     news_html = ''
-    news_path = os.path.join(OUTPUT_DIR, 'news_crawled.json')
+    news_path = os.path.join(OUTPUT_DIR, 'news_headlines.json')
     if os.path.exists(news_path):
         try:
             with open(news_path, 'r', encoding='utf-8') as f:
                 nd = json.load(f)
-            parts = []
-            for sk, sv in nd.get('sections', {}).items():
-                items_html = ''
-                for item in sv.get('items', []):
-                    items_html += f'<div style="padding:6px 0;border-bottom:1px solid #252525;font-size:18px;">📌 <a href="{item["link"]}" target="_blank" style="color:#58a6ff;text-decoration:none;">{item["title"]}</a></div>\n'
-                if items_html:
-                    parts.append(f'<div style="margin-bottom:12px;"><b style="color:var(--primary-gold);font-size:18px;">{sv["label"]}</b>{items_html}</div>')
-            if parts:
-                news_html = (
-                    '<div class="card" style="border-left-color:#1e90ff;">'
-                    '<div class="card-title">📰 今日新聞（爬蟲自動抓取）</div>'
-                    + ''.join(parts) +
-                    f'<div style="font-size:14px;color:#666;margin-top:8px;">更新: {nd.get("update_time","")}</div>'
-                    '</div>'
-                )
-        except:
-            pass
+            # 用 morning_news.generate_html() 直接產HTML
+            sys.path.insert(0, os.path.join(BASE_DIR, 'src', 'sj_trading'))
+            from morning_news import generate_html as gen_news_html
+            news_html = gen_news_html(nd)
+        except Exception as _ne:
+            print(f'  ⚠️ 新聞讀取失敗: {_ne}')
     
     html = gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html, potential_stocks=None)
     size_kb = len(html) / 1024

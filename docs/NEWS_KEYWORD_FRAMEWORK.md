@@ -5,6 +5,25 @@
 
 ---
 
+## 核心持股新增 SOP
+
+**以後若有新增核心持股（如0050），一律用以下流程：**
+
+1. 加進 `daily_web_report.py` 的 `CORE_19` 列表
+2. 加進 `KD3Y_PARAMS` 設一組預設參數（ETF用日K K=9，個股沿用舊檔設定）
+3. **跑 `download_3y_intraday_kd_v2.py` 抓3年資料**
+   ```
+   python src/sj_trading/download_3y_intraday_kd_v2.py
+   ```
+   - 每段100天，約11段/檔
+   - 1分K→合併30分K→算KD→存 `database/30min_kd/{代號}_kd.csv`
+   - 預估每檔約2分鐘
+4. 跑完後產早報確認 KD 正常顯示
+5. 更新 MEMORY.md 的持股清單
+6. **不准 git push** — 只放本機 HDMI 檢查
+
+---
+
 ## 一、過濾規則（哪些新聞直接跳過）
 
 ### 🚫 中國／港股全部過濾
