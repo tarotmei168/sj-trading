@@ -134,12 +134,13 @@ def scan_golden_cross():
                 })
                 print(f"  🔴 {sid} @{close} K={k_now}跌破D={d_now} ({ts})")
             
-            # 接近黃金交叉（K快要穿D）
-            elif k_now > d_now and k_now - d_now < 3 and k_prev < d_prev:
+            # 接近黃金交叉（K<D 但差距縮到 3 以內 + K 正在往上追）
+            elif k_now < d_now and (d_now - k_now) <= 3.0 and k_prev < k_now:
+                gap = round(d_now - k_now, 1)
                 results["approaching"].append({
-                    "sid": sid, "price": close, "k": k_now, "d": d_now, "time": ts
+                    "sid": sid, "price": close, "k": k_now, "d": d_now, "gap": gap, "time": ts
                 })
-                print(f"  💡 {sid} @{close} K={k_now}接近穿D={d_now} ({ts})")
+                print(f"  💡 {sid} @{close} K={k_now}追上D={d_now} (差距{gap}) ({ts})")
         
         except Exception as e:
             continue

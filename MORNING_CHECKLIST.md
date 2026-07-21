@@ -43,7 +43,7 @@ python upload.py
 |:---:|:---|:---|
 | 08:30 | 🦞 產晨報 + git push + 啟動盤中監控 | daily_web_report.py |
 | 16:30 | 🏦 全市場投信掃描 + 更新晨報 + git push | daily_market_update.py → daily_web_report.py |
-| 08:30~13:30 | 📊 盤中每5分KD金叉監控 | day_engine_v2.py |
+| 08:30~13:30 | 📊 盤中每5分KD監控（含逼近金叉預警） | day_engine_v2.py |
 
 ---
 
@@ -130,6 +130,13 @@ C:\Users\User\.openclaw\workspace\sj-trading\database\
 4958 臻鼎   K5/D5/RSV9  買K<50  停損4% 停利5%  勝率52.2%  ✅
 ```
 
+### ⚠️ 逼近金叉預警（2026-07-21 新增）
+day_engine_v2.py 和 kd_30min_monitor.py 均已加入提前預警機制：
+- **定義：** K < D，差距 ≤ 3.0，且 K 值比前一根上升（K 往上追）
+- **盤中輸出：** 每支股票旁邊標 `⚠️逼近金叉!`
+- **底部彙總：** 列出所有逼近金叉的股票、K/D值、差距、RSI位階
+- **意義：** 不等真的金叉才通知，提前1~3根K棒預警
+
 ### 手動重跑回測
 ```
 cd C:\Users\User\.openclaw\workspace\sj-trading
@@ -151,7 +158,7 @@ python -X utf8 src\sj_trading\kd_backtest.py
    - morning_news → 鉅亨網新聞（過濾中國）
    - 組裝 HTML → web/index.html
 2. git push → GitHub Pages 更新
-3. 啟動 day_engine_v2.py → 盤中監控
+3. 啟動 day_engine_v2.py → 盤中監控（含逼近金叉預警，K<D差距≤3且K往上追即預警）
 ```
 
 ### 16:30 盤後更新

@@ -462,16 +462,27 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         event_rows = '<div class="event-row"><span>暫無事件</span></div>'
     
 
-    # ── 潛力股候選 HTML 行 ──
+    # ── 潛力股候選 HTML 行（含 KD/RSI）──
     potential_rows = ''
     for p in potential_stocks:
         fn_color = 'var(--green-go);font-weight:bold;' if p['total_foreign'] < 0 else 'var(--red-alert);font-weight:bold;'
+        sid = p['sid']
+        t = tech_data.get(sid)
+        if t:
+            k, d = t['k'], t['d']
+            gap = t['gap']
+            if gap > 0 and gap < 3: kd_s = f'🔥金叉 K{k}/{d}'
+            elif gap < -3: kd_s = f'💀死叉 K{k}/{d}'
+            else: kd_s = f'K{k}/{d} ➖'
+            tech_str = f'{kd_s} RSI{t["rsi"]} {t["level"]}'
+        else:
+            tech_str = '—'
         potential_rows += (
-            f'<tr><td>{p["sid"]}</td><td>{p["name"]}</td>'
+            f'<tr><td>{sid}</td><td>{p["name"]}</td>'
             f'<td>{p["days"]}天</td>'
             f'<td style="color:var(--red-alert);font-weight:bold;">{p["total_trust"]:,}</td>'
             f'<td style="color:{fn_color}">{p["total_foreign"]:+,}</td>'
-            f'<td>✨ 投信連買</td></tr>\n'
+            f'<td>{tech_str}</td></tr>\n'
         )
     if not potential_rows:
         potential_rows = '<tr><td colspan="6" style="text-align:center;color:#666;">盤後16:30更新全市場掃描</td></tr>'
@@ -778,11 +789,25 @@ def run():
     snaps, tone = get_shioaji_snapshots()
     print(f'   ✅ {len(snaps)} 檔快照就緒')
     
-    # 2. 技術指標
+    # 2. 技術指標（含核心持股 + 潛力股）
     print('\n📊 計算技術指標 (KD/RSI/支撐)...')
-    tech_data = get_tech_batch(CORE_IDS)
+    # 先讀潛力股，一併算 KD
+    trust_scan_path = os.path.join(OUTPUT_DIR, 'trust_scan_latest.json')
+    potential_ids = []
+    if os.path.exists(trust_scan_path):
+        try:
+            with open(trust_scan_path, 'r', encoding='utf-8') as f:
+                ts = json.load(f)
+            candidates = [h for h in ts.get('trust_top40', [])
+                         if not h.get('is_watch', False) and h['days'] >= 3 and h['total_trust'] >= 500000]
+            # 取非核心持股的前15名
+            potential_ids = [h['sid'] for h in candidates[:15] if h['sid'] not in CORE_IDS]
+        except:
+            pass
+    all_ids = list(dict.fromkeys(CORE_IDS + potential_ids))
+    tech_data = get_tech_batch(all_ids)
     ok_count = sum(1 for v in tech_data.values() if v)
-    print(f'   ✅ {ok_count}/{len(CORE_IDS)} 檔技術指標就緒')
+    print(f'   ✅ {ok_count}/{len(all_ids)} 檔技術指標就緒（含 {len(potential_ids)} 檔潛力股）')
     
     # 3. 投信滲透率
     print('\n🏦 計算股本滲透率...')

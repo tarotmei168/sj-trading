@@ -123,12 +123,21 @@ def analyze(sid):
     gc = k[-1] > d[-1] and k[-2] <= d[-2]
     dc = k[-1] < d[-1] and k[-2] >= d[-2]
     
+    # 接近金叉：K<D 但差距縮到 3 以內 + K 趨勢向上
+    approach_gc = False
+    if not kd_up:
+        k_prev = round(k[-2], 1)
+        gap = abs(k_v - d_v)
+        k_rising = k_prev < k_v  # K 往上走
+        approach_gc = (gap <= 3.0) and k_rising
+    
     rsi_val = calc_rsi_last(cls)
     rsi_lv = get_rsi_level(rsi_val)
     
     return {
         'price': price, 'k': k_v, 'd': d_v,
         'kd_up': kd_up, 'gc': gc, 'dc': dc,
+        'approach_gc': approach_gc,
         'rsi': rsi_val, 'rsi_level': rsi_lv
     }
 
@@ -152,13 +161,14 @@ for sid, sname, signal in CORE:
     kd_str = f"{r['k']:.1f}/{r['d']:.1f}"
     icon = "🔴" if not r['kd_up'] else "🟢"
     action = ""
-    if r['gc']: action = "⭐金叉!"
-    elif r['dc']: action = "💀死叉!"
+    if r['gc']: action = " ⭐金叉!"
+    elif r['dc']: action = " 💀死叉!"
+    elif r['approach_gc']: action = " ⚠️逼近金叉!"
     
     # RSI位阶
     emoji = "💎" if r['rsi_level'] in ('超卖','极超卖') else ("🔥" if r['rsi_level']=='过热' else "📊")
     
-    print(f"{sid:<6} {sname:<6} {price:>6.0f}{icon} {kd_str:<9} {r['rsi']:>5.1f} {emoji}{r['rsi_level']:<6} {signal}")
+    print(f"{sid:<6} {sname:<6} {price:>6.0f}{icon} {kd_str:<9} {r['rsi']:>5.1f} {emoji}{r['rsi_level']:<6} {action:<12} {signal}")
 
 print()
 print("🎯 【第 2 層：核心潛力股】— 無部位，等右側開槍")
@@ -175,11 +185,27 @@ for sid, sname, desc in POTENTIAL:
     icon = "🔴" if not r['kd_up'] else "🟢"
     emoji = "💎" if r['rsi_level'] in ('超卖','极超卖') else ("🔥" if r['rsi_level']=='过热' else "📊")
     
-    print(f"{sid:<6} {sname:<6} {price:>6.0f}{icon} {kd_str:<9} {r['rsi']:>5.1f} {emoji}{r['rsi_level']:<6} {desc}")
+    action = ""
+    if r['gc']: action = " ⭐金叉!"
+    elif r['dc']: action = " 💀死叉!"
+    elif r['approach_gc']: action = " ⚠️逼近金叉!"
+    
+    print(f"{sid:<6} {sname:<6} {price:>6.0f}{icon} {kd_str:<9} {r['rsi']:>5.1f} {emoji}{r['rsi_level']:<6} {action:<12} {desc}")
 
 print()
 print("-" * 85)
-print("  無任何15分K金叉訊號，目前全部持防守狀態")
-print("  等待KD金叉出現即為買點")
+# 收集接近金叉的
+approaching_list = []
+for sid, sname, _ in CORE + POTENTIAL:
+    r = analyze(sid)
+    if r and r['approach_gc']:
+        approaching_list.append((sid, sname, r))
+if approaching_list:
+    print("  ⚠️ 接近金叉預警: 以下股票 K 正在追上 D，隨時可能金叉!")
+    for sid, sname, r in approaching_list:
+        gap = round(r['d'] - r['k'], 1)
+        print(f"     {sid} {sname:<6} K={r['k']} D={r['d']} 差距{gap} RSI={r['rsi']}  {r['rsi_level']}")
+else:
+    print("  無任何15分K金叉或逼近訊號，目前全部持防守狀態")
 
 api.logout()
