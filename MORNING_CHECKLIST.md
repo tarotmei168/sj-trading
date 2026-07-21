@@ -165,6 +165,8 @@ python -X utf8 src\sj_trading\kd_backtest.py
    - TWSE T86 全市場投信資料
    - 輸出 trust_scan_latest.json
 2. python src/sj_trading/daily_web_report.py
+   - 潛力股候選區塊動態從 trust_scan_latest.json 載入
+   - 投信/法人分兩欄顯示
 3. git push
 ```
 
