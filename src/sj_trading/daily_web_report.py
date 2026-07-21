@@ -506,26 +506,70 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
     elif potential_stocks is None:
         potential_stocks = []
     
-    # ── 台美聯動牆 ──
+    # ── 台美聯動牆（即時從 global_weather.check_linkage() 抓取）──
+    # ⚠️ 之前寫死 top_us 已修改為動態抓取 (2026-07-21)
     linkage_rows = ''
-    top_us = [
-        ('台積電 ADR','+4.06%','台積電現貨','🔴'),
-        ('艾司摩爾','+3.15%','CoWoS設備檢測','🔴'),
-        ('高通 QCOM','+5.80%','聯發科填息','🔴🔴'),
-        ('超微 AMD','+6.61%','創意/世芯/智原','🔴🔴'),
-        ('威騰電子','+7.14%','旺宏/創見/南亞科','🔴🔴'),
-        ('日月光 ADR','+4.50%','日月光投控','🔴🔴'),
-        ('特斯拉','+6.69%','電動車供應鏈','🔴🔴'),
-        ('Rocket Lab','-7.34%','低軌衛星警戒','🟢🟢'),
-    ]
-    for us_name, us_chg, tw_name, badge in top_us:
-        bc = 'badge-red' if '🔴' in badge else ('badge-orange' if '🟢' in badge else 'badge-blue')
-        linkage_rows += (
-            f'<div class="link-row">'
-            f'<span class="badge {bc}">{badge}</span> '
-            f'<b>{us_name}</b> {us_chg} → {tw_name}'
-            f'</div>\n'
-        )
+    if HAVE_WEATHER:
+        try:
+            from global_weather import LINKAGE_MAP as _LM, get_us_stock_change as _gusc
+            # 各主題欄位專用聯動美股列表
+            _LINKAGE_WATCH = {
+                '半導體': ['TSM','ASML','AVGO','INTC','NVDA','AMD','ARM','QCOM','MRVL'],
+                '記憶體': ['MU','WDC','STX'],
+                '設備': ['AMAT','LRCX','KLAC'],
+                '封測/通路': ['ASX','AMKR'],
+                '車用/類比': ['TXN','STM','ON','IFNNY','NXP'],
+            }
+            _seen_stocks = set()
+            for _topic, _syms in _LINKAGE_WATCH.items():
+                _topic_rows = ''
+                for _sym in _syms:
+                    _chg, _close = _gusc(_sym)
+                    if _chg is None:
+                        continue
+                    # 取台股對應
+                    _info = _LM.get(_sym.upper(), {})
+                    _tw_names_str = ', '.join(_info.get('tw_names', {}).values()) if _info else ''
+                    # 防重複
+                    if _tw_names_str in _seen_stocks:
+                        continue
+                    _seen_stocks.add(_tw_names_str)
+                    _abs = abs(_chg)
+                    if _abs >= 4:
+                        _badge = '🔴🔴'
+                        _bc = 'badge-red'
+                    elif _abs >= 2:
+                        _badge = '🔴'
+                        _bc = 'badge-red'
+                    elif _chg > 0:
+                        _badge = '🟢'
+                        _bc = 'badge-blue'
+                    else:
+                        _badge = '🔻'
+                        _bc = 'badge-orange'
+                    _chg_str = f'{_chg:+.2f}%'
+                    _tw_str = f' → {_tw_names_str}' if _tw_names_str else ''
+                    _topic_rows += (
+                        f'<div class="link-row">'
+                        f'<span class="badge {_bc}">{_badge}</span> '
+                        f'<b>{_sym} {_info.get("name","") if _info else ""}</b> {_chg_str}{_tw_str}'
+                        f'</div>\n'
+                    )
+                    if _topic_rows.count('link-row') >= 4:
+                        break
+                if _topic_rows:
+                    linkage_rows += (
+                        f'<div style="margin-bottom:12px">'
+                        f'<div style="color:var(--primary-gold);font-size:18px;font-weight:bold;margin-bottom:6px">📌 {_topic}</div>'
+                        f'{_topic_rows}'
+                        f'</div>'
+                    )
+            if not linkage_rows:
+                linkage_rows = '<div class="link-row">⚠️ 無法取得即時聯動數據</div>'
+        except Exception as _le:
+            linkage_rows = f'<div class="link-row">⚠️ 聯動牆讀取失敗: {_le}</div>'
+    else:
+        linkage_rows = '<div class="link-row">⚠️ 聯動模組未啟用</div>'
     
     # ── 未來14天事件（只顯示 >= 今天的日期）──
     today_dt = now.replace(hour=0, minute=0, second=0, microsecond=0)
