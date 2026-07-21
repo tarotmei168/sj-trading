@@ -704,7 +704,7 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
 
     <!-- 第1層：核心持股（含19檔全體）-->
     <div class="card">
-        <div class="card-title">🔒 第1層：19檔持股技術監控</div>
+        <div class="card-title">🔒 核心持股（11檔）技術監控</div>
         <table>
             <thead>
                 <tr>
@@ -765,9 +765,6 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
                 </tr>
             </thead>
             <tbody>{potential_rows}</tbody>
-        </table>
-    </div>
-            </tbody>
         </table>
     </div>
 
