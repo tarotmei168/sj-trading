@@ -158,7 +158,9 @@ python -X utf8 src\sj_trading\kd_backtest.py
    - morning_news → 鉅亨網新聞（過濾中國）
    - 組裝 HTML → web/index.html
 2. git push → GitHub Pages 更新
-3. 啟動 day_engine_v2.py → 盤中監控（含逼近金叉預警，K<D差距≤3且K往上追即預警）
+3. 啟動盤中監控（可選）
+   a) `python src/sj_trading/day_engine_v2.py` — 舊版（日K/DayEngine KD）
+   b) `python src/sj_trading/core_intraday_kd_monitor.py --loop` — 🔥新版（核心11檔30分K KD，用本地歷史資料）
 ```
 
 ### 16:30 盤後更新
@@ -197,3 +199,11 @@ python -X utf8 src\sj_trading\kd_backtest.py
 - [x] database/kd_params.json 參數存檔
 - [x] MORNING_CHECKLIST.md 完整版
 - [x] git push 確認成功
+
+### 2026-07-21（🔥核心11檔30分K KD歷史資料庫 + 盤中即時監控）
+- [x] `download_intraday_kd_data.py` — 用 Shioaji 分批下載核心11檔1分K，合併30分K/15分K，存 database/30min_kd/
+- [x] `core_intraday_kd_monitor.py` — 盤中即時掃描，用本地歷史KD+即時1分K判斷金叉/死叉/逼近金叉
+- [x] 已成功下載11檔各620根30分K KD資料
+- [x] 14:49首次測試抓到: TPK金叉✅、鴻海死叉❌、偉詮電逼近死叉⚠️
+- [x] 支援 --loop 循環監控模式
+- [ ] 未來可改跑15分K: python download_intraday_kd_data.py --freq 15
