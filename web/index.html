@@ -64,29 +64,17 @@
             border: 1px solid #444;
         }
 
-        table {
-            width: 100%; border-collapse: collapse; margin-top: 10px;
-            font-size: 18px;
-        }
-        th {
-            background-color: #2d2d2d; color: var(--primary-gold);
-            font-weight: bold; padding: 8px 6px; text-align: left;
-            border-bottom: 2px solid var(--border-color);
-            font-size: 18px;
-        }
-        td {
-            padding: 10px 6px; border-bottom: 1px solid var(--border-color);
-            vertical-align: middle; font-size: 18px;
-        }
-
         .badge {
-            display: inline-block; padding: 2px 6px; border-radius: 4px;
+            display: inline-block; padding: 2px 8px; border-radius: 4px;
             font-size: 14px; font-weight: bold; color: #fff;
         }
-        .badge-red { background: var(--red-alert); }
-        .badge-blue { background: #1e90ff; }
-        .badge-orange { background: #ffa502; }
+        .bg-red { background: var(--red-alert); }
+        .bg-green { background: var(--green-go); color:#000; }
+        .bg-yellow { background: #ffa502; }
+        .bg-gray { background: #555; }
+        .bg-blue { background: #1e90ff; }
 
+        /* ── 事件行（保留）── */
         .event-row {
             display: flex; justify-content: space-between;
             font-size: 18px; padding: 8px 0;
@@ -100,6 +88,62 @@
 
         .up { color: var(--red-alert); font-weight: bold; }
         .down { color: var(--green-go); font-weight: bold; }
+
+        /* ── 核心持股卡片網格 ── */
+        .stock-grid {
+            display: flex; flex-wrap: wrap; gap: 10px;
+            margin-top: 10px;
+        }
+        .stock-card {
+            background: #252525; border-radius: 8px;
+            padding: 12px; flex: 1 1 calc(50% - 5px); min-width: 160px;
+            border: 1px solid #333;
+        }
+        .sc-header {
+            font-size: 17px; margin-bottom: 8px;
+            color: var(--primary-gold);
+        }
+        .sc-body { display: flex; gap: 10px; }
+        .sc-price {
+            font-size: 22px; font-weight: bold;
+            min-width: 65px;
+        }
+        .px-up { color: var(--red-alert); }
+        .px-down { color: var(--green-go); }
+        .sc-info { flex: 1; font-size: 15px; }
+        .sc-row {
+            display: flex; justify-content: space-between;
+            padding: 2px 0;
+        }
+        .sc-label { color: var(--text-muted); }
+        .kd-golden { color: var(--green-go); font-weight: bold; }
+        .kd-near-gc { color: #a0ff60; }
+        .kd-near-dc { color: #ffa060; }
+        .kd-dead { color: var(--red-alert); }
+
+        /* ── 潛力股卡片網格 ── */
+        .pc-grid {
+            display: flex; flex-wrap: wrap; gap: 10px;
+            margin-top: 10px;
+        }
+        .pc-card {
+            background: #252525; border-radius: 8px;
+            padding: 12px; flex: 1 1 calc(50% - 5px); min-width: 160px;
+            border: 1px solid #333;
+        }
+        .pc-header {
+            font-size: 17px; margin-bottom: 6px;
+            color: var(--primary-gold);
+        }
+        .pc-body { font-size: 15px; }
+        .pc-row {
+            display: flex; justify-content: space-between;
+            padding: 3px 0;
+            border-bottom: 1px solid #2a2a2a;
+        }
+        .pc-label { color: var(--text-muted); }
+        .pc-val { font-weight: bold; }
+        .trust-up { color: var(--red-alert); }
         .footer {
             text-align: center; font-size: 18px; color: #445566;
             margin-top: 30px; padding-top: 15px;
@@ -111,7 +155,7 @@
 
     <div class="header">
         <h1>🐛 早報 — 全球股市天氣預報</h1>
-        <p>🦞 小龍蝦早報 | 2026-07-21 20:30 | SOX+台指期 | 30分K KD 3年回測最佳參數</p>
+        <p>🦞 小龍蝦早報 | 2026-07-21 20:37 | SOX+台指期 | 30分K KD 3年回測最佳參數</p>
     </div>
 
     <!-- 費半 SOX（唯一指數）-->
@@ -132,29 +176,24 @@
         </div>
     </div>
 
-    <!-- 第1層：核心持股（含19檔全體）-->
+    <!-- 第1層：核心持股（手機卡片）-->
     <div class="card">
         <div class="card-title">🔒 核心持股（11檔）技術監控</div>
-        <table>
-            <thead>
-                <tr>
-                    <th>代號</th><th>名稱</th><th>股價</th><th>30日低</th><th>KD</th><th>RSI</th><th>量能</th><th>提示</th><th>策略</th>
-                </tr>
-            </thead>
-            <tbody><tr><td><b>2436</b></td><td>偉詮電</td><td style="font-weight:bold;font-size:1.05em">59.6</td><td>54.7</td><td>🟢金叉(K5) K90.7/86.9</td><td>33.2</td><td>量縮🔴</td><td>—</td><td>🟢 K金叉 可持股</td></tr>
-<tr><td><b>2337</b></td><td>旺宏</td><td style="font-weight:bold;font-size:1.05em">123.0</td><td>115.5</td><td>🟢金叉(K21) K78.6/67.6</td><td>30.3</td><td>量縮🔴</td><td>—</td><td>🟢 K金叉 可持股</td></tr>
-<tr><td><b>5351</b></td><td>鈺創</td><td style="font-weight:bold;font-size:1.05em">88.9</td><td>80.0</td><td>🟢金叉(K14) K83.2/69.4</td><td>51.4</td><td>平量⚪</td><td>—</td><td>🟢 K金叉 可持股</td></tr>
-<tr><td><b>3673</b></td><td>TPK-KY</td><td style="font-weight:bold;font-size:1.05em">63.6</td><td>60.0</td><td>🟡逼近金叉(K14) K62.4/59.8</td><td>30.5</td><td>量縮🔴</td><td>🔥金叉中</td><td>🟡 近金叉 觀望期待</td></tr>
-<tr><td><b>3711</b></td><td>日月光</td><td style="font-weight:bold;font-size:1.05em">633.0</td><td>577.0</td><td>🟢金叉(K21) K91.9/86.1</td><td>44.1</td><td>量縮🔴</td><td>—</td><td>🟢 K金叉 可持股</td></tr>
-<tr><td><b>4958</b></td><td>臻鼎-KY</td><td style="font-weight:bold;font-size:1.05em">509.0</td><td>471.5</td><td>🟢金叉(K21) K80.7/72.8</td><td>35.2</td><td>量縮🔴</td><td>—</td><td>🟢 K金叉 可持股</td></tr>
-<tr><td><b>3042</b></td><td>晶技</td><td style="font-weight:bold;font-size:1.05em">168.0</td><td>153.5</td><td>🟢金叉(K14) K67.9/59.2</td><td>44.4</td><td>平量⚪</td><td>—</td><td>🟢 K金叉 可持股</td></tr>
-<tr><td><b>2454</b></td><td>聯發科</td><td style="font-weight:bold;font-size:1.05em">3670.0</td><td>3240.0</td><td>🟢金叉(K21) K96.6/90.4</td><td>32.0</td><td>量縮🔴</td><td>—</td><td>🟢 K金叉 可持股</td></tr>
-<tr><td><b>2317</b></td><td>鴻海</td><td style="font-weight:bold;font-size:1.05em">246.0</td><td>230.5</td><td>🟡逼近金叉(K14) K93.4/91.0</td><td>45.0</td><td>量縮🔴</td><td>🔥金叉中</td><td>🟡 近金叉 觀望期待</td></tr>
-<tr><td><b>8150</b></td><td>南茂</td><td style="font-weight:bold;font-size:1.05em">104.0</td><td>97.3</td><td>🟢金叉(K21) K67.3/55.7</td><td>52.4</td><td>量縮🔴</td><td>—</td><td>🟢 K金叉 可持股</td></tr>
-<tr><td><b>2330</b></td><td>台積電</td><td style="font-weight:bold;font-size:1.05em">2410.0</td><td>2290.0</td><td>🟢金叉(K9) K93.8/89.3</td><td>50.0</td><td>量縮🔴</td><td>—</td><td>🟢 K金叉 可持股</td></tr>
-<tr><td><b>0050</b></td><td>元大台灣50</td><td style="font-weight:bold;font-size:1.05em">102.5</td><td>97.6</td><td>🟡逼近死叉(K9) K31.1/33.5</td><td>36.3</td><td>放量🟢</td><td>💀死叉中</td><td>➖ 觀望</td></tr>
-</tbody>
-        </table>
+        <div class="stock-grid">
+            <div class="stock-card"><div class="sc-header"><b>2436</b> 偉詮電</div><div class="sc-body"><div class="sc-price px-up">59.6</div><div class="sc-info"><div class="sc-row"><span class="sc-label">KD</span><span class="kd-golden">金叉 K90.7/86.9</span></div><div class="sc-row"><span class="sc-label">RSI</span><span>33.2</span></div><div class="sc-row"><span class="sc-label">量能</span><span>量縮🔴</span></div><div class="sc-row"><span class="sc-label">低 54.7</span><span><span class="badge bg-green">可持股</span></span></div></div></div></div>
+<div class="stock-card"><div class="sc-header"><b>2337</b> 旺宏</div><div class="sc-body"><div class="sc-price px-up">123.0</div><div class="sc-info"><div class="sc-row"><span class="sc-label">KD</span><span class="kd-golden">金叉 K78.6/67.6</span></div><div class="sc-row"><span class="sc-label">RSI</span><span>30.3</span></div><div class="sc-row"><span class="sc-label">量能</span><span>量縮🔴</span></div><div class="sc-row"><span class="sc-label">低 115.5</span><span><span class="badge bg-green">可持股</span></span></div></div></div></div>
+<div class="stock-card"><div class="sc-header"><b>5351</b> 鈺創</div><div class="sc-body"><div class="sc-price px-up">88.9</div><div class="sc-info"><div class="sc-row"><span class="sc-label">KD</span><span class="kd-golden">金叉 K83.2/69.4</span></div><div class="sc-row"><span class="sc-label">RSI</span><span>51.4</span></div><div class="sc-row"><span class="sc-label">量能</span><span>平量⚪</span></div><div class="sc-row"><span class="sc-label">低 80.0</span><span><span class="badge bg-green">可持股</span></span></div></div></div></div>
+<div class="stock-card"><div class="sc-header"><b>3673</b> TPK-KY</div><div class="sc-body"><div class="sc-price px-up">63.6</div><div class="sc-info"><div class="sc-row"><span class="sc-label">KD</span><span class="kd-near-gc">近金叉 K62.4/59.8</span></div><div class="sc-row"><span class="sc-label">RSI</span><span>30.5</span></div><div class="sc-row"><span class="sc-label">量能</span><span>量縮🔴</span></div><div class="sc-row"><span class="sc-label">低 60.0</span><span><span class="badge bg-yellow">觀望期待</span></span></div></div></div></div>
+<div class="stock-card"><div class="sc-header"><b>3711</b> 日月光</div><div class="sc-body"><div class="sc-price px-up">633.0</div><div class="sc-info"><div class="sc-row"><span class="sc-label">KD</span><span class="kd-golden">金叉 K91.9/86.1</span></div><div class="sc-row"><span class="sc-label">RSI</span><span>44.1</span></div><div class="sc-row"><span class="sc-label">量能</span><span>量縮🔴</span></div><div class="sc-row"><span class="sc-label">低 577.0</span><span><span class="badge bg-green">可持股</span></span></div></div></div></div>
+<div class="stock-card"><div class="sc-header"><b>4958</b> 臻鼎-KY</div><div class="sc-body"><div class="sc-price px-up">509.0</div><div class="sc-info"><div class="sc-row"><span class="sc-label">KD</span><span class="kd-golden">金叉 K80.7/72.8</span></div><div class="sc-row"><span class="sc-label">RSI</span><span>35.2</span></div><div class="sc-row"><span class="sc-label">量能</span><span>量縮🔴</span></div><div class="sc-row"><span class="sc-label">低 471.5</span><span><span class="badge bg-green">可持股</span></span></div></div></div></div>
+<div class="stock-card"><div class="sc-header"><b>3042</b> 晶技</div><div class="sc-body"><div class="sc-price px-up">168.0</div><div class="sc-info"><div class="sc-row"><span class="sc-label">KD</span><span class="kd-golden">金叉 K67.9/59.2</span></div><div class="sc-row"><span class="sc-label">RSI</span><span>44.4</span></div><div class="sc-row"><span class="sc-label">量能</span><span>平量⚪</span></div><div class="sc-row"><span class="sc-label">低 153.5</span><span><span class="badge bg-green">可持股</span></span></div></div></div></div>
+<div class="stock-card"><div class="sc-header"><b>2454</b> 聯發科</div><div class="sc-body"><div class="sc-price px-up">3670.0</div><div class="sc-info"><div class="sc-row"><span class="sc-label">KD</span><span class="kd-golden">金叉 K96.6/90.4</span></div><div class="sc-row"><span class="sc-label">RSI</span><span>32.0</span></div><div class="sc-row"><span class="sc-label">量能</span><span>量縮🔴</span></div><div class="sc-row"><span class="sc-label">低 3240.0</span><span><span class="badge bg-green">可持股</span></span></div></div></div></div>
+<div class="stock-card"><div class="sc-header"><b>2317</b> 鴻海</div><div class="sc-body"><div class="sc-price px-up">246.0</div><div class="sc-info"><div class="sc-row"><span class="sc-label">KD</span><span class="kd-near-gc">近金叉 K93.4/91.0</span></div><div class="sc-row"><span class="sc-label">RSI</span><span>45.0</span></div><div class="sc-row"><span class="sc-label">量能</span><span>量縮🔴</span></div><div class="sc-row"><span class="sc-label">低 230.5</span><span><span class="badge bg-yellow">觀望期待</span></span></div></div></div></div>
+<div class="stock-card"><div class="sc-header"><b>8150</b> 南茂</div><div class="sc-body"><div class="sc-price px-up">104.0</div><div class="sc-info"><div class="sc-row"><span class="sc-label">KD</span><span class="kd-golden">金叉 K67.3/55.7</span></div><div class="sc-row"><span class="sc-label">RSI</span><span>52.4</span></div><div class="sc-row"><span class="sc-label">量能</span><span>量縮🔴</span></div><div class="sc-row"><span class="sc-label">低 97.3</span><span><span class="badge bg-green">可持股</span></span></div></div></div></div>
+<div class="stock-card"><div class="sc-header"><b>2330</b> 台積電</div><div class="sc-body"><div class="sc-price px-up">2410.0</div><div class="sc-info"><div class="sc-row"><span class="sc-label">KD</span><span class="kd-golden">金叉 K93.8/89.3</span></div><div class="sc-row"><span class="sc-label">RSI</span><span>50.0</span></div><div class="sc-row"><span class="sc-label">量能</span><span>量縮🔴</span></div><div class="sc-row"><span class="sc-label">低 2290.0</span><span><span class="badge bg-green">可持股</span></span></div></div></div></div>
+<div class="stock-card"><div class="sc-header"><b>0050</b> 元大台灣50</div><div class="sc-body"><div class="sc-price px-down">102.5</div><div class="sc-info"><div class="sc-row"><span class="sc-label">KD</span><span class="kd-near-dc">近死叉 K31.1/33.5</span></div><div class="sc-row"><span class="sc-label">RSI</span><span>36.3</span></div><div class="sc-row"><span class="sc-label">量能</span><span>放量🟢</span></div><div class="sc-row"><span class="sc-label">低 97.6</span><span><span class="badge bg-gray">觀望</span></span></div></div></div></div>
+
+        </div>
     </div>
 
     <!-- 未來14天關鍵事件（台股固定 + 美國自動抓取）-->
@@ -205,34 +244,24 @@
             · 若投信+外資同買標記 🟢共愛；對作標記 🔴對作
             · 更新: —
         </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>代號</th><th>名稱</th><th>股價</th><th>連買</th>
-                    <th>投信買超</th>
-                    <th>外資動向</th>
-                    <th>30日低</th>
-                    <th>KD/RSI</th>
-                    <th>備註</th>
-                </tr>
-            </thead>
-            <tbody><tr><td>6770</td><td>力積電</td><td style="font-weight:bold">65.1</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;">13,189,000</td><td style="color:var(--green-go);font-weight:bold;">-53,322,262</td><td>62.1</td><td>💀死叉(K9) K28.8/36.6 RSI30.2 偏低</td><td style="color:var(--primary-gold);font-weight:bold;">🔴對作</td></tr>
-<tr><td>2382</td><td>廣達</td><td style="font-weight:bold">324.0</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;">8,168,121</td><td style="color:var(--red-alert);font-weight:bold;">+1,138,791</td><td>309.0</td><td>💀死叉(K9) K19.6/28.0 RSI29.8 超賣</td><td style="color:var(--green-go);font-weight:bold;">🟢共愛</td></tr>
-<tr><td>3711</td><td>日月光投控</td><td style="font-weight:bold">633.0</td><td>4天</td><td style="color:var(--red-alert);font-weight:bold;">4,854,547</td><td style="color:var(--green-go);font-weight:bold;">-15,676,808</td><td>577.0</td><td>K21 K91.9/86.1 ➖ RSI44.1 中性</td><td style="color:var(--primary-gold);font-weight:bold;">🔴對作</td></tr>
-<tr><td>4958</td><td>臻鼎-KY</td><td style="font-weight:bold">509.0</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;">3,300,901</td><td style="color:var(--green-go);font-weight:bold;">-14,359,315</td><td>471.5</td><td>K21 K80.7/72.8 ➖ RSI35.2 偏低</td><td style="color:var(--primary-gold);font-weight:bold;">🔴對作</td></tr>
-<tr><td>2337</td><td>旺宏</td><td style="font-weight:bold">123.0</td><td>4天</td><td style="color:var(--red-alert);font-weight:bold;">2,911,000</td><td style="color:var(--green-go);font-weight:bold;">-19,138,227</td><td>115.5</td><td>K21 K78.6/67.6 ➖ RSI30.3 偏低</td><td style="color:var(--primary-gold);font-weight:bold;">🔴對作</td></tr>
-<tr><td>1303</td><td>南亞</td><td style="font-weight:bold">195.5</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">139,859,878</td><td style="color:var(--green-go);font-weight:bold;">-155,338,389</td><td>93.1</td><td>💀死叉(K9) K57.2/69.1 RSI58.4 偏多</td><td style="color:var(--primary-gold);font-weight:bold;">🔴對作</td></tr>
-<tr><td>2887</td><td>台新新光金</td><td style="font-weight:bold">34.7</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">102,005,015</td><td style="color:var(--green-go);font-weight:bold;">-96,003,750</td><td>27.1</td><td>💀死叉(K9) K41.2/54.4 RSI59.2 偏多</td><td style="color:var(--primary-gold);font-weight:bold;">🔴對作</td></tr>
-<tr><td>2880</td><td>華南金</td><td style="font-weight:bold">40.8</td><td>4天</td><td style="color:var(--red-alert);font-weight:bold;">27,587,455</td><td style="color:var(--green-go);font-weight:bold;">-11,674,851</td><td>33.0</td><td>K9 K88.3/83.2 ➖ RSI66.3 偏多</td><td style="color:var(--primary-gold);font-weight:bold;">🔴對作</td></tr>
-<tr><td>2890</td><td>永豐金</td><td style="font-weight:bold">40.2</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;">22,123,181</td><td style="color:var(--green-go);font-weight:bold;">-21,235,856</td><td>31.4</td><td>💀死叉(K9) K31.6/35.8 RSI52.3 中性</td><td style="color:var(--primary-gold);font-weight:bold;">🔴對作</td></tr>
-<tr><td>2892</td><td>第一金</td><td style="font-weight:bold">34.5</td><td>4天</td><td style="color:var(--red-alert);font-weight:bold;">20,124,057</td><td style="color:var(--red-alert);font-weight:bold;">+16,263,045</td><td>28.4</td><td>K9 K83.6/78.3 ➖ RSI63.5 偏多</td><td style="color:var(--green-go);font-weight:bold;">🟢共愛</td></tr>
-<tr><td>0050</td><td>元大台灣50</td><td style="font-weight:bold">102.5</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">19,940,000</td><td style="color:var(--green-go);font-weight:bold;">-400,315,651</td><td>97.6</td><td>K9 K31.1/33.5 ➖ RSI36.3 偏低</td><td style="color:var(--primary-gold);font-weight:bold;">🔴對作</td></tr>
-<tr><td>2542</td><td>興富發</td><td style="font-weight:bold">44.1</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">16,214,000</td><td style="color:var(--green-go);font-weight:bold;">-12,185,803</td><td>41.2</td><td>K9 K53.3/46.1 ➖ RSI58.1 偏多</td><td style="color:var(--primary-gold);font-weight:bold;">🔴對作</td></tr>
-<tr><td>1216</td><td>統一</td><td style="font-weight:bold">79.6</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">15,065,479</td><td style="color:var(--green-go);font-weight:bold;">-6,732,383</td><td>72.4</td><td>K9 K81.4/84.3 ➖ RSI87.0 過熱</td><td style="color:var(--primary-gold);font-weight:bold;">🔴對作</td></tr>
-<tr><td>6505</td><td>台塑化</td><td style="font-weight:bold">85.4</td><td>4天</td><td style="color:var(--red-alert);font-weight:bold;">12,440,200</td><td style="color:var(--red-alert);font-weight:bold;">+44,334,614</td><td>50.3</td><td>🔥金叉(K9) K90.8/88.0 RSI83.9 過熱</td><td style="color:var(--green-go);font-weight:bold;">🟢共愛</td></tr>
-<tr><td>2886</td><td>兆豐金</td><td style="font-weight:bold">48.6</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;">10,932,430</td><td style="color:var(--red-alert);font-weight:bold;">+7,615,475</td><td>40.8</td><td>K9 K84.1/77.1 ➖ RSI70.8 過熱</td><td style="color:var(--green-go);font-weight:bold;">🟢共愛</td></tr>
-</tbody>
-        </table>
+        <div class="pc-grid">
+            <div class="pc-card"><div class="pc-header"><b>6770</b> 力積電</div><div class="pc-body"><div class="pc-row"><span class="pc-label">股價</span><span class="pc-val">65.1</span></div><div class="pc-row"><span class="pc-label">投信</span><span class="pc-val trust-up">13,189,000</span></div><div class="pc-row"><span class="pc-label">外資</span><span class="pc-val" style="color:var(--green-go);font-weight:bold;">-53,322,262</span></div><div class="pc-row"><span class="pc-label">連買</span><span>3天</span></div><div class="pc-row"><span class="pc-label">62.1</span><span><span class="badge bg-yellow">🔴對作</span></span></div></div></div>
+<div class="pc-card"><div class="pc-header"><b>2382</b> 廣達</div><div class="pc-body"><div class="pc-row"><span class="pc-label">股價</span><span class="pc-val">324.0</span></div><div class="pc-row"><span class="pc-label">投信</span><span class="pc-val trust-up">8,168,121</span></div><div class="pc-row"><span class="pc-label">外資</span><span class="pc-val" style="color:var(--red-alert);font-weight:bold;">+1,138,791</span></div><div class="pc-row"><span class="pc-label">連買</span><span>3天</span></div><div class="pc-row"><span class="pc-label">309.0</span><span><span class="badge bg-green">🟢共愛</span></span></div></div></div>
+<div class="pc-card"><div class="pc-header"><b>3711</b> 日月光投控</div><div class="pc-body"><div class="pc-row"><span class="pc-label">股價</span><span class="pc-val">633.0</span></div><div class="pc-row"><span class="pc-label">投信</span><span class="pc-val trust-up">4,854,547</span></div><div class="pc-row"><span class="pc-label">外資</span><span class="pc-val" style="color:var(--green-go);font-weight:bold;">-15,676,808</span></div><div class="pc-row"><span class="pc-label">連買</span><span>4天</span></div><div class="pc-row"><span class="pc-label">577.0</span><span><span class="badge bg-yellow">🔴對作</span></span></div></div></div>
+<div class="pc-card"><div class="pc-header"><b>4958</b> 臻鼎-KY</div><div class="pc-body"><div class="pc-row"><span class="pc-label">股價</span><span class="pc-val">509.0</span></div><div class="pc-row"><span class="pc-label">投信</span><span class="pc-val trust-up">3,300,901</span></div><div class="pc-row"><span class="pc-label">外資</span><span class="pc-val" style="color:var(--green-go);font-weight:bold;">-14,359,315</span></div><div class="pc-row"><span class="pc-label">連買</span><span>3天</span></div><div class="pc-row"><span class="pc-label">471.5</span><span><span class="badge bg-yellow">🔴對作</span></span></div></div></div>
+<div class="pc-card"><div class="pc-header"><b>2337</b> 旺宏</div><div class="pc-body"><div class="pc-row"><span class="pc-label">股價</span><span class="pc-val">123.0</span></div><div class="pc-row"><span class="pc-label">投信</span><span class="pc-val trust-up">2,911,000</span></div><div class="pc-row"><span class="pc-label">外資</span><span class="pc-val" style="color:var(--green-go);font-weight:bold;">-19,138,227</span></div><div class="pc-row"><span class="pc-label">連買</span><span>4天</span></div><div class="pc-row"><span class="pc-label">115.5</span><span><span class="badge bg-yellow">🔴對作</span></span></div></div></div>
+<div class="pc-card"><div class="pc-header"><b>1303</b> 南亞</div><div class="pc-body"><div class="pc-row"><span class="pc-label">股價</span><span class="pc-val">195.5</span></div><div class="pc-row"><span class="pc-label">投信</span><span class="pc-val trust-up">139,859,878</span></div><div class="pc-row"><span class="pc-label">外資</span><span class="pc-val" style="color:var(--green-go);font-weight:bold;">-155,338,389</span></div><div class="pc-row"><span class="pc-label">連買</span><span>5天</span></div><div class="pc-row"><span class="pc-label">93.1</span><span><span class="badge bg-yellow">🔴對作</span></span></div></div></div>
+<div class="pc-card"><div class="pc-header"><b>2887</b> 台新新光金</div><div class="pc-body"><div class="pc-row"><span class="pc-label">股價</span><span class="pc-val">34.7</span></div><div class="pc-row"><span class="pc-label">投信</span><span class="pc-val trust-up">102,005,015</span></div><div class="pc-row"><span class="pc-label">外資</span><span class="pc-val" style="color:var(--green-go);font-weight:bold;">-96,003,750</span></div><div class="pc-row"><span class="pc-label">連買</span><span>5天</span></div><div class="pc-row"><span class="pc-label">27.1</span><span><span class="badge bg-yellow">🔴對作</span></span></div></div></div>
+<div class="pc-card"><div class="pc-header"><b>2880</b> 華南金</div><div class="pc-body"><div class="pc-row"><span class="pc-label">股價</span><span class="pc-val">40.8</span></div><div class="pc-row"><span class="pc-label">投信</span><span class="pc-val trust-up">27,587,455</span></div><div class="pc-row"><span class="pc-label">外資</span><span class="pc-val" style="color:var(--green-go);font-weight:bold;">-11,674,851</span></div><div class="pc-row"><span class="pc-label">連買</span><span>4天</span></div><div class="pc-row"><span class="pc-label">33.0</span><span><span class="badge bg-yellow">🔴對作</span></span></div></div></div>
+<div class="pc-card"><div class="pc-header"><b>2890</b> 永豐金</div><div class="pc-body"><div class="pc-row"><span class="pc-label">股價</span><span class="pc-val">40.2</span></div><div class="pc-row"><span class="pc-label">投信</span><span class="pc-val trust-up">22,123,181</span></div><div class="pc-row"><span class="pc-label">外資</span><span class="pc-val" style="color:var(--green-go);font-weight:bold;">-21,235,856</span></div><div class="pc-row"><span class="pc-label">連買</span><span>3天</span></div><div class="pc-row"><span class="pc-label">31.4</span><span><span class="badge bg-yellow">🔴對作</span></span></div></div></div>
+<div class="pc-card"><div class="pc-header"><b>2892</b> 第一金</div><div class="pc-body"><div class="pc-row"><span class="pc-label">股價</span><span class="pc-val">34.5</span></div><div class="pc-row"><span class="pc-label">投信</span><span class="pc-val trust-up">20,124,057</span></div><div class="pc-row"><span class="pc-label">外資</span><span class="pc-val" style="color:var(--red-alert);font-weight:bold;">+16,263,045</span></div><div class="pc-row"><span class="pc-label">連買</span><span>4天</span></div><div class="pc-row"><span class="pc-label">28.4</span><span><span class="badge bg-green">🟢共愛</span></span></div></div></div>
+<div class="pc-card"><div class="pc-header"><b>0050</b> 元大台灣50</div><div class="pc-body"><div class="pc-row"><span class="pc-label">股價</span><span class="pc-val">102.5</span></div><div class="pc-row"><span class="pc-label">投信</span><span class="pc-val trust-up">19,940,000</span></div><div class="pc-row"><span class="pc-label">外資</span><span class="pc-val" style="color:var(--green-go);font-weight:bold;">-400,315,651</span></div><div class="pc-row"><span class="pc-label">連買</span><span>5天</span></div><div class="pc-row"><span class="pc-label">97.6</span><span><span class="badge bg-yellow">🔴對作</span></span></div></div></div>
+<div class="pc-card"><div class="pc-header"><b>2542</b> 興富發</div><div class="pc-body"><div class="pc-row"><span class="pc-label">股價</span><span class="pc-val">44.1</span></div><div class="pc-row"><span class="pc-label">投信</span><span class="pc-val trust-up">16,214,000</span></div><div class="pc-row"><span class="pc-label">外資</span><span class="pc-val" style="color:var(--green-go);font-weight:bold;">-12,185,803</span></div><div class="pc-row"><span class="pc-label">連買</span><span>5天</span></div><div class="pc-row"><span class="pc-label">41.2</span><span><span class="badge bg-yellow">🔴對作</span></span></div></div></div>
+<div class="pc-card"><div class="pc-header"><b>1216</b> 統一</div><div class="pc-body"><div class="pc-row"><span class="pc-label">股價</span><span class="pc-val">79.6</span></div><div class="pc-row"><span class="pc-label">投信</span><span class="pc-val trust-up">15,065,479</span></div><div class="pc-row"><span class="pc-label">外資</span><span class="pc-val" style="color:var(--green-go);font-weight:bold;">-6,732,383</span></div><div class="pc-row"><span class="pc-label">連買</span><span>5天</span></div><div class="pc-row"><span class="pc-label">72.4</span><span><span class="badge bg-yellow">🔴對作</span></span></div></div></div>
+<div class="pc-card"><div class="pc-header"><b>6505</b> 台塑化</div><div class="pc-body"><div class="pc-row"><span class="pc-label">股價</span><span class="pc-val">85.4</span></div><div class="pc-row"><span class="pc-label">投信</span><span class="pc-val trust-up">12,440,200</span></div><div class="pc-row"><span class="pc-label">外資</span><span class="pc-val" style="color:var(--red-alert);font-weight:bold;">+44,334,614</span></div><div class="pc-row"><span class="pc-label">連買</span><span>4天</span></div><div class="pc-row"><span class="pc-label">50.3</span><span><span class="badge bg-green">🟢共愛</span></span></div></div></div>
+<div class="pc-card"><div class="pc-header"><b>2886</b> 兆豐金</div><div class="pc-body"><div class="pc-row"><span class="pc-label">股價</span><span class="pc-val">48.6</span></div><div class="pc-row"><span class="pc-label">投信</span><span class="pc-val trust-up">10,932,430</span></div><div class="pc-row"><span class="pc-label">外資</span><span class="pc-val" style="color:var(--red-alert);font-weight:bold;">+7,615,475</span></div><div class="pc-row"><span class="pc-label">連買</span><span>3天</span></div><div class="pc-row"><span class="pc-label">40.8</span><span><span class="badge bg-green">🟢共愛</span></span></div></div></div>
+
+        </div>
     </div>
 
     <!-- 新聞區塊：從 output/news_crawled.json 讀取（爬蟲，0 token） -->
