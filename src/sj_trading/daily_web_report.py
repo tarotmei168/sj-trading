@@ -182,6 +182,44 @@ def compute_3ykd(close, low, high, kp):
         d_vals[i] = d_vals[i-1] * 2/3 + k_vals[i] * 1/3
     return k_vals, d_vals
 
+def _fetch_rsi_from_finmind(stock_id):
+    """用 FinMind API 抓近60個交易日日K，算RSI(14)"""
+    import requests, json
+    try:
+        # FinMind TaiwanStockInfo 格式: 股票代號 (e.g. '2330')
+        url = f'https://api.finmindtrade.com/api/v4/data'
+        params = {
+            'dataset': 'TaiwanStockPrice',
+            'data_id': stock_id,
+            'start_date': '2026-05-01',  # 抓約60天
+            'end_date': datetime.now().strftime('%Y-%m-%d'),
+        }
+        resp = requests.get(url, params=params, timeout=10)
+        data = resp.json()
+        if data.get('status') != 200 or not data.get('data'):
+            return 50.0
+        
+        # 取收盤價
+        closes = [d['close'] for d in data['data'] if d.get('close')]
+        if len(closes) < 15:
+            return 50.0
+        
+        import numpy as np
+        arr = np.array(closes[-62:], dtype=float)  # 約60天
+        deltas = np.diff(arr)
+        gains = np.where(deltas > 0, deltas, 0.0)
+        losses = np.where(deltas < 0, -deltas, 0.0)
+        avg_gain = np.mean(gains[-14:])
+        avg_loss = np.mean(losses[-14:])
+        if avg_loss == 0:
+            return 100.0
+        rs = avg_gain / avg_loss
+        rsi = round(100 - 100 / (1 + rs), 1)
+        return rsi
+    except Exception as e:
+        print(f'  ⚠️ FinMind RSI 失敗 ({stock_id}): {str(e)[:50]}')
+        return 50.0
+
 def get_tech_batch(stock_ids):
     """批次產出技術指標（3年30分K KD + RSI + 量能）"""
     result = {}
@@ -218,9 +256,8 @@ def get_tech_batch(stock_ids):
             gap = k - d
             k_trend_up = True  # 無法判斷時預設
         
-        # RSI: 從30分K資料取每日最後一根還原日K
-        # 或者直接對30分K closess 算RSI
-        rsi_val = calc_RSI(closes.tolist())
+        # RSI: 用 FinMind 抓60天日K來算（主人要求）
+        rsi_val = _fetch_rsi_from_finmind(sid)
         
         # 量能（還是用30分K的最後幾根來比）
         if len(volumes) >= 25:
