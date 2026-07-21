@@ -101,11 +101,16 @@ class ShioajiClient:
         sim = self._get_sim_flag()
 
         self._api = sj.Shioaji(simulation=sim)
-        accounts = self._api.login(
-            api_key=cfg["api_key"],
-            secret_key=cfg["secret_key"],
-            fetch_contract=True,
-        )
+        try:
+            accounts = self._api.login(
+                api_key=cfg["api_key"],
+                secret_key=cfg["secret_key"],
+                fetch_contract=True,
+            )
+        except Exception as e:
+            print(f'[ShioajiClient] 登入失敗: {e}')
+            self._api = None
+            raise
         self._contracts = self._api.Contracts.Stocks
 
         # 若有 CA 憑證則啟用

@@ -98,7 +98,17 @@ def get_shioaji_snapshots():
         sjc = ShioajiClient()
     tone = ''
     
-    if sjc and sjc.login():
+    try:
+        if sjc:
+            sjc.login()
+            sjc_ok = True
+        else:
+            sjc_ok = False
+    except Exception as sjc_e:
+        print(f'[Shioaji] 登入失敗: {sjc_e}')
+        sjc_ok = False
+    
+    if sjc_ok:
         # 真API模式
         codes = CORE_IDS + ['2330']
         snaps = sjc.get_snapshots(codes)
