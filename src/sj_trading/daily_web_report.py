@@ -183,7 +183,7 @@ def compute_3ykd(close, low, high, kp):
     return k_vals, d_vals
 
 def get_tech_batch(stock_ids):
-    """批次產出技術指標（3年30分K KD + MACD + RSI + 量能）"""
+    """批次產出技術指標（3年30分K KD + RSI + 量能）"""
     result = {}
     for sid in stock_ids:
         data = read_local_csv(sid)
@@ -195,19 +195,34 @@ def get_tech_batch(stock_ids):
         lows = np.array([d['low'] for d in data], dtype=float)
         volumes = np.array([d['volume'] for d in data], dtype=float)
         
-        # KD（3年回測最佳K值）
-        kp = KD3Y_PARAMS.get(sid, {}).get("K", 9)
-        k_vals, d_vals = compute_3ykd(closes, lows, highs, kp)
-        k = k_vals[-1]
-        d = d_vals[-1]
-        golden = k >= d
-        gap = k - d
+        # 資料預警: 如果資料中有 K,D 欄位（30分K KD），優先直接用
+        # 否則用 compute_3ykd 重算
+        has_kd_col = 'K' in data[0] and 'D' in data[0]
         
-        # RSI
+        if has_kd_col:
+            # 直接取最後一筆的 K/D（30分K KD已預算好）
+            k = float(data[-1]['K'])
+            d = float(data[-1]['D'])
+            gap = k - d
+            golden = k >= d
+            # 也取前一筆的K來判斷趨勢方向
+            k_prev = float(data[-2]['K']) if len(data) >= 2 else k
+            k_trend_up = k > k_prev
+        else:
+            # 用回測最佳K值重算
+            kp = KD3Y_PARAMS.get(sid, {}).get("K", 9)
+            k_vals, d_vals = compute_3ykd(closes, lows, highs, kp)
+            k = k_vals[-1]
+            d = d_vals[-1]
+            golden = k >= d
+            gap = k - d
+            k_trend_up = True  # 無法判斷時預設
+        
+        # RSI: 從30分K資料取每日最後一根還原日K
+        # 或者直接對30分K closess 算RSI
         rsi_val = calc_RSI(closes.tolist())
         
-        
-        # 量能：最近5天均量 / 前20天均量
+        # 量能（還是用30分K的最後幾根來比）
         if len(volumes) >= 25:
             vol5 = float(np.mean(volumes[-5:]))
             vol20 = float(np.mean(volumes[-20:-5])) if len(volumes) >= 25 else vol5
@@ -221,14 +236,6 @@ def get_tech_batch(stock_ids):
         elif vol_ratio < 0.8: vol_note = '量縮🔴'
         else: vol_note = '平量⚪'
         
-        # KD位置
-        if gap > 3: kd_pos = '多頭'
-        elif gap > 0: kd_pos = '偏多'
-        elif gap > -3: kd_pos = '偏空'
-        else: kd_pos = '空頭'
-        
-        # MACD信號
-        
         # 位階
         if rsi_val < 30: level = '超賣'
         elif rsi_val < 40: level = '偏低'
@@ -239,9 +246,9 @@ def get_tech_batch(stock_ids):
         result[sid] = {
             'k': round(k, 1), 'd': round(d, 1), 'gap': round(gap, 1),
             'golden': golden, 'rsi': rsi_val,
-            'dif': round(dif, 2), 'dea': round(dea, 2), 'macd_hist': round(macd_hist, 2),
             'vol_ratio': round(vol_ratio, 2), 'vol_note': vol_note,
             'price': closes[-1],
+            'level': level,
         }
     return result
 
