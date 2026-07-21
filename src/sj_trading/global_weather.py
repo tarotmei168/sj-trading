@@ -36,53 +36,32 @@ def get_us_indexes():
     return result
 
 def get_taiwan_futures():
-    """台指期即時指數 — 抓當下最新報價（不分日夜盤）"""
-    
-    # 方式1：用 Shioaji 永豐 API 抓即時
+    """
+    台指期即時指數 — 用 yfinance 抓最新日K收盤價（不分日夜盤）
+    台指期交易時間 08:45~13:45 + 15:00~次日05:00
+    用 2d 日K 比對前日收盤算漲跌
+    """
     try:
-        import sys, os
-        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-        from shioaji_helper import ShioajiClient
-        import shioaji as sj
-        sjc = ShioajiClient()
-        if sjc.login():
-            # 台指期近月合約
-            contract = sj.BaseContract(
-                code='TXFC1F',
-                exchange=sj.Exchange.TAIFEX,
-                security_type=sj.SecurityType.Stock  # Future 會 crash，用 Stock 可建立
-            )
-            snap = sjc.api.snapshots([contract])
-            if snap and len(snap) > 0:
-                close = snap[0].close
-                change_price = snap[0].change_price
-                if close and close > 0:
-                    change_rate = (change_price / (close - change_price)) * 100 if (close - change_price) != 0 else 0
-                    sjc.logout()
-                    return {"close": round(close, 2), "change": round(change_rate, 2), "source": "永豐即時"}
-            sjc.logout()
+        import yfinance as yf
+        import io, contextlib
+        with contextlib.redirect_stderr(io.StringIO()):
+            t = yf.Ticker('TX00.TW')
+            # 抓最近2根日K（含盤中 partial bar）
+            df = t.history(period='3d', interval='1d')
+            if df is not None and len(df) >= 2:
+                closes = df['Close'].values
+                close_val = round(float(closes[-1]), 2)
+                change = round((closes[-1] / closes[-2] - 1) * 100, 2)
+                return {"close": close_val, "change": change, "source": "yfinance"}
+            # fallback: try 1h
+            df = t.history(period='2d', interval='1h')
+            if df is not None and len(df) >= 2:
+                closes = df['Close'].values
+                close_val = round(float(closes[-1]), 2)
+                change = round((closes[-1] / closes[-2] - 1) * 100, 2)
+                return {"close": close_val, "change": change, "source": "yfinance"}
     except:
         pass
-    
-    # 方式2：用 yfinance 抓台指期即時（最新一根 K 線）
-    for sym in ["TX00.TW", "^TX00", "TW00.TF"]:
-        try:
-            import yfinance as yf
-            import io, contextlib
-            with contextlib.redirect_stderr(io.StringIO()):
-                t = yf.Ticker(sym)
-                df = t.history(period="2d", interval="1h")
-                if df is not None and len(df) >= 2:
-                    closes = df["Close"].values
-                    change = (closes[-1] / closes[-2] - 1) * 100
-                    return {"close": round(closes[-1], 2), "change": round(change, 2), "source": "yfinance即時"}
-                df = t.history(period="5d")
-                if df is not None and len(df) >= 2:
-                    closes = df["Close"].values
-                    change = (closes[-1] / closes[-2] - 1) * 100
-                    return {"close": round(closes[-1], 2), "change": round(change, 2), "source": "yfinance日K"}
-        except:
-            continue
     
     return None
 

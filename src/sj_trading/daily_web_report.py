@@ -487,59 +487,20 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
     if not price_rows:
         price_rows = '<tr><td colspan="8" style="text-align:center;color:#666;">⏳ 資料讀取中</td></tr>'
     
-    # ── 投信秘密建倉（全市場掃描 + 股本滲透率）──
-    trust_rows = ''
+    # ── 潛力股候選（全市場非持股中被投信大買的）──
     trust_update_time = '—'
     trust_scan_path = os.path.join(OUTPUT_DIR, 'trust_scan_latest.json')
-    if os.path.exists(trust_scan_path):
-        try:
-            with open(trust_scan_path, 'r', encoding='utf-8') as f:
-                trust_scan = json.load(f)
-            trust_update_time = trust_scan.get('update_time', '—')
-            for h in trust_scan.get('trust_top40', []):
-                sid = h['sid']
-                name = h['name']
-                days = h['days']
-                total_trust = h['total_trust']
-                total_foreign = h['total_foreign']
-                is_watch = h.get('is_watch', False)
-                
-                # 滲透率（只有持股才有，全市場無資料）
-                r = trust_rates.get(sid, {})
-                p_day = r.get('p_day', 0) if isinstance(r.get('p_day'), (int, float)) and r.get('p_day', 0) > 0 else '—'
-                p_cum = r.get('p_cum', 0) if isinstance(r.get('p_cum'), (int, float)) and r.get('p_cum', 0) > 0 else '—'
-                
-                tag = '【持股】' if is_watch else ''
-                if total_trust >= 5000000:
-                    tag = '🔥🔥' + tag
-                elif total_trust >= 2000000:
-                    tag = '🔥' + tag
-                
-                fn_color = 'var(--green-go);font-weight:bold;' if total_foreign < 0 else 'var(--red-alert);font-weight:bold;'
-                trust_rows += (
-                    f'<tr><td>{sid}</td><td>{name}</td>'
-                    f'<td>{days}天</td>'
-                    f'<td style="color:var(--red-alert);font-weight:bold;">{total_trust:>10,}</td>'
-                    f'<td style="color:{fn_color}">{total_foreign:>+10,}</td>'
-                    f'<td>{p_day if isinstance(p_day, str) else f"{p_day:.4f}%"}</td>'
-                    f'<td>{p_cum if isinstance(p_cum, str) else f"{p_cum:.4f}%"}</td>'
-                    f'<td>{tag}</td></tr>\n'
-                )
-                if trust_rows.count('<tr>') >= 10:
-                    break
-        except:
-            pass
-    if not trust_rows:
-        trust_rows = '<tr><td colspan="8" style="text-align:center;color:#666;">盤後16:30更新</td></tr>'
-    
-    # ── 潛力股候選（全市場非持股中被投信大買的）──
     if potential_stocks is None and os.path.exists(trust_scan_path):
         try:
             with open(trust_scan_path, 'r', encoding='utf-8') as f:
                 trust_scan = json.load(f)
+            # 全部候選：持股+非持股，只要有投信連買>=3天、總額>50萬
             candidates = [h for h in trust_scan.get('trust_top40', []) 
-                         if not h.get('is_watch', False) and h['days'] >= 3 and h['total_trust'] >= 500000]
-            potential_stocks = candidates[:10]
+                         if h['days'] >= 3 and h['total_trust'] >= 500000]
+            # 核心持股放前面，非持股放後面，最多20檔
+            watch = [c for c in candidates if c.get('is_watch', False)]
+            non_watch = [c for c in candidates if not c.get('is_watch', False)]
+            potential_stocks = (watch[:10] + non_watch[:10])[:20]
         except:
             potential_stocks = []
     elif potential_stocks is None:
@@ -583,10 +544,23 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         event_rows = '<div class="event-row"><span>暫無事件</span></div>'
     
 
-    # ── 潛力股候選 HTML 行（含 KD/RSI）──
+    # ── 潛力股候選 HTML 行（含 KD/RSI + 對作/共愛標記）──
     potential_rows = ''
     for p in potential_stocks:
         fn_color = 'var(--green-go);font-weight:bold;' if p['total_foreign'] < 0 else 'var(--red-alert);font-weight:bold;'
+        # 判斷對作還共愛
+        trust_buy = p['total_trust'] > 0
+        fn_buy = p['total_foreign'] > 0
+        if trust_buy and fn_buy:
+            flag = '🟢共愛'
+            flag_color = 'var(--green-go)'
+        elif trust_buy and not fn_buy:
+            flag = '🔴對作'
+            flag_color = 'var(--primary-gold)'
+        else:
+            flag = '➖'
+            flag_color = '#666'
+        
         sid = p['sid']
         t = tech_data.get(sid)
         if t:
@@ -604,10 +578,11 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
             f'<td>{p["days"]}天</td>'
             f'<td style="color:var(--red-alert);font-weight:bold;">{p["total_trust"]:,}</td>'
             f'<td style="color:{fn_color}">{p["total_foreign"]:+,}</td>'
-            f'<td>{tech_str}</td></tr>\n'
+            f'<td>{tech_str}</td>'
+            f'<td style="color:{flag_color};font-weight:bold;">{flag}</td></tr>\n'
         )
     if not potential_rows:
-        potential_rows = '<tr><td colspan="6" style="text-align:center;color:#666;">盤後16:30更新全市場掃描</td></tr>'
+        potential_rows = '<tr><td colspan="7" style="text-align:center;color:#666;">盤後16:30更新全市場掃描</td></tr>'
 
     # ═══════════════════════════════════════════
     #  🏗️ 最終 HTML
@@ -771,55 +746,30 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         {linkage_rows}
     </div>
 
-    <!-- 投信秘密建倉（全市場掃描 + 股本滲透率）-->
+    <!-- 潛力股候選（全市場投信+法人掃描，標記對作/共愛）-->
     <div class="card alert">
         <div class="card-title">
-            🏦 投信法人秘密建倉
-            · 全市場連續買超 >= 3天, 累計 > 50萬
-            · 滲透率 P_day = 當日買超張/(總股本*1000)*100%  · 累計控盤率 P_cum = 累計買超張/(總股本*1000)*100%
-            · 更新時間: {trust_update_time}
+            🎯 潛力股候選：投信/法人動向
+            · 全市場連買>=3天, 累計>50萬
+            · 若投信+外資同買標記 🟢共愛；對作標記 🔴對作
+            · 更新: {trust_update_time}
         </div>
         <table>
             <thead>
                 <tr>
-                    <th>代號</th><th>名稱</th>
-                    <th>連買</th>
+                    <th>代號</th><th>名稱</th><th>連買</th>
                     <th>投信買超</th>
-                    <th>法人（外資）</th>
-                    <th>P_day (%)</th>
-                    <th>P_cum (%)</th>
-                    <th>標記</th>
-                </tr>
-            </thead>
-            <tbody>{trust_rows}</tbody>
-        </table>
-    </div>
-
-    <!-- 潛力股候選（動態從全市場掃描）-->
-    <div class="card info">
-        <div class="card-title">🎯 潛力股候選（投信連買中，非持股）</div>
-        <table>
-            <thead>
-                <tr>
-                    <th>代號</th><th>名稱</th>
-                    <th>連買</th>
-                    <th>投信買超</th>
-                    <th>法人（外資）</th>
+                    <th>外資動向</th>
                     <th>KD/RSI</th>
+                    <th>備註</th>
                 </tr>
             </thead>
             <tbody>{potential_rows}</tbody>
         </table>
     </div>
 
-    <!-- 新聞區塊：由 morning_news.py 動態產生 -->
+    <!-- 新聞區塊：從 output/news_crawled.json 讀取（爬蟲，0 token） -->
     {news_html if news_html else ''}
-    
-    <!-- 川普投顧靜態備援 -->
-    <div class="card" style="border-left-color: #a29bfe;">
-        <div class="card-title">🗣️ 川普投顧大砲特區</div>
-        <p>持續監控川普對台灣晶片關稅與科技禁令言論</p>
-    </div>
 
     <div class="footer">
         小龍蝦自動產出 | 08:30 早報 · 09:00~13:35 監控 · 16:30 更新
@@ -914,10 +864,10 @@ def run():
         try:
             with open(trust_scan_path, 'r', encoding='utf-8') as f:
                 ts = json.load(f)
+            # 持股+非持股都算KD
             candidates = [h for h in ts.get('trust_top40', [])
-                         if not h.get('is_watch', False) and h['days'] >= 3 and h['total_trust'] >= 500000]
-            # 取非核心持股的前15名
-            potential_ids = [h['sid'] for h in candidates[:15] if h['sid'] not in CORE_IDS]
+                         if h['days'] >= 3 and h['total_trust'] >= 500000]
+            potential_ids = [h['sid'] for h in candidates[:20] if h['sid'] not in CORE_IDS]
         except:
             pass
     all_ids = list(dict.fromkeys(CORE_IDS + potential_ids))
@@ -935,18 +885,32 @@ def run():
     print('\n🏗️ 組裝 HTML...')
     alerts = get_linkage_alerts()
     events = get_events()
-    # 4a. 抓新聞
-    print('\n📰 抓取今日新聞...')
-    try:
-        from morning_news import get_all_headlines, generate_html
-        news_data = get_all_headlines()
-        news_html = generate_html(news_data)
-        print(f'   ✅ 新聞就緒')
-    except Exception as e:
-        print(f'   ⚠️ 新聞抓取失敗: {str(e)[:40]}')
-        news_html = ''
+    # 4a. 新聞從 output/news_crawled.json 讀取（爬蟲，0 token）
+    news_html = ''
+    news_path = os.path.join(OUTPUT_DIR, 'news_crawled.json')
+    if os.path.exists(news_path):
+        try:
+            with open(news_path, 'r', encoding='utf-8') as f:
+                nd = json.load(f)
+            parts = []
+            for sk, sv in nd.get('sections', {}).items():
+                items_html = ''
+                for item in sv.get('items', []):
+                    items_html += f'<div style="padding:6px 0;border-bottom:1px solid #252525;font-size:18px;">📌 <a href="{item["link"]}" target="_blank" style="color:#58a6ff;text-decoration:none;">{item["title"]}</a></div>\n'
+                if items_html:
+                    parts.append(f'<div style="margin-bottom:12px;"><b style="color:var(--primary-gold);font-size:18px;">{sv["label"]}</b>{items_html}</div>')
+            if parts:
+                news_html = (
+                    '<div class="card" style="border-left-color:#1e90ff;">'
+                    '<div class="card-title">📰 今日新聞（爬蟲自動抓取）</div>'
+                    + ''.join(parts) +
+                    f'<div style="font-size:14px;color:#666;margin-top:8px;">更新: {nd.get("update_time","")}</div>'
+                    '</div>'
+                )
+        except:
+            pass
     
-    html = gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html)
+    html = gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html, potential_stocks=None)
     size_kb = len(html) / 1024
     print(f'   ✅ HTML 完成 ({size_kb:.0f} KB)')
     
@@ -971,9 +935,8 @@ def run():
             f.write(arch_html)
         print(f'   ✅ 架構頁已複製: {arch_dst}')
     
-    # 8. Git Push
-    print('\n📤 推送至 GitHub Pages...')
-    push_to_github()
+    # 8. Git Push — 跳過（本機檢視）
+    print('\n📤 Git Push — 跳過（本機檢視模式）')
     
     print()
     print('=' * 60)

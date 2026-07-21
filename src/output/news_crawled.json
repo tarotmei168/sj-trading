@@ -1,0 +1,41 @@
+{
+  "update_time": "2026-07-21 17:49",
+  "sections": {
+    "us_stock": {
+      "label": "🇺🇸 美股/國際",
+      "items": [
+        {
+          "title": "1.台股噴漲量卻急縮 外資連13賣、三大法人買超164.07億元",
+          "link": "https://news.cnyes.com/news/id/6541463"
+        }
+      ]
+    },
+    "tw_stock": {
+      "label": "📊 台股重點",
+      "items": [
+        {
+          "title": "1.台股噴漲量卻急縮 外資連13賣、三大法人買超164.07億元",
+          "link": "https://news.cnyes.com/news/id/6541463"
+        }
+      ]
+    },
+    "tech": {
+      "label": "🔬 科技脈動",
+      "items": [
+        {
+          "title": "1.AI股真的失寵了？高盛曝避險基金正加速撤出科技股",
+          "link": "https://news.cnyes.com/news/id/6540770"
+        }
+      ]
+    },
+    "tw_macro": {
+      "label": "🇹🇼 台灣總經",
+      "items": [
+        {
+          "title": "1.台股噴漲量卻急縮 外資連13賣、三大法人買超164.07億元",
+          "link": "https://news.cnyes.com/news/id/6541463"
+        }
+      ]
+    }
+  }
+}

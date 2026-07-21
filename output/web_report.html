@@ -111,7 +111,7 @@
 
     <div class="header">
         <h1>🐛 早報 — 全球股市天氣預報</h1>
-        <p>🦞 小龍蝦早報 | 2026-07-21 17:15 | SOX+台指期 | 30分K KD 3年回測最佳參數</p>
+        <p>🦞 小龍蝦早報 | 2026-07-21 17:51 | SOX+台指期 | 30分K KD 3年回測最佳參數</p>
     </div>
 
     <!-- 費半 SOX（唯一指數）-->
@@ -183,109 +183,45 @@
 
     </div>
 
-    <!-- 投信秘密建倉（全市場掃描 + 股本滲透率）-->
+    <!-- 潛力股候選（全市場投信+法人掃描，標記對作/共愛）-->
     <div class="card alert">
         <div class="card-title">
-            🏦 投信法人秘密建倉
-            · 全市場連續買超 >= 3天, 累計 > 50萬
-            · 滲透率 P_day = 當日買超張/(總股本*1000)*100%  · 累計控盤率 P_cum = 累計買超張/(總股本*1000)*100%
-            · 更新時間: 07/21 13:24
+            🎯 潛力股候選：投信/法人動向
+            · 全市場連買>=3天, 累計>50萬
+            · 若投信+外資同買標記 🟢共愛；對作標記 🔴對作
+            · 更新: —
         </div>
         <table>
             <thead>
                 <tr>
-                    <th>代號</th><th>名稱</th>
-                    <th>連買</th>
+                    <th>代號</th><th>名稱</th><th>連買</th>
                     <th>投信買超</th>
-                    <th>法人（外資）</th>
-                    <th>P_day (%)</th>
-                    <th>P_cum (%)</th>
-                    <th>標記</th>
-                </tr>
-            </thead>
-            <tbody><tr><td>1303</td><td>南亞</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">139,859,878</td><td style="color:var(--green-go);font-weight:bold;">-155,338,389</td><td>—</td><td>—</td><td>🔥🔥</td></tr>
-<tr><td>2887</td><td>台新新光金</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">102,005,015</td><td style="color:var(--green-go);font-weight:bold;">-96,003,750</td><td>—</td><td>—</td><td>🔥🔥</td></tr>
-<tr><td>2880</td><td>華南金</td><td>4天</td><td style="color:var(--red-alert);font-weight:bold;">27,587,455</td><td style="color:var(--green-go);font-weight:bold;">-11,674,851</td><td>—</td><td>—</td><td>🔥🔥</td></tr>
-<tr><td>2890</td><td>永豐金</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;">22,123,181</td><td style="color:var(--green-go);font-weight:bold;">-21,235,856</td><td>—</td><td>—</td><td>🔥🔥</td></tr>
-<tr><td>2892</td><td>第一金</td><td>4天</td><td style="color:var(--red-alert);font-weight:bold;">20,124,057</td><td style="color:var(--red-alert);font-weight:bold;">+16,263,045</td><td>—</td><td>—</td><td>🔥🔥</td></tr>
-<tr><td>0050</td><td>元大台灣50</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">19,940,000</td><td style="color:var(--green-go);font-weight:bold;">-400,315,651</td><td>—</td><td>—</td><td>🔥🔥</td></tr>
-<tr><td>2542</td><td>興富發</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">16,214,000</td><td style="color:var(--green-go);font-weight:bold;">-12,185,803</td><td>—</td><td>—</td><td>🔥🔥</td></tr>
-<tr><td>1216</td><td>統一</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">15,065,479</td><td style="color:var(--green-go);font-weight:bold;">-6,732,383</td><td>—</td><td>—</td><td>🔥🔥</td></tr>
-<tr><td>6770</td><td>力積電</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;">13,189,000</td><td style="color:var(--green-go);font-weight:bold;">-53,322,262</td><td>—</td><td>—</td><td>🔥🔥【持股】</td></tr>
-<tr><td>6505</td><td>台塑化</td><td>4天</td><td style="color:var(--red-alert);font-weight:bold;">12,440,200</td><td style="color:var(--red-alert);font-weight:bold;">+44,334,614</td><td>—</td><td>—</td><td>🔥🔥</td></tr>
-</tbody>
-        </table>
-    </div>
-
-    <!-- 潛力股候選（動態從全市場掃描）-->
-    <div class="card info">
-        <div class="card-title">🎯 潛力股候選（投信連買中，非持股）</div>
-        <table>
-            <thead>
-                <tr>
-                    <th>代號</th><th>名稱</th>
-                    <th>連買</th>
-                    <th>投信買超</th>
-                    <th>法人（外資）</th>
+                    <th>外資動向</th>
                     <th>KD/RSI</th>
+                    <th>備註</th>
                 </tr>
             </thead>
-            <tbody><tr><td>1303</td><td>南亞</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">139,859,878</td><td style="color:var(--green-go);font-weight:bold;">-155,338,389</td><td>—</td></tr>
-<tr><td>2887</td><td>台新新光金</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">102,005,015</td><td style="color:var(--green-go);font-weight:bold;">-96,003,750</td><td>—</td></tr>
-<tr><td>2880</td><td>華南金</td><td>4天</td><td style="color:var(--red-alert);font-weight:bold;">27,587,455</td><td style="color:var(--green-go);font-weight:bold;">-11,674,851</td><td>—</td></tr>
-<tr><td>2890</td><td>永豐金</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;">22,123,181</td><td style="color:var(--green-go);font-weight:bold;">-21,235,856</td><td>—</td></tr>
-<tr><td>2892</td><td>第一金</td><td>4天</td><td style="color:var(--red-alert);font-weight:bold;">20,124,057</td><td style="color:var(--red-alert);font-weight:bold;">+16,263,045</td><td>—</td></tr>
-<tr><td>0050</td><td>元大台灣50</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">19,940,000</td><td style="color:var(--green-go);font-weight:bold;">-400,315,651</td><td>—</td></tr>
-<tr><td>2542</td><td>興富發</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">16,214,000</td><td style="color:var(--green-go);font-weight:bold;">-12,185,803</td><td>—</td></tr>
-<tr><td>1216</td><td>統一</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">15,065,479</td><td style="color:var(--green-go);font-weight:bold;">-6,732,383</td><td>—</td></tr>
-<tr><td>6505</td><td>台塑化</td><td>4天</td><td style="color:var(--red-alert);font-weight:bold;">12,440,200</td><td style="color:var(--red-alert);font-weight:bold;">+44,334,614</td><td>—</td></tr>
-<tr><td>2886</td><td>兆豐金</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;">10,932,430</td><td style="color:var(--red-alert);font-weight:bold;">+7,615,475</td><td>—</td></tr>
+            <tbody><tr><td>6770</td><td>力積電</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;">13,189,000</td><td style="color:var(--green-go);font-weight:bold;">-53,322,262</td><td>—</td><td style="color:var(--primary-gold);font-weight:bold;">🔴對作</td></tr>
+<tr><td>2382</td><td>廣達</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;">8,168,121</td><td style="color:var(--red-alert);font-weight:bold;">+1,138,791</td><td>—</td><td style="color:var(--green-go);font-weight:bold;">🟢共愛</td></tr>
+<tr><td>3711</td><td>日月光投控</td><td>4天</td><td style="color:var(--red-alert);font-weight:bold;">4,854,547</td><td style="color:var(--green-go);font-weight:bold;">-15,676,808</td><td>K21 K91.9/86.1 ➖ RSI44.1 中性</td><td style="color:var(--primary-gold);font-weight:bold;">🔴對作</td></tr>
+<tr><td>4958</td><td>臻鼎-KY</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;">3,300,901</td><td style="color:var(--green-go);font-weight:bold;">-14,359,315</td><td>K21 K80.7/72.8 ➖ RSI35.2 偏低</td><td style="color:var(--primary-gold);font-weight:bold;">🔴對作</td></tr>
+<tr><td>2337</td><td>旺宏</td><td>4天</td><td style="color:var(--red-alert);font-weight:bold;">2,911,000</td><td style="color:var(--green-go);font-weight:bold;">-19,138,227</td><td>K21 K78.6/67.6 ➖ RSI30.3 偏低</td><td style="color:var(--primary-gold);font-weight:bold;">🔴對作</td></tr>
+<tr><td>1303</td><td>南亞</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">139,859,878</td><td style="color:var(--green-go);font-weight:bold;">-155,338,389</td><td>—</td><td style="color:var(--primary-gold);font-weight:bold;">🔴對作</td></tr>
+<tr><td>2887</td><td>台新新光金</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">102,005,015</td><td style="color:var(--green-go);font-weight:bold;">-96,003,750</td><td>—</td><td style="color:var(--primary-gold);font-weight:bold;">🔴對作</td></tr>
+<tr><td>2880</td><td>華南金</td><td>4天</td><td style="color:var(--red-alert);font-weight:bold;">27,587,455</td><td style="color:var(--green-go);font-weight:bold;">-11,674,851</td><td>—</td><td style="color:var(--primary-gold);font-weight:bold;">🔴對作</td></tr>
+<tr><td>2890</td><td>永豐金</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;">22,123,181</td><td style="color:var(--green-go);font-weight:bold;">-21,235,856</td><td>—</td><td style="color:var(--primary-gold);font-weight:bold;">🔴對作</td></tr>
+<tr><td>2892</td><td>第一金</td><td>4天</td><td style="color:var(--red-alert);font-weight:bold;">20,124,057</td><td style="color:var(--red-alert);font-weight:bold;">+16,263,045</td><td>—</td><td style="color:var(--green-go);font-weight:bold;">🟢共愛</td></tr>
+<tr><td>0050</td><td>元大台灣50</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">19,940,000</td><td style="color:var(--green-go);font-weight:bold;">-400,315,651</td><td>—</td><td style="color:var(--primary-gold);font-weight:bold;">🔴對作</td></tr>
+<tr><td>2542</td><td>興富發</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">16,214,000</td><td style="color:var(--green-go);font-weight:bold;">-12,185,803</td><td>—</td><td style="color:var(--primary-gold);font-weight:bold;">🔴對作</td></tr>
+<tr><td>1216</td><td>統一</td><td>5天</td><td style="color:var(--red-alert);font-weight:bold;">15,065,479</td><td style="color:var(--green-go);font-weight:bold;">-6,732,383</td><td>—</td><td style="color:var(--primary-gold);font-weight:bold;">🔴對作</td></tr>
+<tr><td>6505</td><td>台塑化</td><td>4天</td><td style="color:var(--red-alert);font-weight:bold;">12,440,200</td><td style="color:var(--red-alert);font-weight:bold;">+44,334,614</td><td>—</td><td style="color:var(--green-go);font-weight:bold;">🟢共愛</td></tr>
+<tr><td>2886</td><td>兆豐金</td><td>3天</td><td style="color:var(--red-alert);font-weight:bold;">10,932,430</td><td style="color:var(--red-alert);font-weight:bold;">+7,615,475</td><td>—</td><td style="color:var(--green-go);font-weight:bold;">🟢共愛</td></tr>
 </tbody>
         </table>
     </div>
 
-    <!-- 新聞區塊：由 morning_news.py 動態產生 -->
-    <div class="card alert">
-<div class="card-title">🌍 國際政治 × 總經大事</div>
-<div class="news-item"><span class="badge badge-red">🟠財報</span> 微軟股價陷修正僵局 美銀選擇財報前逆勢加碼</div>
-<div class="news-item"><span class="badge badge-red">🟠半導體</span> <span class="badge badge-red">🟠AI</span> 瑞銀：動能股拋售潮接近尾聲 是時候分批布局AI與半導體了</div>
-<div class="news-item"><span class="badge badge-red">🟠AI</span> 華爾街對AI前景分歧 多空激辯美股下一步怎麼走</div>
-<div class="news-item"><span class="badge badge-red">🟠半導體</span> <span class="badge badge-red">🟠AI</span> Kimi K3重塑晶片設計 「三檔」值得買進的AI概念股</div>
-<div class="news-item"><span class="badge badge-red">🟠半導體</span> <span class="badge badge-red">🟠AI</span> 瑞銀：AI與半導體拋售近尾聲   建議投資人分批回補部位</div>
-<div class="news-item"><span class="badge badge-red">⭐營收創高</span> 〈外銷訂單〉17紅！6月逾952億年增飆近6成創新高 上半年破5千億美元創同期高</div>
-</div>
-
-<div class="card" style="border-left-color: #ffa502;">
-<div class="card-title">🔥 股價催化劑（漲價/缺料/營收創高/轉機）</div>
-<div class="news-item"><span class="badge badge-red">⭐漲價</span> 〈惠譽看台灣〉台灣能源價格未充分反映 電價若調漲 塑化鋼鐵等傳產恐虧損擴大</div>
-<div class="news-item"><span class="badge badge-red">⭐營收創高</span> 〈外銷訂單〉17紅！6月逾952億年增飆近6成創新高 上半年破5千億美元創同期高</div>
-<div class="news-item"><span class="badge badge-red">⭐熱門</span> <span class="badge badge-red">🟠除息</span> 台股回神助攻！00991A除息首日強勢填息 年化配息率逾9%</div>
-<div class="news-item"><span class="badge badge-red">⭐擴產</span> <span class="badge badge-red">🟠AI</span> ASML將AI算力榮景寫進2028擴產表！華爾街重估算力版圖 超微上看725、英特爾翻倍至200美元</div>
-</div>
-
-<div class="card">
-<div class="card-title">📊 台股重點</div>
-<div class="news-item"><span class="badge badge-blue">🟠法說</span> 技嘉旗下孫公司技宸前進資本市場 7/22舉行興櫃前法說會</div>
-<div class="news-item"> 洗盤告一段落！台股大漲1783點暴力反彈，融資洗淨訊號浮現，錯殺股迎暴發性修復！</div>
-<div class="news-item"> 台新證併後重大資安缺失 遭罰360萬元創券商歷年新高、資本計提增1倍</div>
-<div class="news-item"> 很多家庭急著分遺產 忘了另一位父母還活著</div>
-<div class="news-item"><span class="badge badge-blue">⭐漲價</span> 〈惠譽看台灣〉台灣能源價格未充分反映 電價若調漲 塑化鋼鐵等傳產恐虧損擴大</div>
-</div>
-
-<div class="card info">
-<div class="card-title">🔬 科技產業</div>
-<div class="news-item"><span class="badge badge-blue">🟠AI</span> WAIC 2026：告別參數競賽 智能體與具身智能開啟AI落地新紀元</div>
-<div class="news-item"> 記憶體類股回檔是「假摔」？大摩：當前為「黃金坑」進場良機</div>
-<div class="news-item"><span class="badge badge-blue">🟠AI</span> 南韓券商：中東主權AI資金進場買記憶體 Kimi K3是利多而非衝擊</div>
-<div class="news-item"><span class="badge badge-blue">🟠半導體</span> <span class="badge badge-blue">🟠AI</span> 最好的夏天？傳美國要求分享三星、SK海力士AI晶片鉅額利潤</div>
-</div>
-
+    <!-- 新聞區塊：從 output/news_crawled.json 讀取（爬蟲，0 token） -->
     
-    <!-- 川普投顧靜態備援 -->
-    <div class="card" style="border-left-color: #a29bfe;">
-        <div class="card-title">🗣️ 川普投顧大砲特區</div>
-        <p>持續監控川普對台灣晶片關稅與科技禁令言論</p>
-    </div>
 
     <div class="footer">
         小龍蝦自動產出 | 08:30 早報 · 09:00~13:35 監控 · 16:30 更新
