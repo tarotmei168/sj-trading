@@ -17,13 +17,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(SCRIPT_DIR))
 DB_DIR = os.path.join(BASE_DIR, 'database')
 KD3_DIR = os.path.join(DB_DIR, '3y_kd')
 
-# 調試: import 時就印出路徑
-import_at_top = os.path.join(DB_DIR, '3y_kd', '2330_kd.csv')
-_has_file = os.path.exists(import_at_top)
-if not _has_file:
-    print(f"[calc_tech init] __file__={__file__}, SCRIPT_DIR={SCRIPT_DIR}, BASE_DIR={BASE_DIR}, DB_DIR={DB_DIR}, KD3_DIR={KD3_DIR}")
-    print(f"[calc_tech init] 測試 2330_kd.csv: {import_at_top} -> exists={os.path.exists(import_at_top)}")
-
 # ─── 舊日K讀取（database/代號_3y.csv, legacy）───
 def read_local_csv(stock_id):
     """

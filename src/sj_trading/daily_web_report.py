@@ -884,14 +884,6 @@ def run():
         except:
             pass
     all_ids = list(dict.fromkeys(CORE_IDS + potential_ids))
-    # 🔍 debug: 直接看 calc_tech 模組
-    import calc_tech as ct
-    print(f'  [DEBUG] ct.__file__={ct.__file__}')
-    print(f'  [DEBUG] ct.DB_DIR={ct.DB_DIR}')
-    debug_test = read_local_csv('2330')
-    print(f'  [DEBUG] read_local_csv(2330) via daily_web_report: {type(debug_test).__name__}, len={len(debug_test) if debug_test else "None"}')
-    debug_test2 = ct.read_local_csv('2330')
-    print(f'  [DEBUG] ct.read_local_csv(2330): {type(debug_test2).__name__}, len={len(debug_test2) if debug_test2 else "None"}')
     tech_data = get_tech_batch(all_ids)
     ok_count = sum(1 for v in tech_data.values() if v)
     print(f'   ✅ {ok_count}/{len(all_ids)} 檔技術指標就緒（含 {len(potential_ids)} 檔潛力股）')
