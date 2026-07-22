@@ -17,6 +17,9 @@
 import sys, os, csv, json, subprocess
 from datetime import datetime, timedelta
 
+# 富邦爬蟲（即時抓取，不用 PIP）
+from fubon_force_crawler import fetch_force_top_2d, fetch_trust_top_1d, fubon_crawler
+
 sys.stdout.reconfigure(encoding='utf-8')
 
 # ─── 路徑 ─────────────────────────────────────
@@ -60,7 +63,7 @@ WEEKDAY_NAMES = ['一','二','三','四','五','六','日']
 # ═══════════════════════════════════════════════
 
 # calc_tech: KD/RSI/支撐 (完全離線)
-from calc_tech import read_local_csv, calc_KD, calc_RSI
+from calc_tech import read_local_csv, calc_STOCH, calc_RSI, calc_MACD
 
 # calc_trust_rate: 股本滲透率
 from calc_trust_rate import calc_rates, SHARES_TOTAL, CLOSE_PRICES
@@ -166,60 +169,43 @@ KD3Y_PARAMS = {
 
 import numpy as np
 
-def compute_3ykd(close, low, high, kp):
-    """計算30分K KD（3年回測的最佳K值）"""
-    n = len(close)
-    k_vals = np.full(n, 50.0, dtype=float)
-    d_vals = np.full(n, 50.0, dtype=float)
-    for i in range(kp - 1, n):
-        llv = np.min(low[i - kp + 1 : i + 1])
-        hhv = np.max(high[i - kp + 1 : i + 1])
-        denom = hhv - llv
-        rsv = 50.0 if denom == 0 else ((close[i] - llv) / denom) * 100
-        if i == kp - 1:
-            k_vals[i] = 50.0 * 2/3 + rsv * 1/3
-        else:
-            k_vals[i] = k_vals[i-1] * 2/3 + rsv * 1/3
-        d_vals[i] = d_vals[i-1] * 2/3 + k_vals[i] * 1/3
+def compute_talib_stoch(highs, lows, closes, fastk=14, slowk=1, slowd=3):
+    """TA-Lib STOCH(14,1,3) — TradingView 標準預設"""
+    import talib
+    k_vals, d_vals = talib.STOCH(highs, lows, closes,
+                                  fastk_period=fastk,
+                                  slowk_period=slowk,
+                                  slowk_matype=0,
+                                  slowd_period=slowd,
+                                  slowd_matype=0)
     return k_vals, d_vals
 
 def _fetch_rsi_from_finmind(stock_id):
-    """用 FinMind API 抓近60個交易日日K，算RSI(14)"""
-    import requests, json
+    """用 yfinance 抓近60個交易日日K，算RSI(14) (FinMind已付費,改用yfinance)"""
     try:
-        # FinMind TaiwanStockInfo 格式: 股票代號 (e.g. '2330')
-        url = f'https://api.finmindtrade.com/api/v4/data'
-        params = {
-            'dataset': 'TaiwanStockPrice',
-            'data_id': stock_id,
-            'start_date': '2026-05-01',  # 抓約60天
-            'end_date': datetime.now().strftime('%Y-%m-%d'),
-        }
-        resp = requests.get(url, params=params, timeout=10)
-        data = resp.json()
-        if data.get('status') != 200 or not data.get('data'):
-            return 50.0
-        
-        # 取收盤價
-        closes = [d['close'] for d in data['data'] if d.get('close')]
-        if len(closes) < 15:
-            return 50.0
-        
-        import numpy as np
-        arr = np.array(closes[-62:], dtype=float)  # 約60天
-        deltas = np.diff(arr)
-        gains = np.where(deltas > 0, deltas, 0.0)
-        losses = np.where(deltas < 0, -deltas, 0.0)
-        avg_gain = np.mean(gains[-14:])
-        avg_loss = np.mean(losses[-14:])
-        if avg_loss == 0:
-            return 100.0
-        rs = avg_gain / avg_loss
-        rsi = round(100 - 100 / (1 + rs), 1)
-        return rsi
-    except Exception as e:
-        print(f'  ⚠️ FinMind RSI 失敗 ({stock_id}): {str(e)[:50]}')
+        import yfinance as yf
+        tw_sid = stock_id + '.TW' if not stock_id.startswith('0050') else stock_id + '.TW'
+        tk = yf.Ticker(tw_sid)
+        df = tk.history(period='6mo')
+        if df is not None and len(df) >= 15:
+            closes = df['Close'].values[-62:]
+            import numpy as np
+            arr = np.array(closes, dtype=float)
+            deltas = np.diff(arr)
+            gains = np.where(deltas > 0, deltas, 0.0)
+            losses = np.where(deltas < 0, -deltas, 0.0)
+            avg_gain = np.mean(gains[-14:])
+            avg_loss = np.mean(losses[-14:])
+            if avg_loss == 0:
+                return 100.0
+            rs = avg_gain / avg_loss
+            rsi = round(100 - 100 / (1 + rs), 1)
+            return rsi
         return 50.0
+    except Exception as e:
+        print(f'  RSI fail ({stock_id}): {str(e)[:50]}')
+        return 50.0
+
 
 def get_tech_batch(stock_ids):
     """批次產出技術指標（3年30分K KD + RSI + 量能）"""
@@ -227,31 +213,30 @@ def get_tech_batch(stock_ids):
     for sid in stock_ids:
         data = read_local_csv(sid)
         if not data or len(data) < 25:
-            # 沒本機資料的（如0050），用 FinMind 日K 補
+            # 沒本機資料的：先用 yfinance（免費，不需 API Key）
+            data = None
             try:
-                import requests
-                url = 'https://api.finmindtrade.com/api/v4/data'
-                params = {'dataset': 'TaiwanStockPrice', 'data_id': sid, 'start_date': '2025-07-01', 'end_date': datetime.now().strftime('%Y-%m-%d')}
-                r = requests.get(url, params=params, timeout=10).json()
-                if r.get('status') == 200 and r.get('data') and len(r['data']) >= 25:
-                    items = r['data']
-                    # 轉成本機格式 (FinMind 用 max/min, 本機用 high/low)
+                import yfinance as yf
+                tw_sid = sid + '.TW' if not sid.startswith('0050') else sid + '.TW'
+                tk = yf.Ticker(tw_sid)
+                df = tk.history(period='3mo')
+                if df is not None and len(df) >= 25:
+                    items = df.reset_index().to_dict('records')
                     data = []
                     for d in items:
                         data.append({
-                            'close': d['close'],
-                            'high': d['max'],
-                            'low': d['min'],
-                            'volume': d.get('Trading_Volume', d.get('volume', 0)),
+                            'close': float(d['Close']),
+                            'high': float(d['High']),
+                            'low': float(d['Low']),
+                            'volume': int(d['Volume']) if d['Volume'] else 0,
                         })
                     closes = np.array([d['close'] for d in data], dtype=float)
                     highs = np.array([d['high'] for d in data], dtype=float)
                     lows = np.array([d['low'] for d in data], dtype=float)
                     volumes = np.array([d['volume'] for d in data], dtype=float)
-                else:
-                    result[sid] = None
-                    continue
             except:
+                pass
+            if data is None:
                 result[sid] = None
                 continue
         else:
@@ -260,31 +245,21 @@ def get_tech_batch(stock_ids):
             lows = np.array([d['low'] for d in data], dtype=float)
             volumes = np.array([d['volume'] for d in data], dtype=float)
         
-        # 資料預警: 如果資料中有 K,D 欄位（30分K KD），優先直接用
-        # 否則用 compute_3ykd 重算
-        has_kd_col = 'K' in data[0] and 'D' in data[0]
+        # KD: TA-Lib STOCH(14,1,3) — TradingView 標準
+        k_vals, d_vals = compute_talib_stoch(highs, lows, closes, 14, 1, 3)
+        k = float(k_vals[-1]) if not np.isnan(k_vals[-1]) else 50.0
+        d = float(d_vals[-1]) if not np.isnan(d_vals[-1]) else 50.0
+        gap = k - d
+        golden = k >= d
+        # 取前一筆K判斷趨勢
+        k_prev = float(k_vals[-2]) if len(k_vals) >= 2 and not np.isnan(k_vals[-2]) else k
+        k_trend_up = k > k_prev
         
-        if has_kd_col:
-            # 直接取最後一筆的 K/D（30分K KD已預算好）
-            k = float(data[-1]['K'])
-            d = float(data[-1]['D'])
-            gap = k - d
-            golden = k >= d
-            # 也取前一筆的K來判斷趨勢方向
-            k_prev = float(data[-2]['K']) if len(data) >= 2 else k
-            k_trend_up = k > k_prev
-        else:
-            # 用回測最佳K值重算
-            kp = KD3Y_PARAMS.get(sid, {}).get("K", 9)
-            k_vals, d_vals = compute_3ykd(closes, lows, highs, kp)
-            k = k_vals[-1]
-            d = d_vals[-1]
-            golden = k >= d
-            gap = k - d
-            k_trend_up = True  # 無法判斷時預設
-        
-        # RSI: 用 FinMind 抓60天日K來算（主人要求）
-        rsi_val = _fetch_rsi_from_finmind(sid)
+        # RSI: TA-Lib RSI(14) — TradingView 標準
+        try:
+            rsi_val = calc_RSI(closes)
+        except:
+            rsi_val = 50.0
         
         # 量能（還是用30分K的最後幾根來比）
         if len(volumes) >= 25:
@@ -307,12 +282,26 @@ def get_tech_batch(stock_ids):
         elif rsi_val < 70: level = '偏多'
         else: level = '過熱'
         
+        # MACD: TA-Lib MACD(12,26,9) — TradingView 標準
+        try:
+            _macd, _sig, _hist = calc_MACD(closes)
+            macd_val = round(float(_macd[-1]), 2) if not np.isnan(_macd[-1]) else None
+            sig_val = round(float(_sig[-1]), 2) if not np.isnan(_sig[-1]) else None
+            hist_val = round(float(_hist[-1]), 2) if not np.isnan(_hist[-1]) else None
+            # 取前一根hist來判斷柱狀體方向
+            hist_prev = float(_hist[-2]) if len(_hist) >= 2 and not np.isnan(_hist[-2]) else None
+        except:
+            macd_val = sig_val = hist_val = hist_prev = None
+        
         result[sid] = {
             'k': round(k, 1), 'd': round(d, 1), 'gap': round(gap, 1),
             'golden': golden, 'rsi': rsi_val,
+            'macd': macd_val, 'macd_sig': sig_val, 'macd_hist': hist_val,
+            'macd_hist_prev': hist_prev,
             'low_30d': _get_30d_low(sid),
             'vol_ratio': round(vol_ratio, 2), 'vol_note': vol_note,
             'price': closes[-1],
+            'prev_close': closes[-2] if len(closes) >= 2 else None,
             'level': level,
         }
     return result
@@ -732,12 +721,21 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         tone = f'費半 {sox_chg} | {fut_str} → {fut_tone}'
     
     # ── 核心持股表格 ──
-    def _price_cell(px, s):
-        """產出股價+漲跌幅的上下兩行HTML，s 為 snaps[sid] 或 None"""
+    def _price_cell(px, s, prev_close=None):
+        """產出股價+漲跌幅的上下兩行HTML
+        s 為 snaps[sid] (Shioaji即時) 或 None
+        prev_close 為昨天收盤價 (tech_data 備援)
+        """
         pxt = f'{px}' if px else '—'
+        chg, chg_pct = None, None
         if s and s.get('change') is not None:
             chg = s['change']
             chg_pct = s.get('change_pct', 0)
+        elif prev_close and px and prev_close > 0:
+            chg = px - prev_close
+            chg_pct = (chg / prev_close) * 100
+        
+        if chg is not None:
             if chg > 0:
                 icon, cls = '▲', 'up'
             elif chg < 0:
@@ -763,24 +761,47 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         rsi_val = t['rsi']
         vol_note = t.get('vol_note', '—')
         
-        kp = KD3Y_PARAMS.get(sid, {}).get('K', 9)
-        if gap > 3: kd_s = f'🟢金叉(K{kp}) K{k:.1f}/{d:.1f}'
-        elif gap > 0: kd_s = f'🟡逼近金叉(K{kp}) K{k:.1f}/{d:.1f}'
-        elif gap > -3: kd_s = f'🟡逼近死叉(K{kp}) K{k:.1f}/{d:.1f}'
-        else: kd_s = f'🔴死叉(K{kp}) K{k:.1f}/{d:.1f}'
+        # KD: TA-Lib STOCH(14,1,3) — K値/D値 線型顯示
+        kp = '14,1,3'
+        if gap > 5:
+            kd_s = f'🟢K↑{k:.1f} D↑{d:.1f} (金叉,gap={gap:.1f})'
+        elif gap > 0:
+            kd_s = f'🟡K{k:.1f} D{d:.1f} (逼近金叉,gap={gap:.1f})'
+        elif gap > -5:
+            kd_s = f'🟡K{k:.1f} D{d:.1f} (逼近死叉,gap={gap:.1f})'
+        else:
+            kd_s = f'🔴K↓{k:.1f} D↓{d:.1f} (死叉,gap={gap:.1f})'
+        
+        # MACD: TA-Lib MACD(12,26,9) — 柱狀體方向描述
+        macd_v = t.get('macd')
+        macd_hist = t.get('macd_hist')
+        macd_hist_prev = t.get('macd_hist_prev')
+        if macd_v is not None and macd_hist is not None:
+            if macd_hist > 0:
+                if macd_hist_prev is not None and macd_hist > macd_hist_prev:
+                    macd_s = f'🟢MACD {macd_v:.2f} 紅柱增長(多頭攻擊)'
+                else:
+                    macd_s = f'🟢MACD {macd_v:.2f} 紅柱縮短(動能減弱)'
+            else:
+                if macd_hist_prev is not None and macd_hist < macd_hist_prev:
+                    macd_s = f'🔴MACD {macd_v:.2f} 綠柱增長(空頭攻擊)'
+                else:
+                    macd_s = f'🔴MACD {macd_v:.2f} 綠柱縮短(止跌訊號)'
+        else:
+            macd_s = '—'
         
         hints = []
-        if t.get('golden') and gap < 3: hints.append('🔥金叉中')
-        elif not t.get('golden') and gap > -3: hints.append('💀死叉中')
+        if gap > 5: hints.append('🔥金叉中')
+        elif gap < -5: hints.append('💀死叉中')
         if rsi_val > 70: hints.append('過熱')
         elif rsi_val < 30: hints.append('超賣')
         hint_s = ' | '.join(hints) if hints else '—'
         
-        if gap > 3 and rsi_val < 60:
+        if gap > 5 and rsi_val < 60:
             strategy = '🟢 K金叉 可持股'
         elif gap > 0 and rsi_val < 50:
             strategy = '🟡 近金叉 觀望期待'
-        elif gap < -3 and rsi_val > 40:
+        elif gap < -5 and rsi_val > 40:
             strategy = '🔴 死叉中 避開'
         elif rsi_val > 70:
             strategy = '🔴 RSI過熱 注意回檔'
@@ -801,8 +822,9 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         
         # 股票欄：上名稱下代號
         s_cell = f'<div style="line-height:1.2"><b>{sname}</b></div><div style="font-size:0.85em;color:var(--text-muted);line-height:1.2">{sid}</div>'
-        # 股價欄：上股價下漲跌
-        p_cell = _price_cell(px, snaps.get(sid))
+        # 股價欄：上股價下漲跌（Shioaji 離線時用技術資料前一日收盤價）
+        _prev_c = t.get('prev_close')
+        p_cell = _price_cell(px, snaps.get(sid), prev_close=_prev_c)
         
         return (
             f'<tr>'
@@ -811,6 +833,7 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
             f'<td>{low_s}</td>'
             f'<td>{kd_s}</td>'
             f'<td>{rsi_val}</td>'
+            f'<td>{macd_s}</td>'
             f'<td>{vol_note}</td>'
             f'<td>{hint_s}</td>'
             f'<td>{strategy}</td></tr>\n'
@@ -820,15 +843,17 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
     for sid, sname in CORE_19:
         price_rows += fmt_stock_row(sid, sname, tech_data)
     if not price_rows:
-        price_rows = '<tr><td colspan="8" style="text-align:center;color:#666;">⏳ 資料讀取中</td></tr>'
+        price_rows = '<tr><td colspan="9" style="text-align:center;color:#666;">⏳ 資料讀取中</td></tr>'
     
     # ── 潛力股候選（全市場非持股中被投信大買的）──
     trust_update_time = '—'
+    now_hm = now.strftime('%H:%M')
     trust_scan_path = os.path.join(OUTPUT_DIR, 'trust_scan_latest.json')
     if potential_stocks is None and os.path.exists(trust_scan_path):
         try:
             with open(trust_scan_path, 'r', encoding='utf-8') as f:
                 trust_scan = json.load(f)
+            trust_update_time = trust_scan.get('update_time', '—')
             # 全部候選：持股+非持股，只要有投信連買>=3天、總額>50萬
             candidates = [h for h in trust_scan.get('trust_top40', []) 
                          if h['days'] >= 3 and h['total_trust'] >= 500000]
@@ -836,7 +861,8 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
             watch = [c for c in candidates if c.get('is_watch', False)]
             non_watch = [c for c in candidates if not c.get('is_watch', False)]
             potential_stocks = (watch[:10] + non_watch[:10])[:20]
-        except:
+        except Exception as _pe:
+            print(f'  ⚠️ 潛力股載入失敗: {_pe}')
             potential_stocks = []
     elif potential_stocks is None:
         potential_stocks = []
@@ -936,7 +962,25 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         event_rows = '<div class="event-row"><span>—</span></div>'
     
 
-    # ── 潛力股候選 HTML 行（含 KD/RSI + 對作/共愛標記）──
+    # ── 富邦爬蟲：即時抓取主力/投信買賣超張數 ──
+    fubon_force_data = {}   # code -> net (張)
+    fubon_trust_data = {}   # code -> net (張)
+    try:
+        # 主力買超1日 (overlap 較多) + 2日 (備用)
+        _ff = fubon_crawler(url='https://fubon-ebrokerdj.fbs.com.tw/z/zg/zg_F_0_0.djhtm', top=20)
+        for r in _ff:
+            fubon_force_data[r['code']] = r['net']
+        _ff2 = fubon_crawler(url='https://fubon-ebrokerdj.fbs.com.tw/z/zg/zg_F_0_2.djhtm', top=20)
+        for r in _ff2:
+            if r['code'] not in fubon_force_data:
+                fubon_force_data[r['code']] = r['net']
+        _ft = fetch_trust_top_1d(top=20)
+        for r in _ft:
+            fubon_trust_data[r['code']] = r['net']
+    except Exception as _fe:
+        print(f'⚠️ 富邦爬蟲失敗: {_fe}')
+
+    # ── 潛力股候選 HTML 行（含富邦買賣超 + 完整 KD/RSI/量能）──
     potential_rows = ''
     for p in potential_stocks:
         fn_color = 'var(--green-go);font-weight:bold;' if p['total_foreign'] < 0 else 'var(--red-alert);font-weight:bold;'
@@ -958,37 +1002,67 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         if t:
             k, d = t['k'], t['d']
             gap = t['gap']
-            kp2 = KD3Y_PARAMS.get(sid, {}).get("K", 9)
-            if gap > 0 and gap < 3: kd_s = f'🔥金叉(K{kp2}) K{k:.1f}/{d:.1f}'
-            elif gap < -3: kd_s = f'💀死叉(K{kp2}) K{k:.1f}/{d:.1f}'
-            else: kd_s = f'K{kp2} K{k:.1f}/{d:.1f} ➖'
-            tech_str = f'{kd_s} RSI{t["rsi"]} {t["level"]}'
+            # KD: TA-Lib STOCH(14,1,3)
+            if gap > 5:
+                kd_s = f'🟢K↑{k:.1f} D↑{d:.1f} (金叉,gap={gap:.1f})'
+            elif gap > 0:
+                kd_s = f'🟡K{k:.1f} D{d:.1f} (逼近金叉,gap={gap:.1f})'
+            elif gap > -5:
+                kd_s = f'🟡K{k:.1f} D{d:.1f} (逼近死叉,gap={gap:.1f})'
+            else:
+                kd_s = f'🔴K↓{k:.1f} D↓{d:.1f} (死叉,gap={gap:.1f})'
+            rsi_val = t['rsi']
+            vol_note = t.get('vol_note', '—')
+            # MACD: TA-Lib MACD(12,26,9) 柱狀體方向描述
+            macd_v = t.get('macd')
+            macd_hist = t.get('macd_hist')
+            macd_hist_prev = t.get('macd_hist_prev')
+            if macd_v is not None and macd_hist is not None:
+                if macd_hist > 0:
+                    if macd_hist_prev is not None and macd_hist > macd_hist_prev:
+                        macd_s = f'🟢MACD {macd_v:.2f} 紅柱增長(多頭攻擊)'
+                    else:
+                        macd_s = f'🟢MACD {macd_v:.2f} 紅柱縮短(動能減弱)'
+                else:
+                    if macd_hist_prev is not None and macd_hist < macd_hist_prev:
+                        macd_s = f'🔴MACD {macd_v:.2f} 綠柱增長(空頭攻擊)'
+                    else:
+                        macd_s = f'🔴MACD {macd_v:.2f} 綠柱縮短(止跌訊號)'
+            else:
+                macd_s = '—'
         else:
-            tech_str = '—'
+            kd_s = '—'
+            rsi_val = '—'
+            vol_note = '—'
+            macd_s = '—'
         # 潛力股的30日低
         _p_low = _get_30d_low(sid)
-        if _p_low:
-            _p_low_s = f'{_p_low}'
-        else:
-            _p_low_s = '—'
+        _p_low_s = f'{_p_low}' if _p_low else '—'
         _p_price = t['price'] if t else p.get('close',0) or 0
-        _p_price_s = f'{_p_price:.1f}' if _p_price else '—'
         # 潛力股欄位：上名稱下代號
         pot_s_cell = f'<div style="line-height:1.2"><b>{p["name"]}</b></div><div style="font-size:0.85em;color:var(--text-muted);line-height:1.2">{sid}</div>'
         # 潛力股股價+漲跌
-        pot_p_cell = _price_cell(_p_price, snaps.get(sid))
+        _p_prev = t.get('prev_close') if t else None
+        pot_p_cell = _price_cell(round(_p_price,2) if _p_price else _p_price, snaps.get(sid), prev_close=_p_prev)
+        # 富邦買賣超張數
+        fb_force = fubon_force_data.get(sid, None)
+        fb_trust = fubon_trust_data.get(sid, None)
+        fb_force_s = f'<span style="color:var(--red-alert);font-weight:bold;">{fb_force:+,}</span>' if fb_force is not None else '<span style="color:#666;">—</span>'
+        fb_trust_s = f'<span style="color:var(--red-alert);font-weight:bold;">{fb_trust:+,}</span>' if fb_trust is not None else '<span style="color:#666;">—</span>'
         potential_rows += (
             f'<tr><td>{pot_s_cell}</td>'
             f'<td>{pot_p_cell}</td>'
-            f'<td>{p["days"]}天</td>'
-            f'<td style="color:var(--red-alert);font-weight:bold;">{p["total_trust"]:,}</td>'
-            f'<td style="color:{fn_color}">{p["total_foreign"]:+,}</td>'
+            f'<td>{fb_force_s}</td>'
+            f'<td>{fb_trust_s}</td>'
             f'<td>{_p_low_s}</td>'
-            f'<td>{tech_str}</td>'
+            f'<td>{kd_s}</td>'
+            f'<td>{rsi_val}</td>'
+            f'<td>{macd_s}</td>'
+            f'<td>{vol_note}</td>'
             f'<td style="color:{flag_color};font-weight:bold;">{flag}</td></tr>\n'
         )
     if not potential_rows:
-        potential_rows = '<tr><td colspan="8" style="text-align:center;color:#666;">盤後16:30更新全市場掃描</td></tr>'
+        potential_rows = '<tr><td colspan="10" style="text-align:center;color:#666;">盤後16:30更新全市場掃描</td></tr>'
 
     # ═══════════════════════════════════════════
     #  🏗️ 最終 HTML
@@ -1133,7 +1207,7 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         <table>
             <thead>
                 <tr>
-                    <th>股票</th><th>股價</th><th>30日低</th><th>KD</th><th>RSI</th><th>量能</th><th>提示</th><th>策略</th>
+                    <th>股票</th><th>股價</th><th>30日低</th><th>KD</th><th>RSI</th><th>MACD</th><th>量能</th><th>提示</th><th>策略</th>
                 </tr>
             </thead>
             <tbody>{price_rows}</tbody>
@@ -1152,33 +1226,34 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         {us_event_rows if us_event_rows else '<div class="event-row"><span>暫無高重要性事件</span></div>'}
     </div>
 
-    <!-- 台美產業聯動警報 -->
-    <div class="card">
-        <div class="card-title">🔗 台美全市場產業強聯動牆</div>
-        {linkage_rows}
-    </div>
-
-    <!-- 潛力股候選（全市場投信+法人掃描，標記對作/共愛）-->
+    <!-- 潛力股候選（全市場投信+法人掃描 + 富邦主力/投信買賣超張數）-->
     <div class="card alert">
         <div class="card-title">
-            🎯 潛力股候選：投信/法人動向
-            · 全市場連買>=3天, 累計>50萬
-            · 若投信+外資同買標記 🟢共愛；對作標記 🔴對作
+            🎯 潛力股候選
             · 更新: {trust_update_time}
         </div>
         <table>
             <thead>
                 <tr>
-                    <th>股票</th><th>股價</th><th>連買</th>
-                    <th>投信買超</th>
-                    <th>外資動向</th>
+                    <th>股票</th><th>股價</th>
+                    <th>富邦主力<br>買賣超(張)</th>
+                    <th>富邦投信<br>買賣超(張)</th>
                     <th>30日低</th>
-                    <th>KD/RSI</th>
+                    <th>KD</th>
+                    <th>RSI</th>
+                    <th>MACD</th>
+                    <th>量能</th>
                     <th>備註</th>
                 </tr>
             </thead>
             <tbody>{potential_rows}</tbody>
         </table>
+    </div>
+
+    <!-- 台美產業聯動警報 -->
+    <div class="card">
+        <div class="card-title">🔗 台美全市場產業強聯動牆</div>
+        {linkage_rows}
     </div>
 
     <!-- 新聞區塊：從 output/news_crawled.json 讀取（爬蟲，0 token） -->

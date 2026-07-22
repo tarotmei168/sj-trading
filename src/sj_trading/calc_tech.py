@@ -63,45 +63,47 @@ def read_local_csv_deprecated(stock_id):
         return rows
     return read_local_csv(stock_id)
 
-# ─── KD 計算（從原始OHLCV算KD, 已不常用, 保留向後相容）───
-def calc_KD(closes, lows, highs, kp=9):
-    """計算KD值，回傳 (k_vals, d_vals)"""
+# ─── TA-Lib 統一技術指標計算（TradingView 標準參數）───
+# KD: Stoch(14,1,3) → K/D 線
+# RSI: RSI(14)
+# MACD: MACD(12,26,9) → MACD線/信號線/柱狀圖
+
+def calc_STOCH(closes, lows, highs, fastk=14, slowk=1, slowd=3):
+    """KD: TradingView Stoch(14,1,3)，回傳 (k_vals, d_vals)"""
     import numpy as np
+    import talib
     closes = np.array(closes, dtype=float)
-    lows = np.array(lows, dtype=float)
     highs = np.array(highs, dtype=float)
-    n = len(closes)
-    k_vals = np.full(n, 50.0, dtype=float)
-    d_vals = np.full(n, 50.0, dtype=float)
-    for i in range(kp - 1, n):
-        llv = np.min(lows[i - kp + 1 : i + 1])
-        hhv = np.max(highs[i - kp + 1 : i + 1])
-        denom = hhv - llv
-        rsv = 50.0 if denom == 0 else ((closes[i] - llv) / denom) * 100
-        if i == kp - 1:
-            k_vals[i] = 50.0 * 2/3 + rsv * 1/3
-        else:
-            k_vals[i] = k_vals[i-1] * 2/3 + rsv * 1/3
-        d_vals[i] = d_vals[i-1] * 2/3 + k_vals[i] * 1/3
+    lows = np.array(lows, dtype=float)
+    k_vals, d_vals = talib.STOCH(highs, lows, closes,
+                                  fastk_period=fastk,
+                                  slowk_period=slowk,
+                                  slowk_matype=0,  # SMA
+                                  slowd_period=slowd,
+                                  slowd_matype=0)  # SMA
     return k_vals, d_vals
 
-# ─── RSI 計算（從原始OHLCV）───
 def calc_RSI(closes, period=14):
-    """計算RSI"""
+    """RSI: talib.RSI(close, timeperiod=14)"""
     import numpy as np
+    import talib
     closes = np.array(closes, dtype=float)
-    if len(closes) < period + 1:
+    rsi = talib.RSI(closes, timeperiod=period)
+    if len(rsi) == 0:
         return 50.0
-    deltas = np.diff(closes)
-    gains = np.where(deltas > 0, deltas, 0.0)
-    losses = np.where(deltas < 0, -deltas, 0.0)
-    avg_gain = np.mean(gains[-period:])
-    avg_loss = np.mean(losses[-period:])
-    if avg_loss == 0:
-        return 100.0
-    rs = avg_gain / avg_loss
-    rsi = 100 - 100 / (1 + rs)
-    return round(rsi, 1)
+    return round(float(rsi[-1]), 1)
+
+def calc_MACD(closes, fast=12, slow=26, signal=9):
+    """MACD: talib.MACD(close, fastperiod=12, slowperiod=26, signalperiod=9)
+    回傳 (macd_line, signal_line, histogram)"""
+    import numpy as np
+    import talib
+    closes = np.array(closes, dtype=float)
+    macd, signal, hist = talib.MACD(closes,
+                                     fastperiod=fast,
+                                     slowperiod=slow,
+                                     signalperiod=signal)
+    return macd, signal, hist
 
 # ─── 從30分K KD取得最新技術指標 ───
 def get_latest_3ykd(stock_id):

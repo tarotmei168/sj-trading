@@ -30,7 +30,6 @@ sys.stdout.reconfigure(encoding='utf-8')
 import requests
 import numpy as np
 import pandas as pd
-from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 import talib
 
@@ -46,6 +45,7 @@ os.makedirs(DB_DIR, exist_ok=True)
 
 sys.path.insert(0, SCRIPT_DIR)
 load_dotenv(os.path.join(BASE_DIR, '.env'))
+from download_3y_intraday_kd_v2 import login as _shioaji_login, download_stock as _shioaji_download
 
 import shioaji as sj
 
@@ -66,116 +66,123 @@ KD_PARAMS = {
     "2330":9, "0050":9,
 }
 
-FUBON_URL = "https://fubon-ebrokerdj.fbs.com.tw/z/zg/zg_F_0_2.djhtm"
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
+# 證交所 Session（連線重用，提高 T86 成功率）
+_TWSE_SESSION = None
+def _get_twse_session():
+    global _TWSE_SESSION
+    if _TWSE_SESSION is None:
+        s = requests.Session()
+        s.headers.update({
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8",
+            "Referer": "https://www.twse.com.tw/zh/page/trading/fund/T86.html",
+            "X-Requested-With": "XMLHttpRequest",
+        })
+        _TWSE_SESSION = s
+    return _TWSE_SESSION
+
 # ═══════════════════════════ 1. 爬富邦排行 ═══════════════════════════
-def fetch_fubon_top20():
-    """爬富邦DJ主力買超排行，回傳 [(代號, 名稱), ...]"""
-    print("🌐 爬取富邦主力買超排行...")
-    try:
-        resp = requests.get(FUBON_URL, headers=HEADERS, timeout=30)
-        resp.encoding = 'big5'
-    except:
-        return []
-    if resp.status_code != 200:
-        return []
-    soup = BeautifulSoup(resp.text, 'html.parser')
-    stocks = []
-    for table in soup.find_all('table'):
-        for row in table.find_all('tr'):
-            cells = row.find_all('td')
-            texts = [c.get_text(strip=True) for c in cells]
-            if len(texts) != 8 or not texts[0].isdigit():
+def fetch_trust_top20():
+    """
+    從 TWSE T86 爬投信買超排行前20名
+    多重策略確保抓到資料:
+      1. requests.Session + 完整 HTTP 標頭
+      2. 嘗試過去 5 個交易日（盤後 14:00 後才有資料）
+      3. 每次失敗等 2 秒再試
+      4. 爬不到就回退昨天、前天...
+    回傳 [(代號, 名稱, 投信買超金額(張)), ...]
+    以 Trust net 從大到小排序
+    """
+    print("🌐 爬取 TWSE T86 投信買超排行...")
+    url = "https://www.twse.com.tw/fund/T86"
+    stock_list = []
+    session = _get_twse_session()
+
+    # 嘗試過去 5 個交易日
+    dates_to_try = []
+    for i in range(5):
+        d = datetime.now() - timedelta(days=i)
+        # 跳過週末
+        if d.weekday() >= 5:
+            continue
+        dates_to_try.append(d.strftime("%Y%m%d"))
+
+    for date_str in dates_to_try:
+        for attempt in range(3):  # 每個日期重試 3 次
+            try:
+                # selectType=ALL 抓全市場，不加只抓預設分類（如水泥股）
+                resp = session.get(url, params={"response": "json", "date": date_str, "selectType": "ALL"},
+                                   timeout=20)
+                if resp.status_code != 200:
+                    time.sleep(2)
+                    continue
+                d = resp.json()
+                if d.get("stat") != "OK" or not d.get("data"):
+                    time.sleep(2)
+                    continue
+                for row in d["data"]:
+                    code = row[0].strip()
+                    name = row[1].strip()
+                    if not re.match(r'^\d{4}$', code):
+                        continue
+                    try:
+                        trust_net = int(row[7].replace(",", "")) if row[7].strip() else 0
+                    except:
+                        trust_net = 0
+                    if trust_net > 0:
+                        stock_list.append((code, name, trust_net))
+                if stock_list:
+                    break
+            except Exception as e:
+                print(f"  ⚠️ T86 {date_str} 第{attempt+1}次失敗: {e}")
+                time.sleep(2)
                 continue
-            m = re.match(r'(\d{4,6}[A-Za-z]?)\s*(.+)', texts[1])
-            if m:
-                stocks.append((m.group(1), m.group(2).strip()))
-    # 只留 4 碼個股
-    stocks = [(c, n) for c, n in stocks if re.match(r'^\d{4}$', c)][:20]
-    print(f"✅ 富邦排行 {len(stocks)} 檔")
-    for c, n in stocks:
-        print(f"   {c:6s} {n}")
+        if stock_list:
+            print(f"  ✅ T86 {date_str} 成功: {len(stock_list)} 檔 (selectType=ALL)")
+            break
+
+    if not stock_list:
+        print("⚠️ T86 連續 5 日無資料（非盤後時段或假日）")
+        return []
+
+    # 排序取前20
+    stock_list.sort(key=lambda x: x[2], reverse=True)
+    stocks = stock_list[:20]
+    print(f"✅ TWSE T86 投信買超前20名")
+    for c, n, v in stocks:
+        print(f"   {c:6s} {n}   買超 {v:,} 張")
     return stocks
+
+
+
 
 
 # ═══════════════════════════ 2. Shioaji 登入 + 資料下載 ═══════════════════════════
 def login_shioaji():
-    api_key = os.environ.get("SJ_API_KEY", "")
-    sec_key = os.environ.get("SJ_SEC_KEY", "")
-    if not api_key or not sec_key:
-        print("❌ 無 API Key")
-        return None
-    api = sj.Shioaji(simulation=False)
-    try:
-        api.login(api_key=api_key, secret_key=sec_key, fetch_contract=True)
-        print("✅ Shioaji 登入成功")
-        return api
-    except Exception as e:
-        print(f"❌ Shioaji 登入失敗: {e}")
-        return None
+    """使用 proven 的登入方式 """
+    return _shioaji_login()
 
 
 def download_60d_1min(api, sid):
-    """
-    下載 60 天 1分K，分段 14天/段
-    Shioaji ts 為 UTC → 轉台北時間
-    """
-    end = datetime.now()
-    start = end - timedelta(days=60)
-    segs = []
-    s = start
-    while s < end:
-        e = min(s + timedelta(days=14), end)
-        segs.append((s, e))
-        s = e
-    try:
-        contract = api.Contracts.Stocks[sid]
-    except:
-        print(f"  ⚠️ {sid}: 無合約")
-        return None
-    rows = []
-    for ss, se in segs:
-        for retry in range(3):
-            try:
-                kb = api.kbars(contract=contract, start=ss.strftime("%Y-%m-%d"),
-                               end=se.strftime("%Y-%m-%d"), timeout=15000)
-                if kb and len(kb.ts) > 0:
-                    for i in range(len(kb.ts)):
-                        utc = datetime.fromtimestamp(kb.ts[i] / 1e9)
-                        local = utc + timedelta(hours=8)
-                        rows.append({
-                            "ts": local,
-                            "Open": float(kb.Open[i]),
-                            "High": float(kb.High[i]),
-                            "Low": float(kb.Low[i]),
-                            "Close": float(kb.Close[i]),
-                            "Volume": float(kb.Volume[i]),
-                        })
-                break
-            except:
-                if retry < 2:
-                    time.sleep(2 * (retry + 1))
-                else:
-                    break
-    if not rows:
-        return None
-    return pd.DataFrame(rows).sort_values("ts").drop_duplicates(subset="ts").reset_index(drop=True)
-
+    """使用 proven 的 60天1分K下載 (download_3y_intraday_kd_v2)"""
+    return _shioaji_download(api, sid, lookback_days=60, seg_days=30)
 
 def merge_30min(df):
-    """1分K → 30分K，過濾台股交易時段 09:00~13:30（台北時間）"""
+    """1分K -> 30分K，過濾台股交易時段 09:00~13:30"""
     if df is None or df.empty:
         return None
-    d = df.set_index("ts")
-    o = pd.DataFrame({"open": d["Open"].resample("30min").first()})
-    o["high"] = d["High"].resample("30min").max()
-    o["low"] = d["Low"].resample("30min").min()
-    o["close"] = d["Close"].resample("30min").last()
-    o["volume"] = d["Volume"].resample("30min").sum()
+    d = df.set_index("datetime")
+    o = pd.DataFrame({"open": d["open"].resample("30min").first()})
+    o["high"] = d["high"].resample("30min").max()
+    o["low"] = d["low"].resample("30min").min()
+    o["close"] = d["close"].resample("30min").last()
+    o["volume"] = d["volume"].resample("30min").sum()
     o = o.dropna().reset_index()
-    o["h"] = o["ts"].dt.hour
-    o["m"] = o["ts"].dt.minute
+    o["h"] = o["datetime"].dt.hour
+    o["m"] = o["datetime"].dt.minute
     o = o[((o["h"] == 9) & (o["m"] >= 0)) |
           ((o["h"] >= 10) & (o["h"] <= 12)) |
           ((o["h"] == 13) & (o["m"] <= 30))]
@@ -184,8 +191,6 @@ def merge_30min(df):
         return None
     return o
 
-
-# ═══════════════════════════ 3. TA-Lib 指標計算 ═══════════════════════════
 def calc_talib(sid, df30):
     """
     TA-Lib 全指標計算:
@@ -202,35 +207,34 @@ def calc_talib(sid, df30):
     low = np.array(df30["low"], dtype=float)
     vol = np.array(df30["volume"], dtype=float)
 
-    kp = KD_PARAMS.get(sid, 9)
-
-    # KD
-    k_arr, d_arr = talib.STOCH(high, low, close, fastk_period=kp, slowk_period=3, slowd_period=3)
+    # KD - TradingView 標準參數: fastk=14, slowk=1, slowd=3
+    k_arr, d_arr = talib.STOCH(high, low, close, fastk_period=14, slowk_period=1, slowd_period=3)
     k_last = float(k_arr[-1]) if not np.isnan(k_arr[-1]) else 50.0
     d_last = float(d_arr[-1]) if not np.isnan(d_arr[-1]) else 50.0
     k_prev = float(k_arr[-2]) if len(k_arr) >= 2 and not np.isnan(k_arr[-2]) else k_last
     gap = k_last - d_last
     golden = k_last >= d_last
     k_trend_up = k_last > k_prev
+    # 最近5期 K/D 值（給 sparkline）
+    k5 = [float(k_arr[i]) if not np.isnan(k_arr[i]) else 50 for i in range(-5, 0)]
+    d5 = [float(d_arr[i]) if not np.isnan(d_arr[i]) else 50 for i in range(-5, 0)]
 
     # MACD
     macd_arr, sig_arr, hist_arr = talib.MACD(close, fastperiod=12, slowperiod=26, signalperiod=9)
     h_last = float(hist_arr[-1]) if not np.isnan(hist_arr[-1]) else 0
 
-    # 5 期趨勢
+    # 5 期 MACD 柱狀體（Sparkline Bar Chart）
     h5 = [float(hist_arr[i]) if not np.isnan(hist_arr[i]) else 0 for i in range(-5, 0)]
     h_prev = h5[-2] if len(h5) >= 2 else h_last
-    h5_str = " → ".join(f"{x:.1f}" for x in h5)
-
+    max_abs = max([abs(x) for x in h5] + [0.1])
+    svg_bars = _macd_sparkline(h5, max_abs)
     direction = "擴大" if abs(h_last) > abs(h_prev) else "縮小"
     flip_warn = ""
     if len(h5) >= 3 and h_last < 0:
         all_shrinking = all(abs(h5[i]) >= abs(h5[i+1]) for i in range(len(h5)-1))
         if all_shrinking and h_last > -1.0:
-            flip_warn = ' <span class="flip">🔥翻紅</span>'
-
-    bar_html = _macd_bar(h_last)
-    macd_s = f"{bar_html} Hist:{h_last:.1f} {direction}{flip_warn}<br><span style=\"font-size:14px;color:var(--text-muted)\">{h5_str}</span>"
+            flip_warn = '🔥翻紅'
+    macd_s = f"{svg_bars}<span style=\"font-size:17px;font-weight:bold;\">Hist:{h_last:.1f}</span><br><span style=\"font-size:14px;color:var(--text-muted)\">{direction}{' | '+flip_warn if flip_warn else ''}</span>"
 
     # RSI
     rsi_arr = talib.RSI(close, timeperiod=14)
@@ -269,18 +273,21 @@ def calc_talib(sid, df30):
     elif golden and gap < 5 and k_last < k_threshold and k_trend_up:
         low_golden = True
 
+    # KD 迷你折線圖（藍K橘D）
+    kd_svg = _kd_sparkline(k5, d5)
     if low_golden:
-        kd_s = f"🏹 低檔金叉 (K:{k_last:.0f} / D:{d_last:.0f})"
+        kd_label = f"🏹 低檔金叉 (K:{k_last:.0f} / D:{d_last:.0f})"
     elif high_overheat:
-        kd_s = f"⚠️ 高檔過熱 (K:{k_last:.0f} / D:{d_last:.0f})"
+        kd_label = f"⚠️ 高檔過熱 (K:{k_last:.0f} / D:{d_last:.0f})"
     elif golden and gap < 3:
-        kd_s = f"🟡 逼近金叉 (K:{k_last:.0f} / D:{d_last:.0f})"
+        kd_label = f"🟡 逼近金叉 (K:{k_last:.0f} / D:{d_last:.0f})"
     elif golden:
-        kd_s = f"🟢 金叉 (K:{k_last:.0f} / D:{d_last:.0f})"
+        kd_label = f"🟢 金叉 (K:{k_last:.0f} / D:{d_last:.0f})"
     elif not golden and gap > -3:
-        kd_s = f"🟡 逼近死叉 (K:{k_last:.0f} / D:{d_last:.0f})"
+        kd_label = f"🟡 逼近死叉 (K:{k_last:.0f} / D:{d_last:.0f})"
     else:
-        kd_s = f"🔴 死叉 (K:{k_last:.0f} / D:{d_last:.0f})"
+        kd_label = f"🔴 死叉 (K:{k_last:.0f} / D:{d_last:.0f})"
+    kd_s = f"{kd_svg}<br><span style=\"font-size:15px;\">{kd_label}</span>"
 
     if low_golden and rsi_val < 40:
         strategy = "🟢🟢 低檔金叉進場"
@@ -322,12 +329,68 @@ def calc_talib(sid, df30):
     }
 
 
-def _macd_bar(val):
-    w = min(abs(val) * 3, 80)
-    if w < 4:
-        w = 4
-    cls = "pos" if val >= 0 else "neg"
-    return f'<span class="macd-bar {cls}" style="width:{w:.0f}px"></span>'
+def _kd_sparkline(k5, d5):
+    """
+    SVG 迷你折線圖: 藍線=K值, 橘線=D值
+    5期趨勢在同一小方格內
+    """
+    svg_w = 200
+    svg_h = 80
+    pad = 5
+    plot_w = svg_w - pad * 2
+    plot_h = svg_h - pad * 2
+    all_v = k5 + d5
+    min_v = min(all_v) if all_v else 0
+    max_v = max(all_v) if all_v else 100
+    rng = max_v - min_v if max_v > min_v else 50
+    # 補 0~100 的百分比位置
+    def ypos(v):
+        return pad + plot_h - ((v - min_v) / rng) * plot_h
+    pts_k = []
+    pts_d = []
+    for i in range(5):
+        x = pad + (plot_w / 4) * i
+        pts_k.append(f"{x:.1f},{ypos(k5[i]):.1f}")
+        pts_d.append(f"{x:.1f},{ypos(d5[i]):.1f}")
+    polyline_k = " ".join(pts_k)
+    polyline_d = " ".join(pts_d)
+    return (
+        f'<svg width="{svg_w}" height="{svg_h}" style="display:inline-block;vertical-align:middle;margin-right:6px;">'
+        f'<polyline points="{polyline_k}" fill="none" stroke="#4a9eff" stroke-width="2.5" stroke-linejoin="round" />'
+        f'<polyline points="{polyline_d}" fill="none" stroke="#ffa94d" stroke-width="2.5" stroke-linejoin="round" />'
+        f'</svg>'
+    )
+
+
+def _macd_sparkline(h5, max_abs):
+    """
+    SVG 微型柱狀圖: 零軸基準線 + 5根紅/綠柱
+    正值向上(紅)，負值向下(綠)，高度依 max_abs 自動縮放
+    """
+    bar_w = 28
+    gap = 5
+    svg_w = len(h5) * (bar_w + gap) + 8
+    svg_h = 80
+    zero_y = svg_h / 2
+    scale = zero_y / max_abs * 0.85
+    bars = []
+    for i, v in enumerate(h5):
+        x = i * (bar_w + gap) + 4
+        h = abs(v) * scale
+        if h < 2:
+            h = 2
+        if v >= 0:
+            # 紅色柱（零軸向上）
+            y = zero_y - h
+            color = "#ff6b6b"
+        else:
+            # 綠色柱（零軸向下）
+            y = zero_y
+            color = "#2ed573"
+        bars.append(f'<rect x="{x}" y="{y}" width="{bar_w}" height="{h}" fill="{color}" rx="2" />')
+    bars_svg = "".join(bars)
+    line = f'<line x1="0" y1="{zero_y}" x2="{svg_w}" y2="{zero_y}" stroke="#555" stroke-width="1.5" />'
+    return f'<svg width="{svg_w}" height="{svg_h}" style="display:inline-block;vertical-align:middle;margin-right:8px;overflow:visible;">{line}{bars_svg}</svg>'
 
 
 # ═══════════════════════════ 4. 大盤20日線檢查 ═══════════════════════════
@@ -367,49 +430,31 @@ def check_market_below_20ma():
 
 # ═══════════════════════════ 5. 批次處理 ═══════════════════════════
 def analyze_stocks(api, stock_ids, strict_mode):
-    """從 database/30min_60d/ 讀取資料 + Shioaji snapshot 即時更新 + TA-Lib"""
+    """Shioaji 60天1分K -> 30分K -> TA-Lib (proven approach, 0 cache)"""
     kth = 30 if strict_mode else 35
     results = {}
-    print(f"\n📊 讀取 30min_60d DB + TA-Lib {len(stock_ids)} 檔 (K<{kth} 低檔金叉)")
+    print(f"\n?? 60天30分K + TA-Lib {len(stock_ids)} 檔 (K<{kth} 低檔金叉)")
 
     for sid in stock_ids:
         name = CORE_NAMES.get(sid, sid)
-        print(f"\n  {sid} {name}...", end=" ", flush=True)
-
-        # 讀資料庫
-        f = os.path.join(DB_DIR, f"{sid}_60d.csv")
-        if not os.path.isfile(f):
-            print("❌ 無資料庫檔案")
+        print(f"\n  {sid} {name} 下載 60天1分K...")
+        df1 = download_60d_1min(api, sid)
+        if df1 is None:
+            print("  ?? 無資料")
             continue
-        try:
-            df = pd.read_csv(f)
-        except:
-            print("❌ 讀取失敗")
+        df30 = merge_30min(df1)
+        if df30 is None:
+            print("  ?? 30分K合併失敗")
             continue
-        if len(df) < 25:
-            print("❌ 資料不足")
-            continue
-
-        # Shioaji snapshot 更新最後一筆收盤價
-        try:
-            contract = api.Contracts.Stocks[sid]
-            snaps = api.snapshots([contract])
-            if snaps and len(snaps) > 0 and snaps[0].close:
-                live_px = round(float(snaps[0].close), 1)
-                df.loc[df.index[-1], "close"] = live_px
-                print(f"snapshot:{live_px}", end=" ", flush=True)
-        except:
-            print(f"({df.iloc[-1]["close"]})", end=" ", flush=True)
-
-        t = calc_talib(sid, df)
+        print(f"  -> {len(df30)}根30分K | last={str(df30.iloc[-1]["datetime"])[:19]} close={df30.iloc[-1]["close"]}")
+        
+        t = calc_talib(sid, df30)
         if t:
             t["name"] = name
             results[sid] = t
-            print(f"K:{t['k']:.1f}/D:{t['d']:.1f} RSI:{t['rsi']} | {t['strategy']}")
+            print(f"     K:{t['k']:.1f}/D:{t['d']:.1f} RSI:{t['rsi']} MACD_hist:{t.get('macd_hist',0):.1f} | {t['strategy']}")
     return results
 
-
-# ═══════════════════════════ 6. JSON 輸出 ═══════════════════════════
 def save_signal_json(results):
     """輸出精簡 today_signal.json"""
     signals = {
@@ -448,9 +493,11 @@ def generate_html(core, pot, fubon_stocks, strict_mode):
     cr = "".join(_row(s, n, core.get(s)) for s, n in CORE_19 if core.get(s))
     if not cr:
         cr = '<tr><td colspan="7" style="text-align:center;color:#666;">⏳ 讀取中</td></tr>'
-    pr = "".join(_row(s, n, pot.get(s)) for s, n in fubon_stocks if s not in CORE_IDS and pot.get(s))
+    pr = "".join(_pot_row(s[0], s[1], pot.get(s[0]), s[2] if len(s) >= 3 else 0) for s in fubon_stocks if s[0] not in CORE_IDS and pot.get(s[0]))
     if not pr:
-        pr = '<tr><td colspan="7" style="text-align:center;color:#666;">⚠️ 無資料</td></tr>'
+        pr = '<tr><td colspan="8" style="text-align:center;color:#666;">⚠️ 無資料</td></tr>'
+
+
 
     buys = [(s, t) for s, t in sorted({**core, **pot}.items()) if t and t.get("low_golden")]
     ah = "".join(
@@ -476,24 +523,37 @@ table{{width:100%;border-collapse:collapse;margin-top:10px;font-size:18px;}}
 th{{background:#2d2d2d;color:var(--primary-gold);padding:8px 6px;text-align:left;border-bottom:2px solid var(--border-color);}}
 td{{padding:10px 6px;border-bottom:1px solid var(--border-color);vertical-align:middle;}}
 .up{{color:var(--red-alert);font-weight:bold;}} .down{{color:var(--green-go);font-weight:bold;}}
-.macd-bar{{display:inline-block;height:14px;border-radius:3px;min-width:4px;vertical-align:middle;margin-right:3px;}}
-.macd-bar.pos{{background:var(--red-alert);}} .macd-bar.neg{{background:var(--green-go);}}
 .flip{{color:#ffd700;font-weight:bold;font-size:16px;}}
 .buy-signal{{font-size:20px;font-weight:bold;padding:8px;margin:5px 0;background:#0d2a0d;border-radius:6px;border:1px solid var(--green-go);}}
 .footer{{text-align:center;color:#445566;margin-top:30px;padding-top:15px;border-top:1px solid #333;}}
 </style></head><body>
-<div class="header"><h1>🦞 小龍蝦 | 30分K統一週期 + TA-Lib</h1><p>{td} {nh} | {mn}</p></div>
+<div class="header"><h1>🦞 小龍蝦 | 60天日K + TA-Lib</h1><p>{td} {nh} | {mn}</p></div>
+<div style="background:#1a1a2e;border:2px solid #ffd700;border-radius:8px;padding:12px;margin-bottom:15px;text-align:center;">
+<strong style="font-size:22px;color:#ffd700;">⏰ 最新資料更新時間：{td} {nh}</strong>
+</div>
 <div class="card info"><div class="card-title">📊 系統</div>
 <div style="text-align:center;padding:10px;border:1px solid #444;border-radius:6px;font-size:20px;font-weight:bold;">{mn}</div>
-<div style="margin-top:8px;color:#aaa;font-size:16px;">✅ Shioaji 60天1分K→30分K｜TA-Lib STOCH+MACD+RSI｜K<{kth}低檔金叉</div></div>
+<div style="margin-top:8px;color:#aaa;font-size:16px;">⚠️ 60天日K(FinMind) + Shioaji即時股價｜TA-Lib STOCH(14,1,3)｜&#x26A0; 非30分K</div></div>
 {ah}
 <div class="card"><div class="card-title">🔒 核心持股（{len(CORE_19)}檔）[30分K]</div>
 <table><thead><tr><th>股票</th><th>股價</th><th>30日低</th><th>KD</th><th>MACD</th><th>RSI</th><th>策略</th></tr></thead><tbody>{cr}</tbody></table></div>
-<div class="card alert"><div class="card-title">🎯 富邦主力買超排行 ─ 潛力股 [30分K]</div>
-<div style="font-size:16px;color:var(--text-muted);margin-bottom:8px;">來源: 富邦eBroker DJ</div>
-<table><thead><tr><th>股票</th><th>股價</th><th>30日低</th><th>KD</th><th>MACD</th><th>RSI</th><th>策略</th></tr></thead><tbody>{pr}</tbody></table></div>
+<div class="card alert"><div class="card-title">🎯 潛力股候選（TWSE T86 投信買超）</div>
+<table><thead><tr><th>股票</th><th>股價</th><th>投信買超</th><th>30日低</th><th>KD</th><th>MACD</th><th>RSI</th><th>策略</th></tr></thead><tbody>{pr}</tbody></table></div>
 <div class="footer">小龍蝦自動產出 | {td} {nh} | ta_strategy_engine | 全部30分K</div>
 </body></html>'''
+
+
+def _pot_row(sid, sname, t, trust_amt):
+    """潛力股單行，多一欄投信買超"""
+    base = _row(sid, sname, t)
+    # trust 欄位：上買超金額(張)，下小字
+    trust_s = f'<div style="line-height:1.2"><b>{trust_amt:,}</b></div><div style="font-size:0.85em;color:var(--text-muted);line-height:1.2">張</div>'
+    # Insert trust after 股價 column
+    cols = base.split("</td><td>")
+    # col0=股票, col1=股價, col2=30日低, col3=KD, col4=MACD, col5=RSI, col6=策略
+    if len(cols) >= 7:
+        return f"{cols[0]}</td><td>{cols[1]}</td><td>{trust_s}</td><td>" + "</td><td>".join(cols[2:])
+    return base
 
 
 def _row(sid, sname, t):
@@ -524,10 +584,10 @@ def main():
     print("=" * 60)
     t0 = datetime.now()
 
-    # 1. 爬富邦排行
-    fubon_stocks = fetch_fubon_top20()
+    # 1. 爬 TWSE T86 投信買超排行（潛力股來源）
+    fubon_stocks = fetch_trust_top20()
     if not fubon_stocks:
-        fubon_stocks = [("2330", "台積電"), ("2317", "鴻海"), ("2454", "聯發科")]
+        fubon_stocks = [("2330", "台積電", 0), ("2317", "鴻海", 0), ("2454", "聯發科", 0)]
 
     # 2. 大盤檢查
     strict_mode = check_market_below_20ma()
