@@ -206,47 +206,72 @@ def get_taiwan_futures():
     return None
 
 
-# ═══════════════════════════ 3. 台美產業聯動 ═══════════════════════════
+# ═══════════════════════════ 3. 台美產業聯動（架構表驅動）══════════════════════════=
 def get_linkage_alerts():
-    """從 us_tw_mapping_matrix 抓台美連動警報"""
+    """
+    從 us_tw_mapping_matrix LINKAGE_40 抓台美連動警報
+    策略:
+      - 以 us_sym 去重，合併多個產業群的台股清單
+      - 美股波動≥2%才發警報
+      - 顯示該美股連動的「所有」台股名稱（不限核心持股）
+      - 但只優先列出在核心持股內的名稱，其餘標示產業群
+    """
     try:
         sys.path.insert(0, os.path.join(BASE_DIR, "src", "sj_trading"))
         from us_tw_mapping_matrix import LINKAGE_40
     except:
         return []
 
-    alerts = []
+    # 合併：us_sym -> {name, groups:[], all_tw:{code:name}}
+    us_map = {}
     for gid, info in LINKAGE_40.items():
         for us_sym, us_name in info["us"]:
-            try:
-                import yfinance as yf
-                import io, contextlib
-                with contextlib.redirect_stderr(io.StringIO()):
-                    t = yf.Ticker(us_sym)
-                    df = t.history(period="5d")
-                if df is not None and len(df) >= 2:
-                    closes = df["Close"].values
-                    change = (closes[-1] / closes[-2] - 1) * 100
-                    close = round(closes[-1], 2)
-                    if abs(change) >= 2:
-                        tw_stocks = [c for c, n in info["tw"]]
-                        tw_names = {c: n for c, n in info["tw"]}
-                        direction = "暴漲" if change > 0 else "暴跌"
-                        level = "🔴🔴" if abs(change) >= 4 else "🔴"
-                        alerts.append({
-                            "symbol": us_sym,
-                            "name": us_name,
-                            "change": round(change, 2),
-                            "close": close,
-                            "level": level,
-                            "direction": direction,
-                            "sectors": [info.get("sector", "")],
-                            "tw_stocks": tw_stocks,
-                            "tw_names": tw_names,
-                            "desc": info.get("desc", ""),
-                        })
-            except:
-                continue
+            sym = us_sym.upper()
+            if sym not in us_map:
+                us_map[sym] = {"name": us_name, "groups": [], "all_tw": {}}
+            us_map[sym]["groups"].append(info.get("sector", ""))
+            for c, n in info["tw"]:
+                us_map[sym]["all_tw"][c] = n
+
+    alerts = []
+    seen_symbols = set()  # 避免同一美股代號重複抓 yfinance
+    for us_sym, meta in us_map.items():
+        if us_sym in seen_symbols:
+            continue
+        seen_symbols.add(us_sym)
+        try:
+            import yfinance as yf
+            import io, contextlib
+            with contextlib.redirect_stderr(io.StringIO()):
+                t = yf.Ticker(us_sym)
+                df = t.history(period="5d")
+            if df is not None and len(df) >= 2:
+                closes = df["Close"].values
+                change = (closes[-1] / closes[-2] - 1) * 100
+                close = round(closes[-1], 2)
+                if abs(change) >= 2:
+                    # 找出核心持股內的台股
+                    matched_core = {c: n for c, n in meta["all_tw"].items() if c in CORE_NAMES}
+                    # 找出潛力股內的台股
+                    matched_pot = {c: n for c, n in meta["all_tw"].items() if c not in CORE_NAMES}
+                    sector_str = "/".join(list(dict.fromkeys(meta["groups"]))[:2])
+                    direction = "暴漲" if change > 0 else "暴跌"
+                    level = "🔴🔴" if abs(change) >= 4 else "🔴"
+                    alerts.append({
+                        "symbol": us_sym,
+                        "name": meta["name"],
+                        "change": round(change, 2),
+                        "close": close,
+                        "level": level,
+                        "direction": direction,
+                        "sector": sector_str,
+                        "tw_core": [f"{n}({c})" for c, n in sorted(matched_core.items())],
+                        "tw_others": [n for c, n in sorted(matched_pot.items())][:3],
+                    })
+        except:
+            continue
+
+    alerts.sort(key=lambda x: abs(x["change"]), reverse=True)
     return alerts
 
 
@@ -719,11 +744,11 @@ def generate_html(core, pot, fubon_stocks, strict_mode, sox, txf, linkage_alerts
     linkage_html = ""
     if linkage_alerts:
         links = "".join(
-            f'<div style="padding:3px 0;font-size:16px;">{a["level"]} {a["name"]} {a["direction"]} {a["change"]:+.2f}% → '
-            f'<span style="color:var(--primary-gold);">{", ".join(a["tw_names"].get(s,s) for s in a["tw_stocks"] if s in CORE_NAMES or s in [x[0] for x in fubon_stocks])}</span></div>'
+            f'<div style="padding:3px 0;font-size:16px;">{a["level"]} {a["name"]} {a["direction"]} {a["change"]:+.2f}% — '
+            f'<span style="color:var(--primary-gold);">{", ".join(a["tw_core"][:4]) if a["tw_core"] else a["sector"]}</span></div>'
             for a in linkage_alerts
         )
-        linkage_html = f'<div class="card alert"><div class="card-title">🔗 台美產業聯動警報</div>{links}</div>'
+        linkage_html = f'<div class="card alert"><div class="card-title">🔗 台美產業聯動警報（美股波動≥2%）</div>{links}</div>'
 
     # ── 未來14天事件 ──
     events_html = ""
