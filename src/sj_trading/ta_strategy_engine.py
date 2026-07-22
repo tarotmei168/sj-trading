@@ -137,8 +137,9 @@ def fetch_trust_top20():
                     name = row[1].strip()
                     if not re.match(r'^\d{4}$', code):
                         continue
+                    # 欄位10 = 投信買賣超股數
                     try:
-                        trust_net = int(row[7].replace(",", "")) if row[7].strip() else 0
+                        trust_net = int(row[10].replace(",", "")) if len(row) > 10 and row[10].strip() else 0
                     except:
                         trust_net = 0
                     if trust_net > 0:
