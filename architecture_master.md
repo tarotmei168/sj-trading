@@ -1,6 +1,6 @@
 # 🦞 小龍蝦行動總經操盤雷達 — 全系統架構（最高執行準則）
 
-> **最後更新：** 2026-07-21  
+> **最後更新：** 2026-07-21 晚間  
 > **系統地位：** 這是本專案唯一正式架構文件，所有程式碼與排程皆以此為準。  
 
 ---
@@ -63,6 +63,7 @@
 |------|------|------|
 | 鉅亨網 `news.cnyes.com` | us_stock, tw_stock, tech, tw_macro | 中國新聞全面過濾 |
 | 標記規則 | ⭐漲價/營收/EPS ⚠️ 川普/關稅 🔵半導體/AI | — |
+| 腳本 | `morning_news.py` |
 
 ### 🎯 技術指標（完全本機離線計算）
 
@@ -94,16 +95,18 @@
 | 字體 | **18px** 全頁統一 |
 | 色系 | 深色模式（背景 #0d1117） |
 | 指數 | **只留費半SOX + 台指期** |
-| 響應式 | mobile-first |
+| 響應式 | mobile-first（橫向表格，不做卡片） |
 
 ### 📊 必備區塊（由上到下）
 
 1. **🇺🇸 費半SOX + 🇹🇼 台指期** — 開盤基調
-2. **🔒 核心持股表格** — 代號/名稱/股價/KD(3年最佳K值)/RSI/量能/提示/策略
-3. **📅 未來14天事件** — 除息/法說/FOMC/季底
-4. **🔗 台美產業聯動** — 美股波動地圖
-5. **🏦 投信法人建倉** — 投信買超 + 法人(外資) 各10檔
-6. **🎯 潛力股候選** — 投信連買非持股，含KD/RSI
+2. **🔒 核心持股表格** — 代號/名稱/股價/KD(3年最佳K值)/RSI/量能/提示/策略（橫向表格）
+3. **📅 未來14天台股進程** — 除息/法說/FOMC/季底
+4. **🇺🇸 未來14天美股/總經關鍵事件** — 自動計算四物日 + 規則推算CPI/NFP/PPI/ISM + FOMC官網即時爬取
+5. **🔗 台美產業聯動** — 美股波動地圖
+6. **🎯 潛力股候選** — 投信連買非持股（橫向表格，含投信買超/外資動向/對作共愛標記）
+   - 資料源: output/trust_scan_latest.json
+   - 篩選: 連買≥3天+累計>50萬，按 total_trust 降序
 7. **📰 新聞** — 鉅亨網(過濾中國)
 8. **🗣️ 川普投顧** — 關稅/晶片禁令
 
@@ -129,10 +132,18 @@
 
 ### 資料源
 
-- **位置：** `database/3y_kd/{sid}_kd.csv`
-- **範圍：** 每檔約6,500根30分K（約2023-07 ~ 2026-07-21）
-- **腳本：** `download_3y_intraday_kd.py` / `bt_3y_kd_gc.py`
-- **報告：** `output/bt_3y_kd_report.html`
+- **位置：** `database/3y_kd/{sid}_kd.csv`（每檔約6,500根30分K KD）
+- **範圍：** 約2023-07 ~ 2026-07-21
+- **腳本：** `download_3y_intraday_kd_v2.py`（高效版，每段100天，3年約11段）
+- **回測腳本：** `bt_3y_kd_gc.py`
+- **回測報告：** `output/bt_3y_kd_report.html`
+
+### 新增核心持股 SOP
+1. 把代號寫進 `CORE_19` + `KD3Y_PARAMS`（在 `daily_web_report.py`）
+2. 跑 `download_3y_intraday_kd_v2.py` 抓3年資料（約2分鐘/檔）
+3. 產早報確認 KD 正常
+4. 更新 MEMORY.md 持股清單
+5. ❌ 不准 git push，只放本機
 
 ---
 
@@ -141,9 +152,10 @@
 | 項目 | 內容 |
 |------|------|
 | GitHub Pages | `https://tarotmei168.github.io/sj-trading/` |
-| 發布方式 | `git push origin main --force` |
+| 發布方式 | `git push origin main --force`（只有主人說才上傳） |
 | GITHUB_TOKEN | 寫在 `.env` |
 | Git 路徑 | `D:\StableDiffusion\Git\bin\git.exe` |
+| 根目錄同步 | push 前必須 `Copy-Item -Force web\index.html index.html` |
 
 ---
 
@@ -155,7 +167,8 @@ workspace/
 ├── MORNING_CHECKLIST.md        ← 開機記憶卡（完整設定）
 ├── HEARTBEAT.md                ← 復活指令
 ├── architecture_master.md      ← 本文件（最高準則）
-├── calc_tech.py                ← 技術指標（離線，workspace根目錄）
+├── test_qw.py / test_us_events.py / test_fed.html / test_bls_aug.html  ← 測試用暫存檔
+├── SOUL.md / IDENTITY.md / USER.md / TOOLS.md / HEARTBEAT.md ← 開機設定
 │
 └── sj-trading/
     ├── web/

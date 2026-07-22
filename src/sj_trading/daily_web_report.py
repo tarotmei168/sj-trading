@@ -412,7 +412,7 @@ KNOWN_EVENTS = [
     ("2026-09-30","🔥🔥🔥 投信季底結帳日｜富時指數季度調整"),
 ]
 
-# ─── 🐂 美國四物日（Quadruple Witching）自動計算 ───────
+# ─── 🐂 美國四巫日（Quadruple Witching）自動計算 ───────
 def get_quadruple_witching(year, month):
     """回傳該月第3個星期五的日期 (datetime)，僅對 3/6/9/12 月有效"""
     if month not in (3, 6, 9, 12):
@@ -427,7 +427,7 @@ def get_quadruple_witching(year, month):
     return third_fri
 
 def get_upcoming_quadruple_witching(today, cutoff):
-    """未來14天內是否有四物日"""
+    """未來14天內是否有四巫日"""
     results = []
     for m in (3, 6, 9, 12):
         qw = get_quadruple_witching(today.year, m)
@@ -435,13 +435,13 @@ def get_upcoming_quadruple_witching(today, cutoff):
             continue
         if today <= qw <= cutoff:
             days_to = (qw - today).days
-            results.append((qw.strftime('%Y-%m-%d'), f'⚠️ 美股四物日（結算日）波動加劇（{days_to}天後）'))
+            results.append((qw.strftime('%Y-%m-%d'), f'⚠️ 美股四巫日（結算日）波動加劇（{days_to}天後）'))
         # 如果跨年也檢查
         if m == 12 and qw < today and qw.month == 12:
             qw_next = get_quadruple_witching(today.year + 1, 3)
             if qw_next and today <= qw_next <= cutoff:
                 days_to = (qw_next - today).days
-                results.append((qw_next.strftime('%Y-%m-%d'), f'⚠️ 美股四物日（結算日）波動加劇（{days_to}天後）'))
+                results.append((qw_next.strftime('%Y-%m-%d'), f'⚠️ 美股四巫日（結算日）波動加劇（{days_to}天後）'))
     return results
 
 # ─── 🇺🇸 美國總經自動抓取（BLS + Fed 官方行事曆）───────
@@ -615,12 +615,12 @@ def _generate_us_rules_events(today, cutoff):
     return results
 
 def get_us_events():
-    """合併四物日 + 規則推算 + FOMC 行事曆，輸出 [(date_str, event_name), ...]"""
+    """合併四巫日 + 規則推算 + FOMC 行事曆，輸出 [(date_str, event_name), ...]"""
     today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     cutoff = today + timedelta(days=14)
     results = []
     
-    # 1. 四物日
+    # 1. 四巫日
     qw_list = get_upcoming_quadruple_witching(today, cutoff)
     results.extend(qw_list)
     
@@ -731,8 +731,28 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
     if not tone:
         tone = f'費半 {sox_chg} | {fut_str} → {fut_tone}'
     
-    # ── 核心持股卡片（手機友善）──
-    def fmt_stock_card(sid, sname, tech):
+    # ── 核心持股表格 ──
+    def _price_cell(px, s):
+        """產出股價+漲跌幅的上下兩行HTML，s 為 snaps[sid] 或 None"""
+        pxt = f'{px}' if px else '—'
+        if s and s.get('change') is not None:
+            chg = s['change']
+            chg_pct = s.get('change_pct', 0)
+            if chg > 0:
+                icon, cls = '▲', 'up'
+            elif chg < 0:
+                icon, cls = '▼', 'down'
+            else:
+                icon, cls = '▸', ''
+            chg_s = f'<span class="{cls}">{icon} {abs(chg):.2f} ({chg_pct:+.2f}%)</span>'
+            return (
+                f'<div style="font-weight:bold;font-size:1.05em;line-height:1.2">{pxt}</div>'
+                f'<div style="font-size:0.85em;line-height:1.2">{chg_s}</div>'
+            )
+        else:
+            return f'<div style="font-weight:bold;font-size:1.05em">{pxt}</div>'
+
+    def fmt_stock_row(sid, sname, tech):
         t = tech.get(sid)
         if not t:
             return ''
@@ -744,58 +764,63 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         vol_note = t.get('vol_note', '—')
         
         kp = KD3Y_PARAMS.get(sid, {}).get('K', 9)
-        if gap > 3:
-            kd_cls = 'kd-golden'; kd_s = f'金叉 K{k:.1f}/{d:.1f}'
-        elif gap > 0:
-            kd_cls = 'kd-near-gc'; kd_s = f'近金叉 K{k:.1f}/{d:.1f}'
-        elif gap > -3:
-            kd_cls = 'kd-near-dc'; kd_s = f'近死叉 K{k:.1f}/{d:.1f}'
-        else:
-            kd_cls = 'kd-dead'; kd_s = f'死叉 K{k:.1f}/{d:.1f}'
+        if gap > 3: kd_s = f'🟢金叉(K{kp}) K{k:.1f}/{d:.1f}'
+        elif gap > 0: kd_s = f'🟡逼近金叉(K{kp}) K{k:.1f}/{d:.1f}'
+        elif gap > -3: kd_s = f'🟡逼近死叉(K{kp}) K{k:.1f}/{d:.1f}'
+        else: kd_s = f'🔴死叉(K{kp}) K{k:.1f}/{d:.1f}'
         
-        px_cls = 'px-up' if gap > 0 else 'px-down'
+        hints = []
+        if t.get('golden') and gap < 3: hints.append('🔥金叉中')
+        elif not t.get('golden') and gap > -3: hints.append('💀死叉中')
+        if rsi_val > 70: hints.append('過熱')
+        elif rsi_val < 30: hints.append('超賣')
+        hint_s = ' | '.join(hints) if hints else '—'
         
-        strategy = ''
         if gap > 3 and rsi_val < 60:
-            strategy = '<span class="badge bg-green">可持股</span>'
+            strategy = '🟢 K金叉 可持股'
         elif gap > 0 and rsi_val < 50:
-            strategy = '<span class="badge bg-yellow">觀望期待</span>'
+            strategy = '🟡 近金叉 觀望期待'
         elif gap < -3 and rsi_val > 40:
-            strategy = '<span class="badge bg-red">避開</span>'
+            strategy = '🔴 死叉中 避開'
         elif rsi_val > 70:
-            strategy = '<span class="badge bg-red">注意回檔</span>'
+            strategy = '🔴 RSI過熱 注意回檔'
         elif rsi_val < 30 and gap > 0:
-            strategy = '<span class="badge bg-green">留意買點</span>'
+            strategy = '🟢 RSI超賣+金叉 留意買點'
         else:
-            strategy = '<span class="badge bg-gray">觀望</span>'
+            strategy = '➖ 觀望'
         
         low_30d = t.get('low_30d')
         if low_30d:
             dist_to_low = round(((px / low_30d) - 1) * 100, 1)
-            low_str = f'低 {low_30d}'
             if dist_to_low < 5:
-                low_str += ' ⚠️'
+                low_s = f'<span style="color:var(--red-alert)">{low_30d} ⚠️</span>'
+            else:
+                low_s = f'{low_30d}'
         else:
-            low_str = ''
+            low_s = '—'
+        
+        # 股票欄：上名稱下代號
+        s_cell = f'<div style="line-height:1.2"><b>{sname}</b></div><div style="font-size:0.85em;color:var(--text-muted);line-height:1.2">{sid}</div>'
+        # 股價欄：上股價下漲跌
+        p_cell = _price_cell(px, snaps.get(sid))
         
         return (
-            f'<div class="stock-card">'
-            f'<div class="sc-header"><b>{sid}</b> {sname}</div>'
-            f'<div class="sc-body">'
-            f'<div class="sc-price {px_cls}">{px}</div>'
-            f'<div class="sc-info">'
-            f'<div class="sc-row"><span class="sc-label">KD</span><span class="{kd_cls}">{kd_s}</span></div>'
-            f'<div class="sc-row"><span class="sc-label">RSI</span><span>{rsi_val}</span></div>'
-            f'<div class="sc-row"><span class="sc-label">量能</span><span>{vol_note}</span></div>'
-            f'<div class="sc-row"><span class="sc-label">{low_str}</span><span>{strategy}</span></div>'
-            f'</div></div></div>\n'
+            f'<tr>'
+            f'<td>{s_cell}</td>'
+            f'<td>{p_cell}</td>'
+            f'<td>{low_s}</td>'
+            f'<td>{kd_s}</td>'
+            f'<td>{rsi_val}</td>'
+            f'<td>{vol_note}</td>'
+            f'<td>{hint_s}</td>'
+            f'<td>{strategy}</td></tr>\n'
         )
 
     price_rows = ''
     for sid, sname in CORE_19:
-        price_rows += fmt_stock_card(sid, sname, tech_data)
+        price_rows += fmt_stock_row(sid, sname, tech_data)
     if not price_rows:
-        price_rows = '<div class="empty">⏳ 資料讀取中</div>'
+        price_rows = '<tr><td colspan="8" style="text-align:center;color:#666;">⏳ 資料讀取中</td></tr>'
     
     # ── 潛力股候選（全市場非持股中被投信大買的）──
     trust_update_time = '—'
@@ -885,7 +910,7 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
     today_dt = now.replace(hour=0, minute=0, second=0, microsecond=0)
     cutoff_dt = today_dt + timedelta(days=14)
     
-    # A) 自動抓取的美國事件（四物日 + BLS總經 + FOMC）
+    # A) 自動抓取的美國事件（四巫日 + BLS總經 + FOMC）
     us_events = get_us_events()
     us_event_rows = ''
     for date_str, ev in us_events:
@@ -948,23 +973,22 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
             _p_low_s = '—'
         _p_price = t['price'] if t else p.get('close',0) or 0
         _p_price_s = f'{_p_price:.1f}' if _p_price else '—'
-        _flag_badge = (
-            f'<span class="badge {"bg-green" if trust_buy and fn_buy else "bg-yellow"}">'
-            f'{flag}</span>'
-        )
+        # 潛力股欄位：上名稱下代號
+        pot_s_cell = f'<div style="line-height:1.2"><b>{p["name"]}</b></div><div style="font-size:0.85em;color:var(--text-muted);line-height:1.2">{sid}</div>'
+        # 潛力股股價+漲跌
+        pot_p_cell = _price_cell(_p_price, snaps.get(sid))
         potential_rows += (
-            f'<div class="pc-card">'
-            f'<div class="pc-header"><b>{sid}</b> {p["name"]}</div>'
-            f'<div class="pc-body">'
-            f'<div class="pc-row"><span class="pc-label">股價</span><span class="pc-val">{_p_price_s}</span></div>'
-            f'<div class="pc-row"><span class="pc-label">投信</span><span class="pc-val trust-up">{p["total_trust"]:,}</span></div>'
-            f'<div class="pc-row"><span class="pc-label">外資</span><span class="pc-val" style="color:{fn_color}">{p["total_foreign"]:+,}</span></div>'
-            f'<div class="pc-row"><span class="pc-label">連買</span><span>{p["days"]}天</span></div>'
-            f'<div class="pc-row"><span class="pc-label">{_p_low_s}</span><span>{_flag_badge}</span></div>'
-            f'</div></div>\n'
+            f'<tr><td>{pot_s_cell}</td>'
+            f'<td>{pot_p_cell}</td>'
+            f'<td>{p["days"]}天</td>'
+            f'<td style="color:var(--red-alert);font-weight:bold;">{p["total_trust"]:,}</td>'
+            f'<td style="color:{fn_color}">{p["total_foreign"]:+,}</td>'
+            f'<td>{_p_low_s}</td>'
+            f'<td>{tech_str}</td>'
+            f'<td style="color:{flag_color};font-weight:bold;">{flag}</td></tr>\n'
         )
     if not potential_rows:
-        potential_rows = '<div class="empty">盤後16:30更新全市場掃描</div>'
+        potential_rows = '<tr><td colspan="8" style="text-align:center;color:#666;">盤後16:30更新全市場掃描</td></tr>'
 
     # ═══════════════════════════════════════════
     #  🏗️ 最終 HTML
@@ -1035,17 +1059,29 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
             border: 1px solid #444;
         }}
 
+        table {{
+            width: 100%; border-collapse: collapse; margin-top: 10px;
+            font-size: 18px;
+        }}
+        th {{
+            background-color: #2d2d2d; color: var(--primary-gold);
+            font-weight: bold; padding: 8px 6px; text-align: left;
+            border-bottom: 2px solid var(--border-color);
+            font-size: 18px;
+        }}
+        td {{
+            padding: 10px 6px; border-bottom: 1px solid var(--border-color);
+            vertical-align: middle; font-size: 18px;
+        }}
+
         .badge {{
-            display: inline-block; padding: 2px 8px; border-radius: 4px;
+            display: inline-block; padding: 2px 6px; border-radius: 4px;
             font-size: 14px; font-weight: bold; color: #fff;
         }}
-        .bg-red {{ background: var(--red-alert); }}
-        .bg-green {{ background: var(--green-go); color:#000; }}
-        .bg-yellow {{ background: #ffa502; }}
-        .bg-gray {{ background: #555; }}
-        .bg-blue {{ background: #1e90ff; }}
+        .badge-red {{ background: var(--red-alert); }}
+        .badge-blue {{ background: #1e90ff; }}
+        .badge-orange {{ background: #ffa502; }}
 
-        /* ── 事件行（保留）── */
         .event-row {{
             display: flex; justify-content: space-between;
             font-size: 18px; padding: 8px 0;
@@ -1059,62 +1095,6 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
 
         .up {{ color: var(--red-alert); font-weight: bold; }}
         .down {{ color: var(--green-go); font-weight: bold; }}
-
-        /* ── 核心持股卡片網格 ── */
-        .stock-grid {{
-            display: flex; flex-wrap: wrap; gap: 10px;
-            margin-top: 10px;
-        }}
-        .stock-card {{
-            background: #252525; border-radius: 8px;
-            padding: 12px; flex: 1 1 calc(50% - 5px); min-width: 160px;
-            border: 1px solid #333;
-        }}
-        .sc-header {{
-            font-size: 17px; margin-bottom: 8px;
-            color: var(--primary-gold);
-        }}
-        .sc-body {{ display: flex; gap: 10px; }}
-        .sc-price {{
-            font-size: 22px; font-weight: bold;
-            min-width: 65px;
-        }}
-        .px-up {{ color: var(--red-alert); }}
-        .px-down {{ color: var(--green-go); }}
-        .sc-info {{ flex: 1; font-size: 15px; }}
-        .sc-row {{
-            display: flex; justify-content: space-between;
-            padding: 2px 0;
-        }}
-        .sc-label {{ color: var(--text-muted); }}
-        .kd-golden {{ color: var(--green-go); font-weight: bold; }}
-        .kd-near-gc {{ color: #a0ff60; }}
-        .kd-near-dc {{ color: #ffa060; }}
-        .kd-dead {{ color: var(--red-alert); }}
-
-        /* ── 潛力股卡片網格 ── */
-        .pc-grid {{
-            display: flex; flex-wrap: wrap; gap: 10px;
-            margin-top: 10px;
-        }}
-        .pc-card {{
-            background: #252525; border-radius: 8px;
-            padding: 12px; flex: 1 1 calc(50% - 5px); min-width: 160px;
-            border: 1px solid #333;
-        }}
-        .pc-header {{
-            font-size: 17px; margin-bottom: 6px;
-            color: var(--primary-gold);
-        }}
-        .pc-body {{ font-size: 15px; }}
-        .pc-row {{
-            display: flex; justify-content: space-between;
-            padding: 3px 0;
-            border-bottom: 1px solid #2a2a2a;
-        }}
-        .pc-label {{ color: var(--text-muted); }}
-        .pc-val {{ font-weight: bold; }}
-        .trust-up {{ color: var(--red-alert); }}
         .footer {{
             text-align: center; font-size: 18px; color: #445566;
             margin-top: 30px; padding-top: 15px;
@@ -1147,12 +1127,17 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         </div>
     </div>
 
-    <!-- 第1層：核心持股（手機卡片）-->
+    <!-- 第1層：核心持股（含19檔全體）-->
     <div class="card">
         <div class="card-title">🔒 核心持股（11檔）技術監控</div>
-        <div class="stock-grid">
-            {price_rows}
-        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>股票</th><th>股價</th><th>30日低</th><th>KD</th><th>RSI</th><th>量能</th><th>提示</th><th>策略</th>
+                </tr>
+            </thead>
+            <tbody>{price_rows}</tbody>
+        </table>
     </div>
 
     <!-- 未來14天關鍵事件（台股固定 + 美國自動抓取）-->
@@ -1176,11 +1161,24 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
     <!-- 潛力股候選（全市場投信+法人掃描，標記對作/共愛）-->
     <div class="card alert">
         <div class="card-title">
-            🎯 潛力股候選
+            🎯 潛力股候選：投信/法人動向
+            · 全市場連買>=3天, 累計>50萬
+            · 若投信+外資同買標記 🟢共愛；對作標記 🔴對作
+            · 更新: {trust_update_time}
         </div>
-        <div class="pc-grid">
-            {potential_rows}
-        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>股票</th><th>股價</th><th>連買</th>
+                    <th>投信買超</th>
+                    <th>外資動向</th>
+                    <th>30日低</th>
+                    <th>KD/RSI</th>
+                    <th>備註</th>
+                </tr>
+            </thead>
+            <tbody>{potential_rows}</tbody>
+        </table>
     </div>
 
     <!-- 新聞區塊：從 output/news_crawled.json 讀取（爬蟲，0 token） -->
