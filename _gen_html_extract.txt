@@ -1,0 +1,350 @@
+def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', potential_stocks=None, us_events=None):
+    now = datetime.now()
+    today = now.strftime('%Y-%m-%d')
+    now_hm = now.strftime('%H:%M')
+    
+    # ── SOX 指數（從 global_weather 抓） ──
+    try:
+        from global_weather import get_us_indexes
+        us = get_us_indexes()
+    except:
+        us = {}
+    
+    # ── 台指期指數（直接用 yfinance 抓加權指數，TX00.TW 常離線）──
+    try:
+        import yfinance as yf
+        import io, contextlib
+        with contextlib.redirect_stderr(io.StringIO()):
+            twii = yf.Ticker('^TWII')
+            twii_df = twii.history(period='5d')
+        if twii_df is not None and len(twii_df) >= 2:
+            closes = twii_df['Close'].values
+            fut = {
+                'close': round(float(closes[-1]), 2),
+                'change': round((closes[-1] / closes[-2] - 1) * 100, 2),
+                'source': '加權指數',
+            }
+        else:
+            fut = None
+    except:
+        fut = None
+    
+    sox_data = us.get('費城半導體', {})
+    if sox_data:
+        sox_close = f'{sox_data["close"]:,.0f}'
+        sox_chg = f'{sox_data["change"]:+.2f}%'
+        sox_icon = '+' if sox_data['change'] > 0 else '-'
+        if sox_data['change'] > 3:
+            sox_level = '🔥🔥 強多'
+        elif sox_data['change'] > 1:
+            sox_level = '🔥 偏多'
+        elif sox_data['change'] > -1:
+            sox_level = '➖ 中性'
+        elif sox_data['change'] > -3:
+            sox_level = '🔻 偏空'
+        else:
+            sox_level = '🔴🔴 強空'
+    else:
+        sox_close = '—'
+        sox_chg = '—'
+        sox_icon = '-'
+        sox_level = '離線'
+    
+    # ── 台指期指數 ──
+    if fut:
+        fut_icon = '+' if fut['change'] > 0 else '-'
+        source = fut.get('source', '即時')
+        fut_str = f'台指期 {fut["close"]:,.0f} {fut_icon} {fut["change"]:+.2f}% ({source})'
+        if fut['change'] > 0.3:
+            fut_tone = '台指期上漲 → 今日偏多'
+        elif fut['change'] < -0.3:
+            fut_tone = '台指期下跌 → 今日偏空'
+        else:
+            fut_tone = '台指期平穩 → 正常開盤'
+    else:
+        fut_str = '台指期 — 離線'
+        fut_tone = '（以費半為主要判斷）'
+    
+    # ── 開盤基調 ──
+    if not tone:
+        tone = f'費半 {sox_chg} | {fut_str} → {fut_tone}'
+    
+    # ── 核心持股表格 ──
+    def _kd_sparkline(k5, d5, k, d, gap):
+        """KD SVG折線圖 200x80：藍K, 橘D, 5期"""
+        if not k5 or len(k5) < 2:
+            return f'<span style="color:#4a9eff;font-weight:bold;font-size:24px;">K{k:.0f}</span> <span style="color:#ffa502;font-weight:bold;font-size:24px;">D{d:.0f}</span>'
+        w, h = 200, 80
+        # 計算繪圖範圍
+        all_vals = k5 + d5
+        mn, mx = min(all_vals), max(all_vals)
+        if mx - mn < 5:  # 至少 5 的範圍
+            mid = (mn + mx) / 2
+            mn, mx = mid - 2.5, mid + 2.5
+        rng = mx - mn if mx > mn else 1
+        pad = rng * 0.1
+        mn2, mx2 = mn - pad, mx + pad
+        rng2 = mx2 - mn2 if mx2 > mn2 else 1
+        def y(v):
+            return h - ((v - mn2) / rng2) * h
+        n = len(k5) - 1
+        pts_k = ' '.join(f'{(i/n)*w:.1f},{y(k5[i]):.1f}' for i in range(len(k5)))
+        pts_d = ' '.join(f'{(i/n)*w:.1f},{y(d5[i]):.1f}' for i in range(len(d5)))
+        gap_arrow = '▲' if gap > 0 else '▼'
+        cross = ''
+        if gap > 5:
+            cross = '🔥金叉'
+        elif gap < -5:
+            cross = '💀死叉'
+        svg = (
+            f'<svg width="{w}" height="{h}" style="vertical-align:middle;display:block;margin:0 auto;">'
+            f'<polyline points="{pts_k}" fill="none" stroke="#4a9eff" stroke-width="3"/>'
+            f'<polyline points="{pts_d}" fill="none" stroke="#ffa502" stroke-width="3"/>'
+            f'<circle cx="{w}" cy="{y(k5[-1])}" r="4" fill="#4a9eff"/>'
+            f'<circle cx="{w}" cy="{y(d5[-1])}" r="4" fill="#ffa502"/>'
+            f'</svg>'
+        )
+        return (
+            '<div style="text-align:center;white-space:nowrap;">'
+            + svg
+            + f'<div><span style="color:#4a9eff;font-weight:bold;font-size:24px;">K{k:.0f}</span> '
+            + f'<span style="color:#ffa502;font-weight:bold;font-size:24px;">D{d:.0f}</span> '
+            + f'<span style="font-size:18px;">{gap_arrow}gap={abs(gap):.0f}</span>'
+            + (f' <span style="color:#2ed573;font-weight:bold;font-size:18px;">{cross}</span>' if cross else '')
+            + '</div></div>'
+        )
+
+    def _macd_sparkline(hist5, hist_val, hist_prev):
+        """MACD SVG柱狀圖 200x80：5期紅綠柱+零軸，自動縮放讓柱子可見"""
+        if not hist5 or len(hist5) < 1:
+            return '<span style="font-size:24px;color:#666;">—</span>'
+        w, h = 200, 80
+        max_abs = max(abs(v) for v in hist5) if hist5 else 1
+        # 如果數值太小，強制設定最小縮放範圍
+        if max_abs < 0.01:
+            max_abs = 0.01
+        # 最少顯示高度(px)，確保柱子不是平的
+        min_bar_px = 8
+        # 計算縮放比例：以 h/2 為最大高度
+        scale = (h / 2 - 10) / max_abs
+        # 但確保即使很小的值也有足夠高度
+        smallest_val = min([abs(v) for v in hist5 if v != 0]) if any(v != 0 for v in hist5) else max_abs
+        min_needed_scale = min_bar_px / smallest_val if smallest_val > 0 else scale
+        scale = max(scale, min_needed_scale)
+        bars = []
+        bw = max(w / len(hist5) - 6, 10)
+        for i, v in enumerate(hist5):
+            bar_h = abs(v) * scale
+            bar_h = max(bar_h, min_bar_px)  # 最小 8px
+            x = i * (w / len(hist5)) + (w / len(hist5) - bw) / 2
+            if v >= 0:
+                y_pos = h / 2 - bar_h
+                bars.append(f'<rect x="{x:.1f}" y="{y_pos:.1f}" width="{bw:.1f}" height="{bar_h:.1f}" fill="#ff6b6b" rx="3"/>')
+            else:
+                bars.append(f'<rect x="{x:.1f}" y="{h/2:.1f}" width="{bw:.1f}" height="{bar_h:.1f}" fill="#2ed573" rx="3"/>')
+        zero_line = f'<line x1="0" y1="{h/2}" x2="{w}" y2="{h/2}" stroke="#888" stroke-width="2"/>'
+        bars_svg = ''.join(bars)
+        svg = f'<svg width="{w}" height="{h}" style="vertical-align:middle;display:block;margin:0 auto;">{zero_line}{bars_svg}</svg>'
+        # 趨勢文字
+        trend = ''
+        if hist_val is not None and hist_prev is not None:
+            if hist_val > 0 and hist_val > hist_prev:
+                trend = '🔥紅柱擴大'
+            elif hist_val > 0:
+                trend = '紅柱縮短'
+            elif hist_val < hist_prev:
+                trend = '💀綠柱擴大'
+            else:
+                trend = '綠柱縮短'
+        return (
+            '<div style="text-align:center;">'
+            + svg
+            + (f'<div style="font-size:20px;color:#ff6b6b;font-weight:bold;margin-top:4px;text-align:center;">{trend}</div>' if trend else '<div style="font-size:14px;color:#666;margin-top:4px;">—</div>')
+            + '</div>'
+        )
+
+
+    def _price_cell(px, s, prev_close=None):
+        """產出股價+漲跌幅的上下兩行HTML
+        s 為 snaps[sid] (Shioaji即時) 或 None
+        prev_close 為昨天收盤價 (tech_data 備援)
+        """
+        pxt = f'{px}' if px else '—'
+        chg, chg_pct = None, None
+        if s and s.get('change') is not None:
+            chg = s['change']
+            chg_pct = s.get('change_pct', 0)
+        elif prev_close and px and prev_close > 0:
+            chg = px - prev_close
+            chg_pct = (chg / prev_close) * 100
+        
+        if chg is not None:
+            if chg > 0:
+                icon, cls = '▲', 'up'
+            elif chg < 0:
+                icon, cls = '▼', 'down'
+            else:
+                icon, cls = '▸', ''
+            chg_s = f'<span class="{cls}">{icon} {abs(chg):.2f} ({chg_pct:+.2f}%)</span>'
+            return (
+                f'<div style="font-weight:bold;font-size:1.05em;line-height:1.2">{pxt}</div>'
+                f'<div style="font-size:0.85em;line-height:1.2">{chg_s}</div>'
+            )
+        else:
+            return f'<div style="font-weight:bold;font-size:1.05em">{pxt}</div>'
+
+    def fmt_stock_row(sid, sname, tech):
+        t = tech.get(sid)
+        if not t:
+            return ''
+        
+        px = t.get('price', 0)
+        k, d = t['k'], t['d']
+        gap = t['gap']
+        rsi_val = t['rsi']
+        vol_note = t.get('vol_note', '—')
+        
+        # KD: SVG折線圖（藍K橘D, 5期）
+        k5 = t.get('k5', [])
+        d5 = t.get('d5', [])
+        kd_html = _kd_sparkline(k5, d5, k, d, gap)
+        
+        # RSI: 整數
+        rsi_html = f'{int(rsi_val)}' if rsi_val is not None else '—'
+        
+        # MACD: SVG柱狀圖（紅正綠負, 5期）
+        macd_v = t.get('macd')
+        macd_hist = t.get('macd_hist')
+        macd_hist_prev = t.get('macd_hist_prev')
+        hist5 = t.get('hist5', [])
+        macd_html = _macd_sparkline(hist5, macd_hist, macd_hist_prev)
+        
+        hints = []
+        if gap > 5: hints.append('🔥金叉中')
+        elif gap < -5: hints.append('💀死叉中')
+        if rsi_val > 70: hints.append('過熱')
+        elif rsi_val < 30: hints.append('超賣')
+        hint_s = ' | '.join(hints) if hints else '—'
+        
+        if gap > 5 and rsi_val < 60:
+            strategy = '🟢 K金叉 可持股'
+        elif gap > 0 and rsi_val < 50:
+            strategy = '🟡 近金叉 觀望期待'
+        elif gap < -5 and rsi_val > 40:
+            strategy = '🔴 死叉中 避開'
+        elif rsi_val > 70:
+            strategy = '🔴 RSI過熱 注意回檔'
+        elif rsi_val < 30 and gap > 0:
+            strategy = '🟢 RSI超賣+金叉 留意買點'
+        else:
+            strategy = '➖ 觀望'
+        
+        low_30d = t.get('low_30d')
+        if low_30d:
+            dist_to_low = round(((px / low_30d) - 1) * 100, 1)
+            if dist_to_low < 5:
+                low_s = f'<span style="color:var(--red-alert)">{low_30d} ⚠️</span>'
+            else:
+                low_s = f'{low_30d}'
+        else:
+            low_s = '—'
+        
+        # 股票欄：上名稱下代號
+        s_cell = f'<div style="line-height:1.2"><b>{sname}</b></div><div style="font-size:0.85em;color:var(--text-muted);line-height:1.2">{sid}</div>'
+        # 股價欄：上股價下漲跌（Shioaji 離線時用技術資料前一日收盤價）
+        _prev_c = t.get('prev_close')
+        p_cell = _price_cell(px, snaps.get(sid), prev_close=_prev_c)
+        
+        return (
+            f'<tr>'
+            f'<td>{s_cell}</td>'
+            f'<td>{p_cell}</td>'
+            f'<td>{low_s}</td>'
+            f'<td>{kd_html}</td>'
+            f'<td>{rsi_html}</td>'
+            f'<td>{macd_html}</td>'
+            f'<td>{vol_note}</td>'
+            f'<td>{hint_s}</td>'
+            f'<td>{strategy}</td></tr>\n'
+        )
+
+    price_rows = ''
+    for sid, sname in CORE_19:
+        price_rows += fmt_stock_row(sid, sname, tech_data)
+    if not price_rows:
+        price_rows = '<tr><td colspan="9" style="text-align:center;color:#666;">⏳ 資料讀取中</td></tr>'
+    
+    # ── 潛力股候選（全市場非持股中被投信大買的）──
+    trust_update_time = '—'
+    now_hm = now.strftime('%H:%M')
+    # potential_stocks 由 run() 處理完直接傳入
+    # 這裡只處理 trust_update_time
+    if potential_stocks is None:
+        potential_stocks = []
+    if potential_stocks and len(potential_stocks) > 0:
+        trust_update_time = datetime.now().strftime('%m/%d %H:%M')
+    
+    # ──     # —— 台美連動震波牆（篩選 >=2.5% 或 <=-5% 才顯示）——
+    linkage_rows = ''
+    if HAVE_WEATHER:
+        try:
+            from global_weather import get_us_stock_change as _gusc
+            _sector_rows = {}
+            _all_us_symbols = {}
+            for _k, _v in LINKAGE_40.items():
+                _sector = _v.get('sector', '其他')
+                for _us_sym, _us_name in _v.get('us', []):
+                    _tw_codes = _v.get('tw', [])
+                    _tw_str = ', '.join([f'{c}({n})' for c, n in _tw_codes]) if _tw_codes else ''
+                    if _us_sym not in _all_us_symbols:
+                        _all_us_symbols[_us_sym] = []
+                    _all_us_symbols[_us_sym].append((_sector, _us_name, _tw_str, _v.get('desc', '')))
+            for _sym, _entries in _all_us_symbols.items():
+                try:
+                    _chg, _close = _gusc(_sym)
+                except:
+                    continue
+                if _chg is None:
+                    continue
+                if not (_chg >= 2.5 or _chg <= -5):
+                    continue
+                _abs = abs(_chg)
+                if _abs >= 5:
+                    _badge = '🔴🔴' if _chg < 0 else '🟢🟢'
+                    _bc = 'badge-red' if _chg < 0 else 'badge-blue'
+                elif _abs >= 2.5:
+                    _badge = '🔴' if _chg < 0 else '🟢'
+                    _bc = 'badge-red' if _chg < 0 else 'badge-blue'
+                else:
+                    _badge = '🔻' if _chg < 0 else '🟢'
+                    _bc = 'badge-orange' if _chg < 0 else 'badge-blue'
+                _chg_str = f'{_chg:+.2f}%'
+                _sector = _entries[0][0]
+                _us_name = _entries[0][1]
+                _tw_str = _entries[0][2]
+                _desc = _entries[0][3]
+                _line = (
+                    '<div class=link-row>',
+                    '<span class=badge {_bc}>{_badge}</span> ',
+                    '<b>{_sym} {_us_name}</b> {_chg_str}',
+                    (' -> <span style=color:#4a9eff>{_tw_str}</span>' if _tw_str else ''),
+                    ' <span style=color:#888;font-size:20px>({_desc})</span>',
+                    '</div>\n',
+                )
+                if _sector not in _sector_rows:
+                    _sector_rows[_sector] = ''
+                _sector_rows[_sector] += _line
+            for _sector, _lines in _sector_rows.items():
+                if _lines:
+                    linkage_rows += (
+                        '<div style=margin-bottom:12px>',
+                        '<div style=color:var(--primary-gold);font-size:20px;font-weight:bold;margin-bottom:6px>📌 {_sector}</div>',
+                        f'{_lines}',
+                        '</div>',
+                    )
+            if not linkage_rows:
+                linkage_rows = '<div class=link-row>✅ 本日無劇烈波動（無美股漲>=2.5%或跌<=-5%）</div>'
+        except Exception as _le:
+            linkage_rows = f'<div class=link-row>⚠️ 聯動牆讀取失敗: {_le}</div>'
+    else:
+        linkage_rows = '<div class=link-row>⚠️ 聯動模組未啟用</div>'

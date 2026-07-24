@@ -118,32 +118,59 @@ def get_shioaji_snapshots():
         sjc.logout()
         print(f'[Shioaji] ✅ 真實API模式: {len(snaps)} 檔快照')
     else:
-        # 模擬模式：從本機CSV取昨日收盤
-        print('[Shioaji] ⚠️ 模擬模式: 用本機日K收盤價')
-        for sid in CORE_IDS:
-            data = read_local_csv(sid)
-            if data and len(data) >= 2:
-                c1, c2 = data[-1]['close'], data[-2]['close']
-                chg_pct = round((c1/c2 - 1)*100, 2)
-                ref_px = data[-2]['close'] if len(data) >= 2 else c1
-                change = c1 - ref_px
-                snaps[sid] = {
-                    'price': c1,
-                    'reference': ref_px,
-                    'change': round(change, 1),
-                    'change_pct': chg_pct,
-                    'high': data[-1]['high'],
-                    'low': data[-1]['low'],
-                    'volume': data[-1]['volume'],
-                }
-            else:
-                snaps[sid] = {
-                    'price': 100, 'reference': 100,
-                    'change': 0, 'change_pct': 0,
-                    'high': 100, 'low': 100, 'volume': 0,
-                }
-        # 開盤基調：用費半
-        tone = '➖ 模擬模式（無即時報價）'
+        # 盤後/模擬模式
+        now_h = datetime.now().hour
+        now_m = datetime.now().minute
+        is_pm = (now_h >= 13 and now_m >= 30) or now_h >= 14
+        if is_pm:
+            # 盤後(13:30後)：用 yfinance 抓今日收盤
+            print('[Shioaji] ⚠️ 盤後模式: yfinance抓今日收盤')
+            import yfinance as yf, io, contextlib
+            for sid in CORE_IDS:
+                try:
+                    tw_sid = sid + '.TW'
+                    with contextlib.redirect_stderr(io.StringIO()):
+                        df = yf.Ticker(tw_sid).history(period='5d')
+                    if df is not None and len(df) >= 2:
+                        c1 = float(df['Close'].values[-1])
+                        c2 = float(df['Close'].values[-2])
+                        snaps[sid] = {
+                            'price': c1, 'reference': c2,
+                            'change': round(c1 - c2, 1),
+                            'change_pct': round((c1/c2 - 1)*100, 2),
+                            'high': float(df['High'].values[-1]),
+                            'low': float(df['Low'].values[-1]),
+                            'volume': int(df['Volume'].values[-1]),
+                        }
+                except:
+                    snaps[sid] = {'price': 100, 'reference': 100, 'change': 0, 'change_pct': 0, 'high': 100, 'low': 100, 'volume': 0}
+            # 台指期
+            try:
+                with contextlib.redirect_stderr(io.StringIO()):
+                    df = yf.Ticker('^TWII').history(period='5d')
+                if df is not None and len(df) >= 2:
+                    c1, c2 = float(df['Close'].values[-1]), float(df['Close'].values[-2])
+                    snaps['_TXF'] = {'price': c1, 'change': c1 - c2, 'change_pct': round((c1/c2 - 1)*100, 2)}
+            except:
+                pass
+            tone = ''
+        else:
+            # 模擬模式：本機CSV
+            print('[Shioaji] ⚠️ 模擬模式: 用本機日K收盤價')
+            for sid in CORE_IDS:
+                data = read_local_csv(sid)
+                if data and len(data) >= 2:
+                    c1, c2 = data[-1]['close'], data[-2]['close']
+                    snaps[sid] = {
+                        'price': c1, 'reference': c2,
+                        'change': round(c1 - c2, 1),
+                        'change_pct': round((c1/c2 - 1)*100, 2),
+                        'high': data[-1]['high'], 'low': data[-1]['low'],
+                        'volume': data[-1]['volume'],
+                    }
+                else:
+                    snaps[sid] = {'price': 100, 'reference': 100, 'change': 0, 'change_pct': 0, 'high': 100, 'low': 100, 'volume': 0}
+            tone = '➖ 模擬模式（無即時報價）'
     
     return snaps, tone
 
@@ -208,18 +235,24 @@ def _fetch_rsi_from_finmind(stock_id):
 
 
 def get_tech_batch(stock_ids):
-    """批次產出技術指標（3年30分K KD + RSI + 量能）"""
+    """批次產出技術指標（3年30分K KD + RSI + 量能）
+    
+    🆕 盤後(13:30後)強制yfinance抓今日日K，確保股價最新。
+    """
     result = {}
+    _now = datetime.now()
+    _is_pm = (_now.hour >= 13 and _now.minute >= 30) or _now.hour >= 14
+    
     for sid in stock_ids:
-        data = read_local_csv(sid)
-        if not data or len(data) < 25:
-            # 沒本機資料的：先用 yfinance（免費，不需 API Key）
-            data = None
+        data = None
+        
+        # 🆕 盤後：強制 yfinance 抓今日資料
+        if _is_pm:
             try:
-                import yfinance as yf
-                tw_sid = sid + '.TW' if not sid.startswith('0050') else sid + '.TW'
-                tk = yf.Ticker(tw_sid)
-                df = tk.history(period='3mo')
+                import yfinance as yf, io, contextlib
+                tw_sid = sid + '.TW'
+                with contextlib.redirect_stderr(io.StringIO()):
+                    df = yf.Ticker(tw_sid).history(period='3mo')
                 if df is not None and len(df) >= 25:
                     items = df.reset_index().to_dict('records')
                     data = []
@@ -236,14 +269,41 @@ def get_tech_batch(stock_ids):
                     volumes = np.array([d['volume'] for d in data], dtype=float)
             except:
                 pass
-            if data is None:
-                result[sid] = None
-                continue
-        else:
-            closes = np.array([d['close'] for d in data], dtype=float)
-            highs = np.array([d['high'] for d in data], dtype=float)
-            lows = np.array([d['low'] for d in data], dtype=float)
-            volumes = np.array([d['volume'] for d in data], dtype=float)
+        
+        if data is None:
+            # 非盤後或 yfinance 失敗：本機CSV
+            data = read_local_csv(sid)
+            if not data or len(data) < 25:
+                data = None
+                try:
+                    import yfinance as yf, io, contextlib
+                    tw_sid = sid + '.TW'
+                    with contextlib.redirect_stderr(io.StringIO()):
+                        df = yf.Ticker(tw_sid).history(period='3mo')
+                    if df is not None and len(df) >= 25:
+                        items = df.reset_index().to_dict('records')
+                        data = []
+                        for d in items:
+                            data.append({
+                                'close': float(d['Close']),
+                                'high': float(d['High']),
+                                'low': float(d['Low']),
+                                'volume': int(d['Volume']) if d['Volume'] else 0,
+                            })
+                        closes = np.array([d['close'] for d in data], dtype=float)
+                        highs = np.array([d['high'] for d in data], dtype=float)
+                        lows = np.array([d['low'] for d in data], dtype=float)
+                        volumes = np.array([d['volume'] for d in data], dtype=float)
+                except:
+                    pass
+                if data is None:
+                    result[sid] = None
+                    continue
+            else:
+                closes = np.array([d['close'] for d in data], dtype=float)
+                highs = np.array([d['high'] for d in data], dtype=float)
+                lows = np.array([d['low'] for d in data], dtype=float)
+                volumes = np.array([d['volume'] for d in data], dtype=float)
         
         # KD: TA-Lib STOCH(14,1,3) — TradingView 標準
         k_vals, d_vals = compute_talib_stoch(highs, lows, closes, 14, 1, 3)
@@ -732,9 +792,11 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         fut_str = '台指期 — 離線'
         fut_tone = '（以費半為主要判斷）'
     
-    # ── 開盤基調 ──
+    # ── 開盤基調（模擬模式隱藏）──
     if not tone:
         tone = f'費半 {sox_chg} | {fut_str} → {fut_tone}'
+    if '模擬模式' in str(tone):
+        tone = ''
     
     # ── 核心持股表格 ──
     def _kd_sparkline(k5, d5, k, d, gap):
@@ -836,7 +898,7 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         s 為 snaps[sid] (Shioaji即時) 或 None
         prev_close 為昨天收盤價 (tech_data 備援)
         """
-        pxt = f'{px}' if px else '—'
+        pxt = f'{px:.1f}' if px else '—'
         chg, chg_pct = None, None
         if s and s.get('change') is not None:
             chg = s['change']
@@ -941,7 +1003,7 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
     if not price_rows:
         price_rows = '<tr><td colspan="9" style="text-align:center;color:#666;">⏳ 資料讀取中</td></tr>'
     
-    # ── 潛力股候選（全市場非持股中被投信大買的）──
+    # ── 潛力股候選（盤後 T86 更新 · 投信超前20名）──
     trust_update_time = '—'
     now_hm = now.strftime('%H:%M')
     # potential_stocks 由 run() 處理完直接傳入
