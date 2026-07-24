@@ -20,8 +20,9 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 import pandas as pd
 import numpy as np
-import talib
 from dotenv import load_dotenv
+
+from calc_tech import calc_STOCH, calc_MACD, calc_RSI, apply_indicators
 
 # ─── 路徑 ─────────────────────────────────────
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -34,13 +35,7 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 import shioaji as sj
 
-# ─── KD 參數表（可擴充）─────────────────────
-KD_PARAMS = {
-    "2436": 5,  "2337": 21, "5351": 14,
-    "3673": 14, "3711": 21, "4958": 21,
-    "3042": 14, "2454": 21, "2317": 14,
-    "8150": 21, "2330": 9,  "0050": 9,
-}
+# TradingView 標準參數由 calc_tech 統一管理 — Stoch(14,1,3) / MACD(12,26,9) / RSI(14)
 
 # ═══════════════════════════════════════════════
 #  Shioaji 登入（重複使用）
@@ -154,33 +149,25 @@ def merge_30min(df_1min):
 #  TA-Lib 計算並存檔
 # ═══════════════════════════════════════════════
 def calc_and_save(sid, df_30min):
-    """用 TA-Lib 算 KD/MACD/RSI，存入 database/3y_kd/"""
+    """用 TradingView 標準公式算 KD/MACD/RSI，存入 database/3y_kd/"""
     close = np.array(df_30min["close"], dtype=float)
     high = np.array(df_30min["high"], dtype=float)
     low = np.array(df_30min["low"], dtype=float)
     vol = np.array(df_30min["volume"], dtype=float)
-    
-    kp = KD_PARAMS.get(sid, 9)
-    
-    # KD
-    k_arr, d_arr = talib.STOCH(high, low, close, fastk_period=kp, slowk_period=3, slowd_period=3)
+
+    k_arr, d_arr = calc_STOCH(high, low, close)
+    macd, macd_sig, macd_hist = calc_MACD(close)
+    rsi = calc_RSI(close)
+
     df_30min["K"] = k_arr
     df_30min["D"] = d_arr
-    
-    # MACD
-    macd, macd_sig, macd_hist = talib.MACD(close, fastperiod=12, slowperiod=26, signalperiod=9)
     df_30min["MACD"] = macd
     df_30min["MACD_signal"] = macd_sig
     df_30min["MACD_hist"] = macd_hist
-    
-    # RSI
-    rsi = talib.RSI(close, timeperiod=14)
     df_30min["RSI"] = rsi
-    
-    # Volume MA
-    df_30min["vol_ma5"] = talib.SMA(vol, timeperiod=5)
-    df_30min["vol_ma20"] = talib.SMA(vol, timeperiod=20)
-    
+    df_30min["vol_ma5"] = pd.Series(vol).rolling(5).mean().values
+    df_30min["vol_ma20"] = pd.Series(vol).rolling(20).mean().values
+
     # 時間轉字串
     df_30min["datetime"] = df_30min["ts"].astype(str)
     df_30min = df_30min.drop(columns=["ts"])

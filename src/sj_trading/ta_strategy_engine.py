@@ -31,7 +31,7 @@ import requests
 import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
-import talib
+from calc_tech import calc_STOCH, calc_RSI, calc_MACD, calc_RSI_last
 
 # ═══════════════════════════ 路徑 ═══════════════════════════
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -476,7 +476,7 @@ def calc_talib(sid, df30):
     low = np.array(df30["low"], dtype=float)
     vol = np.array(df30["volume"], dtype=float)
 
-    k_arr, d_arr = talib.STOCH(high, low, close, fastk_period=14, slowk_period=1, slowd_period=3)
+    k_arr, d_arr = calc_STOCH(high, low, close)
     k_last = float(k_arr[-1]) if not np.isnan(k_arr[-1]) else 50.0
     d_last = float(d_arr[-1]) if not np.isnan(d_arr[-1]) else 50.0
     k_prev = float(k_arr[-2]) if len(k_arr) >= 2 and not np.isnan(k_arr[-2]) else k_last
@@ -486,7 +486,7 @@ def calc_talib(sid, df30):
     k5 = [float(k_arr[i]) if not np.isnan(k_arr[i]) else 50 for i in range(-5, 0)]
     d5 = [float(d_arr[i]) if not np.isnan(d_arr[i]) else 50 for i in range(-5, 0)]
 
-    macd_arr, sig_arr, hist_arr = talib.MACD(close, fastperiod=12, slowperiod=26, signalperiod=9)
+    macd_arr, sig_arr, hist_arr = calc_MACD(close)
     h_last = float(hist_arr[-1]) if not np.isnan(hist_arr[-1]) else 0
     h5 = [float(hist_arr[i]) if not np.isnan(hist_arr[i]) else 0 for i in range(-5, 0)]
     h_prev = h5[-2] if len(h5) >= 2 else h_last
@@ -500,8 +500,7 @@ def calc_talib(sid, df30):
             flip_warn = '🔥翻紅'
     macd_s = f"{svg_bars}<span style=\"font-size:17px;font-weight:bold;\">Hist:{h_last:.1f}</span><br><span style=\"font-size:14px;color:var(--text-muted)\">{direction}{' | '+flip_warn if flip_warn else ''}</span>"
 
-    rsi_arr = talib.RSI(close, timeperiod=14)
-    rsi_val = round(float(rsi_arr[-1]) if not np.isnan(rsi_arr[-1]) else 50, 1)
+    rsi_val = calc_RSI_last(close)
     low_30d = round(float(np.min(low[-30:])), 1) if len(low) >= 30 else None
 
     v5 = float(np.mean(vol[-5:]))

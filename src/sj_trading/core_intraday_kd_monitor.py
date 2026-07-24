@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-🦞 核心11檔 30分K KD 盤中即時監控 ⚠️ WeChat 通知版
+📊 核心11檔 30分K KD 盤中即時監控 ⚠️ WeChat 通知版
 =========================================================
 使用本地 database/30min_kd/*_kd.csv 歷史KD資料，
 盤中每5分鐘掃一次，偵測30分K KD黃金/死亡交叉。
@@ -28,6 +28,8 @@ import numpy as np
 from dotenv import load_dotenv
 import shioaji as sj
 
+from calc_tech import apply_indicators, calc_all_last
+
 load_dotenv()
 
 # ── 核心持股11檔（與 download_intraday_kd_data.py 一致）──
@@ -44,15 +46,128 @@ OUTPUT_DIR = BASE_DIR / "output"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 ALERTS_FILE = OUTPUT_DIR / "core_kd_alerts.json"
+SNAPSHOT_FILE = OUTPUT_DIR / "snapshot_latest.json"   # 🆕 盤中即時數據中心
 
-# ── WeChat 通知設定 ──
+# ── 通知設定 ──
 WECHAT_TARGET = None  # 由 send_wechat_alert() 自動從 message 工具發送
 WECHAT_CHANNEL = "openclaw-weixin"
+
+# ── Telegram 通知設定（0 token，免費）──
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
+TELEGRAM_API = "https://api.telegram.org/bot"
 
 
 # ═══════════════════════════════════════════════════════
 #  載入歷史KD
 # ═══════════════════════════════════════════════════════
+
+
+# ═══════════════════════════════════════════════════════
+#  🆕 寫入盤中即時 snapshot
+# ═══════════════════════════════════════════════════════
+
+def write_snapshot(all_results: list[dict], txf_data: dict = None):
+    """寫入 output/snapshot_latest.json 供早報盤中讀取"""
+    now = datetime.now()
+    snapshot = {
+        "update_time": now.strftime("%Y-%m-%d %H:%M:%S"),
+        "update_ts": int(time.time()),
+        "market_open": (9 <= now.hour < 13) or (now.hour == 13 and now.minute <= 30),
+        "stocks": {},
+        "txf": txf_data or None,
+    }
+    for r in all_results:
+        if r.get("error"):
+            continue
+        sid = r["sid"]
+        snapshot["stocks"][sid] = {
+            "name": r["name"],
+            "price": r.get("price"),
+            "change": r.get("change"),
+            "change_pct": r.get("change_pct"),
+            "K": r.get("K"),
+            "D": r.get("D"),
+            "kd_gap": r.get("kd_gap"),
+            "RSI": None,
+            "signal": r.get("signal"),
+            "status": r.get("status"),
+            "update_time": r.get("datetime", now.strftime("%m/%d %H:%M")),
+        }
+    try:
+        with open(SNAPSHOT_FILE, "w", encoding="utf-8") as f:
+            json.dump(snapshot, f, ensure_ascii=False, indent=2)
+        print(f"  [snapshot] 已寫入: {SNAPSHOT_FILE.name} ({len(all_results)} 檔)")
+    except Exception as e:
+        print(f"  [snapshot] 寫入失敗: {e}")
+
+
+def enrich_snapshot_with_quotes(all_results: list[dict], api) -> list[dict]:
+    """從 Shioaji snapshots 補漲跌/漲跌幅到 all_results"""
+    if api is None:
+        return all_results
+    try:
+        codes = list(CORE_STOCKS.keys())
+        contracts = []
+        for sid in codes:
+            try:
+                c = api.Contracts.Stocks[sid]
+                contracts.append(c)
+            except:
+                pass
+        if not contracts:
+            return all_results
+        snapshots = api.snapshots(contracts)
+        snap_map = {}
+        for s in snapshots:
+            sid = str(s.code)
+            if hasattr(s, 'close') and s.close > 0:
+                snap_map[sid] = {
+                    'close': s.close,
+                    'change': getattr(s, 'change', None) or (s.close - getattr(s, 'reference', s.close)),
+                    'reference': getattr(s, 'reference', s.close),
+                }
+        for r in all_results:
+            sid = r["sid"]
+            if sid in snap_map:
+                sq = snap_map[sid]
+                ref = sq.get('reference', sq['close'])
+                r['price'] = round(sq['close'], 2)
+                r['change'] = round(sq['change'], 2) if sq['change'] else 0
+                r['change_pct'] = round((sq['change'] / ref) * 100, 2) if ref > 0 and sq['change'] else 0
+        print(f"  [snapshot] Shioaji 即時報價補完: {len(snap_map)} 檔")
+    except Exception as e:
+        print(f"  [snapshot] 即時報價補完失敗: {e}")
+    return all_results
+
+
+def fetch_txf_price(api=None) -> dict | None:
+    """用 yfinance 爬台指期 TX00.TW 即時報價（不花 token）"""
+    try:
+        import yfinance as yf
+        # TX00.TW Yahoo已下架，改用 ^TWII 加權指數
+        t = yf.Ticker("^TWII")
+        df = t.history(period="5d")
+        if df is not None and len(df) >= 2:
+            closes = df["Close"].values
+            price = round(float(closes[-1]), 2)
+            change_pct = round((closes[-1] / closes[-2] - 1) * 100, 2)
+            result = {
+                'price': price,
+                'change': round(closes[-1] - closes[-2], 2),
+                'change_pct': change_pct,
+                'high': round(float(df["High"].values[-1]), 2),
+                'low': round(float(df["Low"].values[-1]), 2),
+                'volume': int(df["Volume"].values[-1]),
+            }
+            print(f"  [txf] 台指期: {result['price']} ({result['change_pct']:+.2f}%)")
+            return result
+        print("  [txf] yfinance 無資料")
+        return None
+    except Exception as e:
+        print(f"  [txf] 台指期爬取失敗: {e}")
+        return None
+
 
 def load_kd_history(sid: str) -> pd.DataFrame | None:
     """載入本地 30分K KD 歷史資料"""
@@ -136,30 +251,11 @@ def resample_30min(min1_df: pd.DataFrame) -> pd.DataFrame:
     return resampled
 
 
-def compute_kd(df: pd.DataFrame, k_period: int = 9) -> pd.DataFrame:
-    """計算KD"""
-    if df is None or df.empty or len(df) < k_period + 3:
+def compute_kd(df: pd.DataFrame, k_period: int = None) -> pd.DataFrame:
+    """計算 KD — TradingView Stoch(14,1,3). k_period 保留相容性，已忽略."""
+    if df is None or df.empty or len(df) < 17:
         return df
-
-    close = df["close"].values
-    low_min = pd.Series(df["low"].values).rolling(k_period).min().values
-    high_max = pd.Series(df["high"].values).rolling(k_period).max().values
-    denom = high_max - low_min
-    rsv = np.where(denom != 0, ((close - low_min) / denom) * 100, 50.0)
-
-    n = len(close)
-    k_vals = np.full(n, 50.0)
-    d_vals = np.full(n, 50.0)
-    for i in range(k_period, n):
-        k_new = (2/3) * k_vals[i-1] + (1/3) * rsv[i]
-        d_new = (2/3) * d_vals[i-1] + (1/3) * k_new
-        k_vals[i] = k_new
-        d_vals[i] = d_new
-
-    df = df.copy()
-    df["K"] = np.round(k_vals, 2)
-    df["D"] = np.round(d_vals, 2)
-    return df
+    return apply_indicators(df)
 
 
 # ═══════════════════════════════════════════════════════
@@ -326,7 +422,7 @@ def scan_once():
     """執行一次掃描（用於cron或一次性觸發）"""
     now = datetime.now()
     print(f"\n{'='*65}")
-    print(f"  🦞 核心11檔 30分K KD 即時掃描")
+    print(f"  📊 核心11檔 30分K KD 即時掃描")
     print(f"  時間: {now.strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"{'='*65}")
 
@@ -369,6 +465,15 @@ def scan_once():
         else:
             print(f"  ⚪ {name}({sid}) K={result['K']} D={result['D']} 無信號")
 
+    # 🆕 補即時報價
+    results = enrich_snapshot_with_quotes(results, api)
+    
+    # 🆕 抓台指期
+    txf_data = fetch_txf_price(api)
+    
+    # 🆕 寫入 snapshot
+    write_snapshot(results, txf_data)
+
     save_alerts(alerts)
     api.logout()
 
@@ -381,9 +486,10 @@ def scan_once():
             msg = a['message']
             print(f"  {msg}")
             
-            # 只對正式交叉發 WeChat（逼近不發），連續3次
+            # 只對正式交叉發通知（逼近不發），連續3次
             if a["status"] in ("GOLDEN_CROSS", "DEATH_CROSS"):
                 send_wechat_alert(msg, repeat=3, delay=1)
+                send_telegram_alert(msg)
 
     print(f"\n{'='*65}")
     print(f"  掃描完成\n")
@@ -393,7 +499,7 @@ def scan_once():
 
 def loop_mode(interval_minutes: int = 5):
     """循環監控模式（每 N 分鐘掃描一次）"""
-    print(f"🦞 核心11檔 30分K KD 循環監控啟動")
+    print(f"📊 核心11檔 30分K KD 循環監控啟動")
     print(f"  掃描間隔: {interval_minutes} 分鐘")
     print(f"  ⌛ 等待第一根30分K完成...\n")
 
@@ -432,6 +538,31 @@ def loop_mode(interval_minutes: int = 5):
 # ═══════════════════════════════════════════════════════
 #  WeChat 發送
 # ═══════════════════════════════════════════════════════
+
+def send_telegram_alert(message: str):
+    """透過 Telegram Bot API 傳送訊息（0 token，免費）"""
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        return False
+    try:
+        import requests
+        url = f"{TELEGRAM_API}{TELEGRAM_BOT_TOKEN}/sendMessage"
+        payload = {
+            "chat_id": TELEGRAM_CHAT_ID,
+            "text": message,
+            "parse_mode": "HTML",
+        }
+        resp = requests.post(url, json=payload, timeout=10)
+        if resp.status_code == 200:
+            print("  📱 Telegram 發送成功")
+            return True
+        else:
+            print(f"  ⚠️ Telegram 發送失敗: {resp.status_code}")
+            return False
+    except Exception as e:
+        print(f"  ⚠️ Telegram 發送異常: {e}")
+        return False
+
+
 
 def send_wechat_alert(message: str, repeat: int = 3, delay: int = 1):
     """

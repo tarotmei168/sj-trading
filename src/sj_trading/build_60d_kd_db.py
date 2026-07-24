@@ -5,7 +5,7 @@
 Shioaji 歷史 kbar 只給盤後資料，所以用 FinMind 日K 建立
 再用 Shioaji snapshot 更新最新即時價格
 """
-import sys, os, requests, numpy as np, pandas as pd, talib
+import sys, os, requests, numpy as np, pandas as pd
 from datetime import datetime, timedelta
 sys.stdout.reconfigure(encoding='utf-8')
 from dotenv import load_dotenv
@@ -17,12 +17,9 @@ os.makedirs(DB_DIR, exist_ok=True)
 sys.path.insert(0, SCRIPT_DIR)
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 
-import shioaji as sj
+from calc_tech import calc_STOCH, calc_MACD, calc_RSI
 
-KD_PARAMS = {
-    "2436":5,"2337":21,"5351":14,"3673":14,"3711":21,"4958":21,
-    "3042":14,"2454":21,"2317":14,"8150":21,"2330":9,"0050":9,
-}
+import shioaji as sj
 
 def fetch_finmind(sid, days=90):
     url = "https://api.finmindtrade.com/api/v4/data"
@@ -71,10 +68,9 @@ def calc_and_save(sid, df):
     h = np.array(df["high"], dtype=float)
     l = np.array(df["low"], dtype=float)
     v = np.array(df["volume"], dtype=float)
-    kp = KD_PARAMS.get(sid, 9)
-    k,d_ = talib.STOCH(h,l,c,fastk_period=kp,slowk_period=3,slowd_period=3)
-    macd,sig,hist = talib.MACD(c,fastperiod=12,slowperiod=26,signalperiod=9)
-    rsi = talib.RSI(c,timeperiod=14)
+    k, d_ = calc_STOCH(h, l, c)
+    macd, sig, hist = calc_MACD(c)
+    rsi = calc_RSI(c)
     df["K"] = k; df["D"] = d_
     df["MACD"] = macd; df["MACD_signal"] = sig; df["MACD_hist"] = hist
     df["RSI"] = rsi

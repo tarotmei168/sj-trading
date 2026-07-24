@@ -5,6 +5,8 @@ import shioaji as sj
 import numpy as np
 from datetime import datetime
 
+from calc_tech import calc_STOCH, calc_RSI_last
+
 ak = os.environ.get('SJ_API_KEY', '')
 sk = os.environ.get('SJ_SEC_KEY', '')
 api = sj.Shioaji(simulation=True)
@@ -37,21 +39,6 @@ POTENTIAL = [
     ("3017","qihong","散热龙头极致超卖（严重背离）"),
     ("2451","chuanjian","记忆体模组超卖（题材补涨股）"),
 ]
-
-def calc_rsi_last(closes, period=14):
-    n = len(closes)
-    if n < period + 1:
-        return 50.0
-    gains = 0; losses = 0
-    for i in range(n-period, n):
-        d = closes[i] - closes[i-1]
-        if d > 0: gains += d
-        else: losses += abs(d)
-    avg_gain = gains / period
-    avg_loss = losses / period
-    if avg_loss == 0: return 100.0
-    rs = avg_gain / avg_loss
-    return round(100.0 - 100.0 / (1.0 + rs), 1)
 
 def get_rsi_level(rsi_val):
     if rsi_val < 20: return "极超卖"
@@ -109,28 +96,27 @@ def analyze(sid):
     cls = np.array([b[2] for b in bars], dtype=float)
     his = np.array([b[3] for b in bars], dtype=float)
     los = np.array([b[4] for b in bars], dtype=float)
-    n = len(cls); k=np.zeros(n); d=np.zeros(n)
-    k[0]=50; d[0]=50
-    for i in range(1,n):
-        ps=max(0,i-9+1); hh=np.max(his[ps:i+1]); ll=np.min(los[ps:i+1])
-        rsv=(cls[i]-ll)/(hh-ll)*100 if hh-ll>0 else 50
-        k[i]=(2/3)*k[i-1]+(1/3)*rsv; d[i]=(2/3)*d[i-1]+(1/3)*k[i]
-    
+    n = len(cls)
+    if n < 17:
+        return None
+
+    k_arr, d_arr = calc_STOCH(his, los, cls)
+    k_v = round(float(k_arr[-1]) if np.isfinite(k_arr[-1]) else 50.0, 1)
+    d_v = round(float(d_arr[-1]) if np.isfinite(d_arr[-1]) else 50.0, 1)
+    k_prev_v = round(float(k_arr[-2]) if len(k_arr) >= 2 and np.isfinite(k_arr[-2]) else k_v, 1)
+    d_prev_v = round(float(d_arr[-2]) if len(d_arr) >= 2 and np.isfinite(d_arr[-2]) else d_v, 1)
+
     price = cls[-1]
-    k_v = round(k[-1], 1)
-    d_v = round(d[-1], 1)
-    kd_up = k[-1] > d[-1]
-    gc = k[-1] > d[-1] and k[-2] <= d[-2]
-    dc = k[-1] < d[-1] and k[-2] >= d[-2]
-    
-    # 接近金叉：K<D 但差距縮到 3 以內 + K 趨勢向上
+    kd_up = k_v > d_v
+    gc = k_v > d_v and k_prev_v <= d_prev_v
+    dc = k_v < d_v and k_prev_v >= d_prev_v
+
     approach_gc = False
     if not kd_up:
-        k_prev = round(k[-2], 1)
         gap = abs(k_v - d_v)
-        k_rising = k_prev < k_v  # K 往上走
+        k_rising = k_prev_v < k_v
         approach_gc = (gap <= 3.0) and k_rising
-    
+
     rsi_val = calc_rsi_last(cls)
     rsi_lv = get_rsi_level(rsi_val)
     

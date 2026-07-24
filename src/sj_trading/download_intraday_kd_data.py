@@ -232,32 +232,12 @@ def aggregate_to_nmin(min1_df: pd.DataFrame, freq_min: int = 30) -> pd.DataFrame
     return resampled
 
 
-def compute_kd(df: pd.DataFrame, k_period: int = 9) -> pd.DataFrame:
-    """計算KD值，支援自訂K值參數"""
-    if df is None or df.empty or len(df) < k_period + 3:
+def compute_kd(df: pd.DataFrame, k_period: int = None) -> pd.DataFrame:
+    """計算 KD — TradingView Stoch(14,1,3). k_period 保留相容性，已忽略."""
+    if df is None or df.empty or len(df) < 17:
         return df
-
-    close = df["close"].values
-    low_min = pd.Series(df["low"].values).rolling(k_period).min().values
-    high_max = pd.Series(df["high"].values).rolling(k_period).max().values
-
-    denom = high_max - low_min
-    rsv = np.where(denom != 0, ((close - low_min) / denom) * 100, 50.0)
-
-    n = len(close)
-    k_vals = np.full(n, 50.0)
-    d_vals = np.full(n, 50.0)
-
-    for i in range(k_period, n):
-        k_new = (2/3) * k_vals[i-1] + (1/3) * rsv[i]
-        d_new = (2/3) * d_vals[i-1] + (1/3) * k_new
-        k_vals[i] = k_new
-        d_vals[i] = d_new
-
-    df = df.copy()
-    df["K"] = np.round(k_vals, 2)
-    df["D"] = np.round(d_vals, 2)
-    return df
+    from calc_tech import apply_indicators
+    return apply_indicators(df)
 
 
 # ═══════════════════════════════════════════════════════

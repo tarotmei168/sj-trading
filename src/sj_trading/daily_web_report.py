@@ -1,6 +1,6 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
-🦞 daily_web_report.py — 小龍蝦行動總經操盤雷達
+📊 daily_web_report.py — 股票行動總經操盤雷達
 ==================================================
 最高執行準則: architecture_master.md
 排程: 08:30 自動產出 → Git Push → GitHub Pages
@@ -249,6 +249,14 @@ def get_tech_batch(stock_ids):
         k_vals, d_vals = compute_talib_stoch(highs, lows, closes, 14, 1, 3)
         k = float(k_vals[-1]) if not np.isnan(k_vals[-1]) else 50.0
         d = float(d_vals[-1]) if not np.isnan(d_vals[-1]) else 50.0
+        # 最近5期K/D陣列（供SVG迷你折線圖）
+        k5 = []
+        d5 = []
+        for i in range(-5, 0):
+            kv = float(k_vals[i]) if len(k_vals) >= abs(i) and not np.isnan(k_vals[i]) else 50.0
+            dv = float(d_vals[i]) if len(d_vals) >= abs(i) and not np.isnan(d_vals[i]) else 50.0
+            k5.append(kv)
+            d5.append(dv)
         gap = k - d
         golden = k >= d
         # 取前一筆K判斷趨勢
@@ -276,10 +284,11 @@ def get_tech_batch(stock_ids):
         else: vol_note = '平量⚪'
         
         # 位階
-        if rsi_val < 30: level = '超賣'
-        elif rsi_val < 40: level = '偏低'
-        elif rsi_val < 55: level = '中性'
-        elif rsi_val < 70: level = '偏多'
+        rsi_last = float(rsi_val[-1]) if hasattr(rsi_val, '__len__') and len(rsi_val) > 0 else float(rsi_val)
+        if rsi_last < 30: level = '超賣'
+        elif rsi_last < 40: level = '偏低'
+        elif rsi_last < 55: level = '中性'
+        elif rsi_last < 70: level = '偏多'
         else: level = '過熱'
         
         # MACD: TA-Lib MACD(12,26,9) — TradingView 標準
@@ -290,12 +299,19 @@ def get_tech_batch(stock_ids):
             hist_val = round(float(_hist[-1]), 2) if not np.isnan(_hist[-1]) else None
             # 取前一根hist來判斷柱狀體方向
             hist_prev = float(_hist[-2]) if len(_hist) >= 2 and not np.isnan(_hist[-2]) else None
+            # 最近5期hist陣列（供SVG迷你柱狀圖）
+            hist5 = []
+            for i in range(-5, 0):
+                hv = float(_hist[i]) if len(_hist) >= abs(i) and not np.isnan(_hist[i]) else 0.0
+                hist5.append(hv)
         except:
             macd_val = sig_val = hist_val = hist_prev = None
+            hist5 = []
         
         result[sid] = {
             'k': round(k, 1), 'd': round(d, 1), 'gap': round(gap, 1),
-            'golden': golden, 'rsi': rsi_val,
+            'k5': k5, 'd5': d5, 'hist5': hist5,
+            'golden': golden, 'rsi': rsi_last,
             'macd': macd_val, 'macd_sig': sig_val, 'macd_hist': hist_val,
             'macd_hist_prev': hist_prev,
             'low_30d': _get_30d_low(sid),
@@ -721,6 +737,100 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         tone = f'費半 {sox_chg} | {fut_str} → {fut_tone}'
     
     # ── 核心持股表格 ──
+    def _kd_sparkline(k5, d5, k, d, gap):
+        """KD SVG折線圖 200x80：藍K, 橘D, 5期"""
+        if not k5 or len(k5) < 2:
+            return f'<span style="color:#4a9eff;font-weight:bold;font-size:24px;">K{k:.0f}</span> <span style="color:#ffa502;font-weight:bold;font-size:24px;">D{d:.0f}</span>'
+        w, h = 200, 80
+        # 計算繪圖範圍
+        all_vals = k5 + d5
+        mn, mx = min(all_vals), max(all_vals)
+        if mx - mn < 5:  # 至少 5 的範圍
+            mid = (mn + mx) / 2
+            mn, mx = mid - 2.5, mid + 2.5
+        rng = mx - mn if mx > mn else 1
+        pad = rng * 0.1
+        mn2, mx2 = mn - pad, mx + pad
+        rng2 = mx2 - mn2 if mx2 > mn2 else 1
+        def y(v):
+            return h - ((v - mn2) / rng2) * h
+        n = len(k5) - 1
+        pts_k = ' '.join(f'{(i/n)*w:.1f},{y(k5[i]):.1f}' for i in range(len(k5)))
+        pts_d = ' '.join(f'{(i/n)*w:.1f},{y(d5[i]):.1f}' for i in range(len(d5)))
+        gap_arrow = '▲' if gap > 0 else '▼'
+        cross = ''
+        if gap > 5:
+            cross = '🔥金叉'
+        elif gap < -5:
+            cross = '💀死叉'
+        svg = (
+            f'<svg width="{w}" height="{h}" style="vertical-align:middle;display:block;margin:0 auto;">'
+            f'<polyline points="{pts_k}" fill="none" stroke="#4a9eff" stroke-width="3"/>'
+            f'<polyline points="{pts_d}" fill="none" stroke="#ffa502" stroke-width="3"/>'
+            f'<circle cx="{w}" cy="{y(k5[-1])}" r="4" fill="#4a9eff"/>'
+            f'<circle cx="{w}" cy="{y(d5[-1])}" r="4" fill="#ffa502"/>'
+            f'</svg>'
+        )
+        return (
+            '<div style="text-align:center;white-space:nowrap;">'
+            + svg
+            + f'<div><span style="color:#4a9eff;font-weight:bold;font-size:24px;">K{k:.0f}</span> '
+            + f'<span style="color:#ffa502;font-weight:bold;font-size:24px;">D{d:.0f}</span> '
+            + f'<span style="font-size:18px;">{gap_arrow}gap={abs(gap):.0f}</span>'
+            + (f' <span style="color:#2ed573;font-weight:bold;font-size:18px;">{cross}</span>' if cross else '')
+            + '</div></div>'
+        )
+
+    def _macd_sparkline(hist5, hist_val, hist_prev):
+        """MACD SVG柱狀圖 200x80：5期紅綠柱+零軸，自動縮放讓柱子可見"""
+        if not hist5 or len(hist5) < 1:
+            return '<span style="font-size:24px;color:#666;">—</span>'
+        w, h = 200, 80
+        max_abs = max(abs(v) for v in hist5) if hist5 else 1
+        # 如果數值太小，強制設定最小縮放範圍
+        if max_abs < 0.01:
+            max_abs = 0.01
+        # 最少顯示高度(px)，確保柱子不是平的
+        min_bar_px = 8
+        # 計算縮放比例：以 h/2 為最大高度
+        scale = (h / 2 - 10) / max_abs
+        # 但確保即使很小的值也有足夠高度
+        smallest_val = min([abs(v) for v in hist5 if v != 0]) if any(v != 0 for v in hist5) else max_abs
+        min_needed_scale = min_bar_px / smallest_val if smallest_val > 0 else scale
+        scale = max(scale, min_needed_scale)
+        bars = []
+        bw = max(w / len(hist5) - 6, 10)
+        for i, v in enumerate(hist5):
+            bar_h = abs(v) * scale
+            bar_h = max(bar_h, min_bar_px)  # 最小 8px
+            x = i * (w / len(hist5)) + (w / len(hist5) - bw) / 2
+            if v >= 0:
+                y_pos = h / 2 - bar_h
+                bars.append(f'<rect x="{x:.1f}" y="{y_pos:.1f}" width="{bw:.1f}" height="{bar_h:.1f}" fill="#ff6b6b" rx="3"/>')
+            else:
+                bars.append(f'<rect x="{x:.1f}" y="{h/2:.1f}" width="{bw:.1f}" height="{bar_h:.1f}" fill="#2ed573" rx="3"/>')
+        zero_line = f'<line x1="0" y1="{h/2}" x2="{w}" y2="{h/2}" stroke="#888" stroke-width="2"/>'
+        bars_svg = ''.join(bars)
+        svg = f'<svg width="{w}" height="{h}" style="vertical-align:middle;display:block;margin:0 auto;">{zero_line}{bars_svg}</svg>'
+        # 趨勢文字
+        trend = ''
+        if hist_val is not None and hist_prev is not None:
+            if hist_val > 0 and hist_val > hist_prev:
+                trend = '🔥紅柱擴大'
+            elif hist_val > 0:
+                trend = '紅柱縮短'
+            elif hist_val < hist_prev:
+                trend = '💀綠柱擴大'
+            else:
+                trend = '綠柱縮短'
+        return (
+            '<div style="text-align:center;">'
+            + svg
+            + (f'<div style="font-size:20px;color:#ff6b6b;font-weight:bold;margin-top:4px;text-align:center;">{trend}</div>' if trend else '<div style="font-size:14px;color:#666;margin-top:4px;">—</div>')
+            + '</div>'
+        )
+
+
     def _price_cell(px, s, prev_close=None):
         """產出股價+漲跌幅的上下兩行HTML
         s 為 snaps[sid] (Shioaji即時) 或 None
@@ -761,34 +871,20 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         rsi_val = t['rsi']
         vol_note = t.get('vol_note', '—')
         
-        # KD: TA-Lib STOCH(14,1,3) — K値/D値 線型顯示
-        kp = '14,1,3'
-        if gap > 5:
-            kd_s = f'🟢K↑{k:.1f} D↑{d:.1f} (金叉,gap={gap:.1f})'
-        elif gap > 0:
-            kd_s = f'🟡K{k:.1f} D{d:.1f} (逼近金叉,gap={gap:.1f})'
-        elif gap > -5:
-            kd_s = f'🟡K{k:.1f} D{d:.1f} (逼近死叉,gap={gap:.1f})'
-        else:
-            kd_s = f'🔴K↓{k:.1f} D↓{d:.1f} (死叉,gap={gap:.1f})'
+        # KD: SVG折線圖（藍K橘D, 5期）
+        k5 = t.get('k5', [])
+        d5 = t.get('d5', [])
+        kd_html = _kd_sparkline(k5, d5, k, d, gap)
         
-        # MACD: TA-Lib MACD(12,26,9) — 柱狀體方向描述
+        # RSI: 整數
+        rsi_html = f'{int(rsi_val)}' if rsi_val is not None else '—'
+        
+        # MACD: SVG柱狀圖（紅正綠負, 5期）
         macd_v = t.get('macd')
         macd_hist = t.get('macd_hist')
         macd_hist_prev = t.get('macd_hist_prev')
-        if macd_v is not None and macd_hist is not None:
-            if macd_hist > 0:
-                if macd_hist_prev is not None and macd_hist > macd_hist_prev:
-                    macd_s = f'🟢MACD {macd_v:.2f} 紅柱增長(多頭攻擊)'
-                else:
-                    macd_s = f'🟢MACD {macd_v:.2f} 紅柱縮短(動能減弱)'
-            else:
-                if macd_hist_prev is not None and macd_hist < macd_hist_prev:
-                    macd_s = f'🔴MACD {macd_v:.2f} 綠柱增長(空頭攻擊)'
-                else:
-                    macd_s = f'🔴MACD {macd_v:.2f} 綠柱縮短(止跌訊號)'
-        else:
-            macd_s = '—'
+        hist5 = t.get('hist5', [])
+        macd_html = _macd_sparkline(hist5, macd_hist, macd_hist_prev)
         
         hints = []
         if gap > 5: hints.append('🔥金叉中')
@@ -831,9 +927,9 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
             f'<td>{s_cell}</td>'
             f'<td>{p_cell}</td>'
             f'<td>{low_s}</td>'
-            f'<td>{kd_s}</td>'
-            f'<td>{rsi_val}</td>'
-            f'<td>{macd_s}</td>'
+            f'<td>{kd_html}</td>'
+            f'<td>{rsi_html}</td>'
+            f'<td>{macd_html}</td>'
             f'<td>{vol_note}</td>'
             f'<td>{hint_s}</td>'
             f'<td>{strategy}</td></tr>\n'
@@ -848,24 +944,12 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
     # ── 潛力股候選（全市場非持股中被投信大買的）──
     trust_update_time = '—'
     now_hm = now.strftime('%H:%M')
-    trust_scan_path = os.path.join(OUTPUT_DIR, 'trust_scan_latest.json')
-    if potential_stocks is None and os.path.exists(trust_scan_path):
-        try:
-            with open(trust_scan_path, 'r', encoding='utf-8') as f:
-                trust_scan = json.load(f)
-            trust_update_time = trust_scan.get('update_time', '—')
-            # 全部候選：持股+非持股，只要有投信連買>=3天、總額>50萬
-            candidates = [h for h in trust_scan.get('trust_top40', []) 
-                         if h['days'] >= 3 and h['total_trust'] >= 500000]
-            # 核心持股放前面，非持股放後面，最多20檔
-            watch = [c for c in candidates if c.get('is_watch', False)]
-            non_watch = [c for c in candidates if not c.get('is_watch', False)]
-            potential_stocks = (watch[:10] + non_watch[:10])[:20]
-        except Exception as _pe:
-            print(f'  ⚠️ 潛力股載入失敗: {_pe}')
-            potential_stocks = []
-    elif potential_stocks is None:
+    # potential_stocks 由 run() 處理完直接傳入
+    # 這裡只處理 trust_update_time
+    if potential_stocks is None:
         potential_stocks = []
+    if potential_stocks and len(potential_stocks) > 0:
+        trust_update_time = datetime.now().strftime('%m/%d %H:%M')
     
     # ── 台美聯動牆（即時從 global_weather.check_linkage() 抓取）──
     # ⚠️ 之前寫死 top_us 已修改為動態抓取 (2026-07-21)
@@ -962,23 +1046,9 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         event_rows = '<div class="event-row"><span>—</span></div>'
     
 
-    # ── 富邦爬蟲：即時抓取主力/投信買賣超張數 ──
-    fubon_force_data = {}   # code -> net (張)
-    fubon_trust_data = {}   # code -> net (張)
-    try:
-        # 主力買超1日 (overlap 較多) + 2日 (備用)
-        _ff = fubon_crawler(url='https://fubon-ebrokerdj.fbs.com.tw/z/zg/zg_F_0_0.djhtm', top=20)
-        for r in _ff:
-            fubon_force_data[r['code']] = r['net']
-        _ff2 = fubon_crawler(url='https://fubon-ebrokerdj.fbs.com.tw/z/zg/zg_F_0_2.djhtm', top=20)
-        for r in _ff2:
-            if r['code'] not in fubon_force_data:
-                fubon_force_data[r['code']] = r['net']
-        _ft = fetch_trust_top_1d(top=20)
-        for r in _ft:
-            fubon_trust_data[r['code']] = r['net']
-    except Exception as _fe:
-        print(f'⚠️ 富邦爬蟲失敗: {_fe}')
+    # ── 富邦爬蟲已移除，改用 trust_scan 的 total_trust/days ──
+    fubon_force_data = {}
+    fubon_trust_data = {}
 
     # ── 潛力股候選 HTML 行（含富邦買賣超 + 完整 KD/RSI/量能）──
     potential_rows = ''
@@ -1002,39 +1072,25 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         if t:
             k, d = t['k'], t['d']
             gap = t['gap']
-            # KD: TA-Lib STOCH(14,1,3)
-            if gap > 5:
-                kd_s = f'🟢K↑{k:.1f} D↑{d:.1f} (金叉,gap={gap:.1f})'
-            elif gap > 0:
-                kd_s = f'🟡K{k:.1f} D{d:.1f} (逼近金叉,gap={gap:.1f})'
-            elif gap > -5:
-                kd_s = f'🟡K{k:.1f} D{d:.1f} (逼近死叉,gap={gap:.1f})'
-            else:
-                kd_s = f'🔴K↓{k:.1f} D↓{d:.1f} (死叉,gap={gap:.1f})'
+            # KD: SVG折線圖（藍K橘D, 5期）
+            k5 = t.get('k5', [])
+            d5 = t.get('d5', [])
+            kd_html = _kd_sparkline(k5, d5, k, d, gap)
             rsi_val = t['rsi']
+            rsi_html = f'{int(rsi_val)}' if rsi_val is not None else '—'
             vol_note = t.get('vol_note', '—')
-            # MACD: TA-Lib MACD(12,26,9) 柱狀體方向描述
+            # MACD: SVG柱狀圖（紅正綠負, 5期）
             macd_v = t.get('macd')
             macd_hist = t.get('macd_hist')
             macd_hist_prev = t.get('macd_hist_prev')
-            if macd_v is not None and macd_hist is not None:
-                if macd_hist > 0:
-                    if macd_hist_prev is not None and macd_hist > macd_hist_prev:
-                        macd_s = f'🟢MACD {macd_v:.2f} 紅柱增長(多頭攻擊)'
-                    else:
-                        macd_s = f'🟢MACD {macd_v:.2f} 紅柱縮短(動能減弱)'
-                else:
-                    if macd_hist_prev is not None and macd_hist < macd_hist_prev:
-                        macd_s = f'🔴MACD {macd_v:.2f} 綠柱增長(空頭攻擊)'
-                    else:
-                        macd_s = f'🔴MACD {macd_v:.2f} 綠柱縮短(止跌訊號)'
-            else:
-                macd_s = '—'
+            hist5 = t.get('hist5', [])
+            macd_html = _macd_sparkline(hist5, macd_hist, macd_hist_prev)
         else:
-            kd_s = '—'
+            kd_html = '—'
+            rsi_html = '—'
             rsi_val = '—'
             vol_note = '—'
-            macd_s = '—'
+            macd_html = '—'
         # 潛力股的30日低
         _p_low = _get_30d_low(sid)
         _p_low_s = f'{_p_low}' if _p_low else '—'
@@ -1044,20 +1100,21 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         # 潛力股股價+漲跌
         _p_prev = t.get('prev_close') if t else None
         pot_p_cell = _price_cell(round(_p_price,2) if _p_price else _p_price, snaps.get(sid), prev_close=_p_prev)
-        # 富邦買賣超張數
-        fb_force = fubon_force_data.get(sid, None)
-        fb_trust = fubon_trust_data.get(sid, None)
-        fb_force_s = f'<span style="color:var(--red-alert);font-weight:bold;">{fb_force:+,}</span>' if fb_force is not None else '<span style="color:#666;">—</span>'
-        fb_trust_s = f'<span style="color:var(--red-alert);font-weight:bold;">{fb_trust:+,}</span>' if fb_trust is not None else '<span style="color:#666;">—</span>'
+                # 投信買入張數/天數（TWSE T86）
+        trust_shares = p.get('total_trust', 0)
+        trust_days = p.get('days', 0)
+        trust_lots = trust_shares / 1000
+        trust_shares_s = f'<span style="color:var(--green-go);font-weight:bold;">{trust_lots:,.0f}張</span>' if trust_lots > 0 else '<span style="color:#666;">—</span>'
+        trust_days_s = f'<span style="color:var(--green-go);font-weight:bold;">{trust_days}天</span>' if trust_days > 0 else '<span style="color:#666;">—</span>'
         potential_rows += (
             f'<tr><td>{pot_s_cell}</td>'
             f'<td>{pot_p_cell}</td>'
-            f'<td>{fb_force_s}</td>'
-            f'<td>{fb_trust_s}</td>'
+            f'<td>{trust_shares_s}</td>'
+            f'<td>{trust_days_s}</td>'
             f'<td>{_p_low_s}</td>'
-            f'<td>{kd_s}</td>'
-            f'<td>{rsi_val}</td>'
-            f'<td>{macd_s}</td>'
+            f'<td>{kd_html}</td>'
+            f'<td>{rsi_html}</td>'
+            f'<td>{macd_html}</td>'
             f'<td>{vol_note}</td>'
             f'<td style="color:{flag_color};font-weight:bold;">{flag}</td></tr>\n'
         )
@@ -1072,7 +1129,7 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🦞 小龍蝦早報 — 行動總經操盤雷達</title>
+    <title>📊 股票早報 — 行動總經操盤雷達</title>
     <style>
         :root {{
             --bg-dark: #121212;
@@ -1093,7 +1150,7 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
             margin: 0;
             padding: 12px;
             line-height: 1.5;
-            font-size: 18px;
+            font-size: 24px;
         }}
         .header {{
             text-align: center; padding: 14px 0;
@@ -1101,7 +1158,7 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
             margin-bottom: 16px;
         }}
         .header h1 {{ margin: 0; font-size: 22px; color: var(--red-alert); }}
-        .header p {{ margin: 6px 0 0 0; font-size: 18px; color: var(--text-muted); }}
+        .header p {{ margin: 6px 0 0 0; font-size: 24px; color: var(--text-muted); }}
 
         .card {{
             background: var(--card-bg); border-radius: 8px;
@@ -1122,12 +1179,12 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
             text-align: center; border: 1.5px solid var(--red-alert);
             margin-bottom: 10px;
         }}
-        .sox-name {{ font-size: 18px; color: var(--text-muted); }}
+        .sox-name {{ font-size: 24px; color: var(--text-muted); }}
         .sox-val {{ font-size: 24px; font-weight: bold; margin: 6px 0; color: #fff; }}
         .sox-chg {{ font-size: 20px; }}
 
         .tone-bar {{
-            font-size: 18px; color: var(--primary-gold);
+            font-size: 24px; color: var(--primary-gold);
             margin: 12px 0 0 0; text-align: center; font-weight: bold;
             padding: 10px; background: #222; border-radius: 6px;
             border: 1px solid #444;
@@ -1135,17 +1192,17 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
 
         table {{
             width: 100%; border-collapse: collapse; margin-top: 10px;
-            font-size: 18px;
+            font-size: 24px;
         }}
         th {{
             background-color: #2d2d2d; color: var(--primary-gold);
             font-weight: bold; padding: 8px 6px; text-align: left;
             border-bottom: 2px solid var(--border-color);
-            font-size: 18px;
+            font-size: 24px;
         }}
         td {{
             padding: 10px 6px; border-bottom: 1px solid var(--border-color);
-            vertical-align: middle; font-size: 18px;
+            vertical-align: middle; font-size: 24px;
         }}
 
         .badge {{
@@ -1158,11 +1215,11 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
 
         .event-row {{
             display: flex; justify-content: space-between;
-            font-size: 18px; padding: 8px 0;
+            font-size: 24px; padding: 8px 0;
             border-bottom: 1px solid var(--border-color);
         }}
         .link-row {{
-            font-size: 18px; padding: 8px 0;
+            font-size: 24px; padding: 8px 0;
             border-bottom: 1px solid #252525; line-height: 1.5;
         }}
         .empty {{ text-align: center; padding: 20px; color: #556677; }}
@@ -1170,7 +1227,7 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         .up {{ color: var(--red-alert); font-weight: bold; }}
         .down {{ color: var(--green-go); font-weight: bold; }}
         .footer {{
-            text-align: center; font-size: 18px; color: #445566;
+            text-align: center; font-size: 24px; color: #445566;
             margin-top: 30px; padding-top: 15px;
             border-top: 1px solid #333;
         }}
@@ -1180,7 +1237,7 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
 
     <div class="header">
         <h1>🐛 早報 — 全球股市天氣預報</h1>
-        <p>🦞 小龍蝦早報 | {today} {now_hm} | SOX+台指期 | 30分K KD 3年回測最佳參數</p>
+        <p>📊 股票早報 | {today} {now_hm} | SOX+台指期 | 30分K KD 3年回測最佳參數</p>
     </div>
 
     <!-- 費半 SOX（唯一指數）-->
@@ -1193,7 +1250,7 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
             <div class="sox-chg">{sox_icon} {sox_chg} {sox_level}</div>
         </div>
         <div style="background: #2a2a2a; padding: 12px; border-radius: 6px; text-align: center; margin-top: 10px; border: 1.5px solid #1e90ff;">
-            <div style="font-size: 18px; color: #ccc;">台指期指數</div>
+            <div style="font-size: 24px; color: #ccc;">台指期指數</div>
             <div style="font-size: 24px; font-weight: bold; margin: 6px 0; color: #fff;">{fut_str if fut is not None and fut else '台指期 — 離線'}</div>
         </div>
         <div class="tone-bar">
@@ -1236,8 +1293,8 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
             <thead>
                 <tr>
                     <th>股票</th><th>股價</th>
-                    <th>富邦主力<br>買賣超(張)</th>
-                    <th>富邦投信<br>買賣超(張)</th>
+                    <th>投信<br>買超(張)</th>
+                    <th>連買<br>天數</th>
                     <th>30日低</th>
                     <th>KD</th>
                     <th>RSI</th>
@@ -1260,8 +1317,8 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
     {news_html if news_html else ''}
 
     <div class="footer">
-        小龍蝦自動產出 | 08:30 早報 · 09:00~13:35 監控 · 16:30 更新
-        | 雙核心 FinMind+Shioaji | 全頁 18px 統一
+        股票自動產出 | 08:30 早報 · 09:00~13:35 監控 · 16:30 更新
+        | 雙核心 FinMind+Shioaji | 全頁 24px 統一
     </div>
 
 </body>
@@ -1309,7 +1366,7 @@ def push_to_github():
         
         subprocess.run([git_path, 'add', '-A'],
                        cwd=git_dir, capture_output=True, timeout=30)
-        subprocess.run([git_path, 'commit', '-m', f'🦞 早報更新 {now}'],
+        subprocess.run([git_path, 'commit', '-m', f'📊 早報更新 {now}'],
                        cwd=git_dir, capture_output=True, timeout=30)
         result = subprocess.run([git_path, 'push', 'origin', 'main', '--force'],
                                 cwd=git_dir, capture_output=True, timeout=60)
@@ -1334,8 +1391,8 @@ def push_to_github():
 def run():
     now = datetime.now()
     print('=' * 60)
-    print(f'  🦞 網頁早報產出 | {now.strftime("%Y-%m-%d %H:%M")}')
-    print(f'  執行模式: {"模擬" if not HAVE_SJ else "標準"} | 18px 全頁')
+    print(f'  📊 網頁早報產出 | {now.strftime("%Y-%m-%d %H:%M")}')
+    print(f'  執行模式: {"模擬" if not HAVE_SJ else "標準"} | 24px 全頁')
     print('=' * 60)
     
     # 1. Shioaji 快照
@@ -1345,16 +1402,47 @@ def run():
     
     # 2. 技術指標（含核心持股 + 潛力股）
     print('\n📊 計算技術指標 (KD/RSI/支撐)...')
-    # 先讀潛力股，一併算 KD
+    # 先讀潛力股，一併算 KD（盤後 >16:00 強制重掃）
     trust_scan_path = os.path.join(OUTPUT_DIR, 'trust_scan_latest.json')
     potential_ids = []
     if os.path.exists(trust_scan_path):
         try:
             with open(trust_scan_path, 'r', encoding='utf-8') as f:
                 ts = json.load(f)
-            # 持股+非持股都算KD
+            # 盤後強制重掃
+            now_h = datetime.now().hour
+            if now_h >= 16 or now_h < 8:
+                print('  ⏰ 盤後時段，重新掃描 TWSE T86 投信買超前40名...')
+                try:
+                    # 直接爬 TWSE T86 更新投信買超資料
+                    try:
+                        from ta_strategy_engine import fetch_trust_top20
+                        t86_data = fetch_trust_top20()
+                        if t86_data:
+                            # 轉成 trust_scan 格式
+                            new_top40 = []
+                            for code, name, net in t86_data:
+                                new_top40.append({
+                                    'sid': code, 'name': name,
+                                    'days': 1, 'total_trust': net * 1000,
+                                    'total_foreign': 0, 'is_watch': code in CORE_IDS
+                                })
+                            ts = {
+                                'update_time': datetime.now().strftime('%m/%d %H:%M'),
+                                'scan_dates': [datetime.now().strftime('%Y-%m-%d')],
+                                'trust_top40': new_top40,
+                                'watch_sold': []
+                            }
+                            # 存回 json 供後續使用
+                            with open(trust_scan_path, 'w', encoding='utf-8') as _ff:
+                                json.dump(ts, _ff, ensure_ascii=False, indent=2)
+                            print(f'  ✅ T86 即時掃描成功: {len(new_top40)} 檔')
+                    except Exception as _te:
+                        print(f'  ⚠️ T86 掃描失敗: {_te}')
+                except Exception as _se:
+                    print(f'  ⚠️ 重掃失敗: {_se}')
             candidates = [h for h in ts.get('trust_top40', [])
-                         if h['days'] >= 3 and h['total_trust'] >= 500000]
+                         if h['days'] >= 1 and h['total_trust'] >= 500000]
             potential_ids = [h['sid'] for h in candidates[:20] if h['sid'] not in CORE_IDS]
         except:
             pass
@@ -1387,7 +1475,17 @@ def run():
         except Exception as _ne:
             print(f'  ⚠️ 新聞讀取失敗: {_ne}')
     
-    html = gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html, potential_stocks=None)
+    # 從 ts 中取出潛力股列表（run() 中已由 T86 更新）
+    potential_stocks = []
+    if 'trust_top40' in ts:
+        candidates = [h for h in ts.get('trust_top40', [])
+                     if h['days'] >= 1 and h['total_trust'] >= 500000]
+        watch = [c for c in candidates if c.get('is_watch', False)]
+        non_watch = [c for c in candidates if not c.get('is_watch', False)]
+        potential_stocks = (watch[:10] + non_watch[:10])[:20]
+        print(f'  🎯 潛力股就緒: {len(potential_stocks)} 檔 (含核心{len(watch[:10])}+非核心{len(non_watch[:10])})')
+    
+    html = gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html, potential_stocks)
     size_kb = len(html) / 1024
     print(f'   ✅ HTML 完成 ({size_kb:.0f} KB)')
     
@@ -1412,8 +1510,8 @@ def run():
             f.write(arch_html)
         print(f'   ✅ 架構頁已複製: {arch_dst}')
     
-    # 8. Git Push — 跳過（本機檢視）
-    print('\n📤 Git Push — 跳過（本機檢視模式）')
+    # 8. Git Push
+    push_to_github()
     
     print()
     print('=' * 60)
@@ -1431,7 +1529,7 @@ def gen_arch_html(now):
     return f'''<!DOCTYPE html>
 <html lang="zh-TW">
 <head><meta charset="utf-8">
-<title>??? 小龍蝦系統全架構</title>
+<title>??? 股票系統全架構</title>
 <style>
 *{{box-sizing:border-box}}
 body{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft JhengHei",sans-serif;background:#121212;color:#e0e0e0;margin:0;padding:12px;font-size:18px;line-height:1.5}}
@@ -1454,7 +1552,7 @@ td{{padding:8px;border:1px solid #444;font-size:18px}}
 </style>
 </head><body>
 
-<h1>??? 小龍蝦行動總經操盤雷達</h1>
+<h1>??? 股票行動總經操盤雷達</h1>
 <p style="text-align:center;color:#a0a0a0;font-size:18px">全系統架構（最高執行準則） | 更新: {t}</p>
 
 <div class="section red">
@@ -1673,7 +1771,7 @@ td{{padding:8px;border:1px solid #444;font-size:18px}}
 </ol>
 </div>
 
-<div class="footer">??? 小龍蝦系統全架構 | 更新: {t} | 最高執行準則</div>
+<div class="footer">??? 股票系統全架構 | 更新: {t} | 最高執行準則</div>
 
 </body></html>'''
 

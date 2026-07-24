@@ -17,7 +17,8 @@ sys.stdout.reconfigure(encoding='utf-8')
 import requests, numpy as np, pandas as pd
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
-import talib
+
+from calc_tech import calc_STOCH, calc_MACD, calc_RSI, calc_RSI_last
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(os.path.dirname(SCRIPT_DIR))
@@ -76,13 +77,13 @@ def calc_30min_kd_macd_rsi_from_db(sid):
     times=list(df.get("datetime", [str(i) for i in range(len(df))]))
     
     # KD (直接用資料庫已算好的K/D，或重新用STOCH)
-    k_arr,d_arr=talib.STOCH(high,low,close,fastk_period=9,slowk_period=3,slowd_period=3)
+    k_arr,d_arr=calc_STOCH(high,low,close)
     k_last=float(k_arr[-1]) if not np.isnan(k_arr[-1]) else 50.0
     d_last=float(d_arr[-1]) if not np.isnan(d_arr[-1]) else 50.0
     k_prev=float(k_arr[-2]) if len(k_arr)>=2 and not np.isnan(k_arr[-2]) else k_last
     
     # MACD(30分K) — 柱狀體 + 5期趨勢 + 翻紅預警
-    macd_arr,sig_arr,hist_arr=talib.MACD(close,fastperiod=12,slowperiod=26,signalperiod=9)
+    macd_arr,sig_arr,hist_arr=calc_MACD(close)
     h_last=float(hist_arr[-1]) if not np.isnan(hist_arr[-1]) else 0
     # 取最後5根hist值（遇nan替換為0）
     h5=[float(hist_arr[i]) if not np.isnan(hist_arr[i]) else 0 for i in range(-5,0)]
@@ -102,8 +103,7 @@ def calc_30min_kd_macd_rsi_from_db(sid):
     macd_s=f"{bar_html} Hist:{h_last:.1f} {direction}{flip_warn}<br><span style=\"font-size:14px;color:var(--text-muted)\">{h5_str}</span>"
     
     # RSI(30分K)
-    rsi_arr=talib.RSI(close,timeperiod=14)
-    rsi_val=round(float(rsi_arr[-1]) if not np.isnan(rsi_arr[-1]) else 50,1)
+    rsi_val=calc_RSI_last(close)
     
     # 30日最低（30分K低點）
     low_30d=round(float(np.min(low[-30:])),1) if len(low)>=30 else None
@@ -147,12 +147,12 @@ def calc_30min_from_finmind_fallback(sid):
     except: return None
     if len(close)<30: return None
     
-    k_arr,d_arr=talib.STOCH(high,low,close,fastk_period=9,slowk_period=3,slowd_period=3)
+    k_arr,d_arr=calc_STOCH(high,low,close)
     k_last=float(k_arr[-1]) if not np.isnan(k_arr[-1]) else 50.0
     d_last=float(d_arr[-1]) if not np.isnan(d_arr[-1]) else 50.0
     k_prev=float(k_arr[-2]) if len(k_arr)>=2 and not np.isnan(k_arr[-2]) else k_last
     
-    macd_arr,sig_arr,hist_arr=talib.MACD(close,fastperiod=12,slowperiod=26,signalperiod=9)
+    macd_arr,sig_arr,hist_arr=calc_MACD(close)
     h_last=float(hist_arr[-1]) if not np.isnan(hist_arr[-1]) else 0
     h_prev=float(hist_arr[-2]) if len(hist_arr)>=2 and not np.isnan(hist_arr[-2]) else 0
     # MACD(日K) — 柱狀體 + 5期趨勢 + 翻紅預警
@@ -168,8 +168,7 @@ def calc_30min_from_finmind_fallback(sid):
             flip_warn=' <span class="flip">🔥翻紅</span>'
     macd_s=f"{bar_html} Hist:{h_last:.1f} {direction}{flip_warn}(日K)<br><span style=\"font-size:14px;color:var(--text-muted)\">{h5_str}</span>"
     
-    rsi_arr=talib.RSI(close,timeperiod=14)
-    rsi_val=round(float(rsi_arr[-1]) if not np.isnan(rsi_arr[-1]) else 50,1)
+    rsi_val=calc_RSI_last(close)
     low_30d=round(float(np.min(low[-30:])),1) if len(low)>=30 else None
     v5=float(np.mean(vol[-5:])); v20=float(np.mean(vol[-20:-5])) if len(vol)>=25 else v5
     vr=v5/v20 if v20>0 else 1.0
@@ -254,12 +253,12 @@ def calc_30min_from_shioaji(sid):
     times=list(ohlc["ts"])
     
     # TA-Lib 全算
-    k_arr,d_arr=talib.STOCH(high,low,close,fastk_period=9,slowk_period=3,slowd_period=3)
+    k_arr,d_arr=calc_STOCH(high,low,close)
     k_last=float(k_arr[-1]) if not np.isnan(k_arr[-1]) else 50.0
     d_last=float(d_arr[-1]) if not np.isnan(d_arr[-1]) else 50.0
     k_prev=float(k_arr[-2]) if len(k_arr)>=2 and not np.isnan(k_arr[-2]) else k_last
     
-    macd_arr,sig_arr,hist_arr=talib.MACD(close,fastperiod=12,slowperiod=26,signalperiod=9)
+    macd_arr,sig_arr,hist_arr=calc_MACD(close)
     h_last=float(hist_arr[-1]) if not np.isnan(hist_arr[-1]) else 0
     h_prev=float(hist_arr[-2]) if len(hist_arr)>=2 and not np.isnan(hist_arr[-2]) else 0
     # MACD(30分K Shioaji) — 柱狀體 + 5期趨勢 + 翻紅預警
@@ -274,8 +273,7 @@ def calc_30min_from_shioaji(sid):
             flip_warn=' <span class="flip">🔥翻紅</span>'
     macd_s=f"{bar_html} Hist:{h_last:.1f} {direction}{flip_warn}<br><span style=\"font-size:14px;color:var(--text-muted)\">{h5_str}</span>"
     
-    rsi_arr=talib.RSI(close,timeperiod=14)
-    rsi_val=round(float(rsi_arr[-1]) if not np.isnan(rsi_arr[-1]) else 50,1)
+    rsi_val=calc_RSI_last(close)
     
     low_30d=round(float(np.min(low[-30:])),1) if len(low)>=30 else None
     v5=float(np.mean(vol[-5:])); v20=float(np.mean(vol[-20:-5])) if len(vol)>=25 else v5

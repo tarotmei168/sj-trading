@@ -9,6 +9,8 @@ import shioaji as sj
 import pandas as pd
 import numpy as np
 
+from calc_tech import apply_indicators
+
 load_dotenv()
 
 WATCHLIST = [
@@ -66,26 +68,13 @@ def get_30min_kd(api, sid):
         "volume": "sum",
     }).dropna()
     
-    if len(df_30m) < 15:
+    if len(df_30m) < 17:
         return None
-    
-    # 算KD (K=9)
-    low_min = df_30m["low"].rolling(9).min()
-    high_max = df_30m["high"].rolling(9).max()
-    rsv = ((df_30m["close"] - low_min) / (high_max - low_min)) * 100
-    rsv = rsv.fillna(50)
-    
-    k_vals = [50]*9
-    d_vals = [50]*9
-    for i in range(9, len(df_30m)):
-        k_new = (2/3)*k_vals[-1] + (1/3)*rsv.iloc[i]
-        d_new = (2/3)*d_vals[-1] + (1/3)*k_new
-        k_vals.append(k_new)
-        d_vals.append(d_new)
-    
-    df_30m["K"] = k_vals
-    df_30m["D"] = d_vals
-    
+
+    df_30m = apply_indicators(df_30m.reset_index())
+    if 'datetime' in df_30m.columns:
+        df_30m.set_index('datetime', inplace=True)
+
     return df_30m
 
 
