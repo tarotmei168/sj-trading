@@ -11,7 +11,7 @@
   - Shioaji (即時報價, 無API Key時自動模擬模式)
   - 本機 database/*_3y.csv (離線備援)
 
-⚠️ 全頁字體 22px, 只留費半指數, 帶入股本滲透率
+⚠️ 全頁字體 18px, 只留費半指數, 帶入股本滲透率
 """
 
 import sys, os, csv, json, subprocess
@@ -47,11 +47,10 @@ except:
 # ─── 11檔核心持股（純核心倉位）──────────────────
 # 潛力股從 trust_scan_latest.json 動態載入
 CORE_19 = [
-    ('2337','旺宏'), ('0050','元大台灣50'), ('2330','台積電'),
-    ('2436','偉詮電'), ('5351','鈺創'),
+    ('2436','偉詮電'), ('2337','旺宏'), ('5351','鈺創'),
     ('3673','TPK-KY'), ('3711','日月光'), ('4958','臻鼎-KY'),
     ('3042','晶技'), ('2454','聯發科'), ('2317','鴻海'),
-    ('8150','南茂'),
+    ('8150','南茂'), ('2330','台積電'), ('0050','元大台灣50'),
 ]
 CORE_IDS = [s[0] for s in CORE_19]
 CORE_NAMES = {s[0]: s[1] for s in CORE_19}
@@ -235,78 +234,6 @@ def _fetch_rsi_from_finmind(stock_id):
         return 50.0
 
 
-
-
-def get_txf_data(snaps=None):
-    now = __import__('datetime').datetime.now()
-    h, m = now.hour, now.minute
-    mins = h * 60 + m
-    if snaps and snaps.get('_TXF'):
-        txf = snaps['_TXF']
-        if txf.get('price'):
-            p = 'panzhong' if (8*60+45 <= mins < 13*60+45) else 'panhou'
-            return {'price': txf['price'],'change': txf.get('change',0),'change_pct': txf.get('change_pct',0),'source': 'taichiqi'+p,'period': p}
-    if 8*60+45 <= mins < 13*60+45:
-        try:
-            from shioaji_helper import ShioajiClient
-            sjc = ShioajiClient(); sjc.login()
-            import shioaji as sj
-            c = sjc.api.Contracts.Futures['TXF']
-            s = sjc.api.snapshots([c])
-            sjc.logout()
-            if s and s[0].close:
-                return {'price': s[0].close,'change': getattr(s[0],'change',0),'change_pct': getattr(s[0],'change_pct',0),'source':'taichiqi_panzhong','period':'panzhong'}
-        except: pass
-    if 5*60 <= mins < 8*60+45:
-        try:
-            import yfinance as yf, io, contextlib
-            with contextlib.redirect_stderr(io.StringIO()):
-                d = yf.download('TX00.TW', period='5d', interval='1d')
-            if d is not None and len(d) >= 2:
-                c1,c2 = float(d['Close'].values[-1]),float(d['Close'].values[-2])
-                chg = round((c1/c2-1)*100,2)
-                return {'price':c1,'change':c1-c2,'change_pct':chg,'source':'txf_yf_night','period':'night_close'}
-        except: pass
-        try:
-            import yfinance as yf, io, contextlib
-            with contextlib.redirect_stderr(io.StringIO()):
-                d = yf.download('^TWII', period='5d', interval='1d')
-            if d is not None and len(d) >= 2:
-                c1,c2 = float(d['Close'].values[-1]),float(d['Close'].values[-2])
-                chg = round((c1/c2-1)*100,2)
-                return {'price':c1,'change':c1-c2,'change_pct':chg,'source':'taiji_night','period':'night_close'}
-        except: pass
-    if 13*60+45 <= mins < 15*60:
-        try:
-            import yfinance as yf, io, contextlib
-            with contextlib.redirect_stderr(io.StringIO()):
-                d = yf.download('^TWII', period='2d', interval='1d')
-            if d is not None and len(d) >= 2:
-                c1,c2 = float(d['Close'].values[-1]),float(d['Close'].values[-2])
-                chg = round((c1/c2-1)*100,2)
-                return {'price':c1,'change':c1-c2,'change_pct':chg,'source':'taiji_close','period':'morning_close'}
-        except: pass
-    if mins >= 15*60 or mins < 5*60:
-        try:
-            from shioaji_helper import ShioajiClient
-            sjc = ShioajiClient(); sjc.login()
-            import shioaji as sj
-            c = sjc.api.Contracts.Futures['TXF']
-            s = sjc.api.snapshots([c])
-            sjc.logout()
-            if s and s[0].close:
-                return {'price': s[0].close,'change': getattr(s[0],'change',0),'change_pct': getattr(s[0],'change_pct',0),'source':'taichiqi_yepan','period':'yepan'}
-        except: pass
-    try:
-        import yfinance as yf, io, contextlib
-        with contextlib.redirect_stderr(io.StringIO()):
-            d = yf.download('^TWII', period='2d', interval='1d')
-        if d is not None and len(d) >= 2:
-            c1,c2 = float(d['Close'].values[-1]),float(d['Close'].values[-2])
-            chg = round((c1/c2-1)*100,2)
-            return {'price':c1,'change':c1-c2,'change_pct':chg,'source':'taiji_fallback','period':'close'}
-    except: pass
-    return None
 def get_tech_batch(stock_ids):
     """批次產出技術指標（3年30分K KD + RSI + 量能）
     
@@ -1406,10 +1333,22 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
         </table>
     </div>
 
-    <!-- 投信連買前20名（證交所 TWSE T86 投信買超前20名）-->
+    <!-- 未來14天關鍵事件（台股固定 + 美國自動抓取）-->
+    <div class="card alert">
+        <div class="card-title">📅 未來 14 天台股進程與作帳節奏</div>
+        {event_rows}
+    </div>
+
+    <!-- 美國關鍵事件（自動抓取 BLS + Fed）-->
+    <div class="card info">
+        <div class="card-title">🇺🇸 未來 14 天美股/總經關鍵事件</div>
+        {us_event_rows if us_event_rows else '<div class="event-row"><span>暫無高重要性事件</span></div>'}
+    </div>
+
+    <!-- 潛力股候選（全市場投信+法人掃描 + 富邦主力/投信買賣超張數）-->
     <div class="card alert">
         <div class="card-title">
-            🎯 投信連買前20名
+            🎯 潛力股候選
             · 更新: {trust_update_time}
         </div>
         <table>
@@ -1428,18 +1367,6 @@ def gen_html(snaps, tech_data, trust_rates, alerts, events, tone, news_html='', 
             </thead>
             <tbody>{potential_rows}</tbody>
         </table>
-    </div>
-
-    <!-- 未來14天關鍵事件（台股固定 + 美國自動抓取）-->
-    <div class="card alert">
-        <div class="card-title">📅 未來 14 天台股進程與作帳節奏</div>
-        {event_rows}
-    </div>
-
-    <!-- 美國關鍵事件（自動抓取 BLS + Fed）-->
-    <div class="card info">
-        <div class="card-title">🇺🇸 未來 14 天美股/總經關鍵事件</div>
-        {us_event_rows if us_event_rows else '<div class="event-row"><span>暫無高重要性事件</span></div>'}
     </div>
 
     <!-- 台美產業聯動警報 -->
